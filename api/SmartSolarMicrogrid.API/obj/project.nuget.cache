@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "HzqCCvy2K9E=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\chath\\Downloads\\Smart-Solar-Microgrid-Trading-System-\\api\\SmartSolarMicrogrid.API\\SmartSolarMicrogrid.API.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\chath\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.8\\microsoft.aspnetcore.openapi.9.0.8.nupkg.sha512",
+    "C:\\Users\\chath\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
