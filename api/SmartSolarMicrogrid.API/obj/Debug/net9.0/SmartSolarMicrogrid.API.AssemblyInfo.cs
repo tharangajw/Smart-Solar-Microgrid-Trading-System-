@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SmartSolarMicrogrid.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c9e8897adc6506fef9fccdb8e4e4f881527a55f4")]
 [assembly: System.Reflection.AssemblyProductAttribute("SmartSolarMicrogrid.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SmartSolarMicrogrid.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
