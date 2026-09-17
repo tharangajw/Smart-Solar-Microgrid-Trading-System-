@@ -5,6 +5,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
 builder.Services.AddSingleton<MongoDbContext>();
+builder.Services.AddScoped<SmartSolarMicrogrid.API.Modules.Reservations.Services.ReservationService>();
+builder.Services.AddScoped<SmartSolarMicrogrid.API.Modules.Transactions.Services.OperatorTransactionService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
