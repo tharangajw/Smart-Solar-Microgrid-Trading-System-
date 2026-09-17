@@ -13,14 +13,23 @@
         android:theme="@style/Theme.SmartSolarMicrogrid"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".modules.authentication.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".MainActivity" android:exported="false" />
+        <activity android:name=".modules.authentication.RegisterActivity" android:exported="false" />
+        <activity android:name=".modules.procumer.ProfileActivity" android:exported="false" />
+        <activity android:name=".modules.procumer.ProsumerDashboardActivity" android:exported="false" />
+        <activity android:name=".modules.map.MapActivity" android:exported="false" />
+        <activity android:name=".modules.reservations.ReservationFormActivity" android:exported="false" />
+        <activity android:name=".modules.history.BookingHistoryActivity" android:exported="false" />
+        <activity android:name=".modules.qr.QrDisplayActivity" android:exported="false" />
+        <activity android:name=".modules.operator.OperatorDashboardActivity" android:exported="false" />
+        <activity android:name=".modules.operator.QrScannerActivity" android:exported="false" />
     </application>
 
 </manifest>
