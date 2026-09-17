@@ -47,7 +47,6 @@ api/*/*.csproj.user
 *.user
 *.userosscache
 *.sln.docstates
-<<<<<<< HEAD
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -56,24 +55,17 @@ api/*/*.csproj.user
 mono_crash.*
 
 # Build results
-=======
 .vs/
 TestResults/
->>>>>>> 8a68d96bb1512516fa1ce090c4a9aefa5dd58c7b
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
 x64/
 x86/
-<<<<<<< HEAD
 [Ww][Ii][Nn]32/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
-=======
-[Aa]RM/
-[Aa]RM64/
->>>>>>> 8a68d96bb1512516fa1ce090c4a9aefa5dd58c7b
 bld/
 [Bb]in/
 [Oo]bj/
@@ -431,7 +423,6 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # VS Code files for those working on multiple tools
-=======
 # =========================
 # Mobile (React Native / Flutter / Android / iOS)
 # =========================
@@ -469,13 +460,11 @@ mobile/.flutter-plugins-dependencies
 # =========================
 # IDEs & Editors
 # =========================
->>>>>>> 8a68d96bb1512516fa1ce090c4a9aefa5dd58c7b
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-<<<<<<< HEAD
 *.code-workspace
 
 # Local History for Visual Studio Code
@@ -566,7 +555,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-=======
 .idea/
 *.swp
 *.swo
@@ -579,4 +567,3 @@ $RECYCLE.BIN/
 **/.env.development
 **/.env.test
 **/.env.production
->>>>>>> 8a68d96bb1512516fa1ce090c4a9aefa5dd58c7b
