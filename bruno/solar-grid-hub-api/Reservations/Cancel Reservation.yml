@@ -1,0 +1,22 @@
+info:
+  name: Cancel Reservation
+  type: http
+  seq: 3
+
+http:
+  method: PUT
+  url: http://localhost:5281/api/reservations/6aac1b0f1c154b6fd7f3e998/cancel
+  body:
+    type: json
+    data: |-
+      {
+        "cancelledReason": "User requested cancellation due to weather"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

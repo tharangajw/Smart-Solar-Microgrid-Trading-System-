@@ -1,0 +1,25 @@
+info:
+  name: Create Reservations
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:5281/api/reservations
+  body:
+    type: json
+    data: |-
+      {
+        "prosumerNic": "951234567V",
+        "slotId": "SLOT-001",
+        "nodeId": "NODE-001",
+        "reservationDate": "2026-09-20T10:00:00Z"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

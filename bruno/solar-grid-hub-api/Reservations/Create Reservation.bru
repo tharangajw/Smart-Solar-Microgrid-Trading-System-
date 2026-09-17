@@ -1,0 +1,20 @@
+meta {
+  name: Create Reservation
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:5281/api/reservations
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "prosumerNic": "951234567V",
+    "slotId": "SLOT-001",
+    "nodeId": "NODE-001",
+    "reservationDate": "2026-09-20T10:00:00Z"
+  }
+}

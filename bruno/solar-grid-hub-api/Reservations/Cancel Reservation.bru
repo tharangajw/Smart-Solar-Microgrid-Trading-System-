@@ -1,0 +1,17 @@
+meta {
+  name: Cancel Reservation
+  type: http
+  seq: 4
+}
+
+put {
+  url: http://localhost:5281/api/reservations/{{reservationId}}/cancel
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "cancelledReason": "User requested cancellation"
+  }
+}

@@ -1,0 +1,18 @@
+meta {
+  name: Update Reservation
+  type: http
+  seq: 3
+}
+
+put {
+  url: http://localhost:5281/api/reservations/{{reservationId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "slotId": "SLOT-002",
+    "reservationDate": "2026-09-21T10:00:00Z"
+  }
+}

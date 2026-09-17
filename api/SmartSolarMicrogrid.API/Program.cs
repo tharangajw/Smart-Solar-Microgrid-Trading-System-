@@ -12,6 +12,9 @@ builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddOpenApi();
 
 // ── Controllers ──────────────────────────────────────
+builder.Services.AddScoped<SmartSolarMicrogrid.API.Modules.Reservations.Repositories.IReservationRepository, SmartSolarMicrogrid.API.Modules.Reservations.Repositories.ReservationRepository>();
+builder.Services.AddScoped<SmartSolarMicrogrid.API.Modules.Reservations.Services.IReservationService, SmartSolarMicrogrid.API.Modules.Reservations.Services.ReservationService>();
+
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -22,7 +25,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.MapControllers();
 
