@@ -2,7 +2,7 @@ package sliit.ead.smartsolarmicrogrid.modules.procumer;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
+import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 
 import sliit.ead.smartsolarmicrogrid.R;
@@ -17,10 +17,10 @@ public class ProsumerDashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_prosumer_dashboard);
 
-        Button buttonProfile = findViewById(R.id.buttonProfile);
-        Button buttonMap = findViewById(R.id.buttonMap);
-        Button buttonManageReservations = findViewById(R.id.buttonManageReservations);
-        Button buttonBookingHistory = findViewById(R.id.buttonBookingHistory);
+        View buttonProfile = findViewById(R.id.buttonProfile);
+        View buttonMap = findViewById(R.id.buttonMap);
+        View buttonManageReservations = findViewById(R.id.buttonManageReservations);
+        View buttonBookingHistory = findViewById(R.id.buttonBookingHistory);
 
         buttonProfile.setOnClickListener(v -> {
             startActivity(new Intent(this, ProfileActivity.class));

@@ -12,6 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Grid Operator Dashboard"
+        android:textColor="@color/textColorPrimary"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,8 +23,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
+        app:cardBackgroundColor="@color/backgroundCard"
         app:cardCornerRadius="12dp"
         app:cardElevation="4dp"
+        app:strokeColor="@color/backgroundCardBorder"
+        app:strokeWidth="1dp"
         app:layout_constraintTop_toBottomOf="@+id/textViewGreeting">
 
         <LinearLayout
@@ -36,6 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Station Status"
+                android:textColor="@color/textColorSecondary"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
@@ -45,6 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Available Battery Slots: 0"
+                android:textColor="@color/textColorPrimary"
                 android:textSize="16sp" />
 
             <TextView
@@ -53,30 +59,42 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="Pending Verification Jobs: 0"
+                android:textColor="@color/textColorPrimary"
                 android:textSize="16sp" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonScanQr"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="48dp"
         android:padding="16dp"
         android:text="Scan Prosumer QR Code"
+        android:textColor="@color/white"
+        android:textStyle="bold"
         app:icon="@android:drawable/ic_menu_camera"
+        app:iconTint="@color/white"
         app:iconGravity="textStart"
+        app:cornerRadius="12dp"
+        app:backgroundTint="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cardOperatorStats" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonViewMap"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:padding="12dp"
         android:text="View Station Map"
+        android:textColor="@color/colorPrimary"
+        android:textStyle="bold"
+        app:strokeColor="@color/colorPrimary"
+        app:strokeWidth="1dp"
+        app:backgroundTint="@android:color/transparent"
+        app:cornerRadius="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonScanQr" />
