@@ -7,37 +7,6 @@
     android:background="@drawable/bg_splash_gradient">
 
     <!-- Top Badge -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="56dp"
-        android:background="@drawable/bg_pill_badge"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingTop="6dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="6dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <View
-            android:layout_width="8dp"
-            android:layout_height="8dp"
-            android:background="@drawable/indicator_active"
-            android:backgroundTint="#00C853" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:fontFamily="sans-serif-medium"
-            android:letterSpacing="0.05"
-            android:text="GRID TELEMETRY SECURE"
-            android:textColor="#8A9BC0"
-            android:textSize="11sp" />
-    </LinearLayout>
 
     <!-- Center Logo Container -->
     <LinearLayout
@@ -49,31 +18,13 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <FrameLayout
-            android:layout_width="140dp"
-            android:layout_height="140dp"
-            android:background="@drawable/bg_logo_container"
-            android:padding="24dp">
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_indicator_pill"
-                android:backgroundTint="#00C853">
+        <ImageView
+            android:layout_width="436dp"
+            android:layout_height="169dp"
+            android:layout_gravity="center"
+            android:src="@drawable/logo" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="8dp"
-                    android:background="@drawable/bg_dashed_circle" />
-
-                <ImageView
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_voltgrid_bolt" />
-            </FrameLayout>
-        </FrameLayout>
 
         <!-- Brand Text -->
         <TextView

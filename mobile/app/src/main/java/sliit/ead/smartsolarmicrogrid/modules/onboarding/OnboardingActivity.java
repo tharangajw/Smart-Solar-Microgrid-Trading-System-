@@ -1,6 +1,5 @@
 package sliit.ead.smartsolarmicrogrid.modules.onboarding;
 
-
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -24,25 +23,23 @@ public class OnboardingActivity extends AppCompatActivity {
     private LinearLayout layoutIndicators;
     private MaterialButton buttonNext;
     private TextView textSkip;
-    private View layoutBrandHeader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // Check if onboarding was already shown (temporarily disabled for testing)
+        // Check if onboarding was already shown
         SharedPreferences prefs = getSharedPreferences("SmartSolarPrefs", MODE_PRIVATE);
-        // if (prefs.getBoolean("isOnboardingComplete", false)) {
-        //     navigateToMain();
-        //     return;
-        // }
+        if (prefs.getBoolean("isOnboardingComplete", false)) {
+            navigateToMain();
+            return;
+        }
 
         setContentView(R.layout.activity_onboarding);
 
         layoutIndicators = findViewById(R.id.layoutIndicators);
         buttonNext = findViewById(R.id.buttonNext);
         textSkip = findViewById(R.id.textSkip);
-        layoutBrandHeader = findViewById(R.id.layoutBrandHeader);
 
         setupOnboardingItems();
         ViewPager2 viewPager = findViewById(R.id.viewPager);
@@ -56,17 +53,12 @@ public class OnboardingActivity extends AppCompatActivity {
                 super.onPageSelected(position);
                 setCurrentIndicator(position);
 
-                // Show brand header only on the first page
-                if (layoutBrandHeader != null) {
-                    layoutBrandHeader.setVisibility(position == 0 ? View.VISIBLE : View.GONE);
-                }
-
                 if (position == onboardingAdapter.getItemCount() - 1) {
                     buttonNext.setText("Get Started →");
-                    textSkip.setVisibility(android.view.View.INVISIBLE);
+                    textSkip.setVisibility(View.INVISIBLE);
                 } else {
                     buttonNext.setText("Next →");
-                    textSkip.setVisibility(android.view.View.VISIBLE);
+                    textSkip.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -140,7 +132,7 @@ public class OnboardingActivity extends AppCompatActivity {
     private void completeOnboarding() {
         SharedPreferences.Editor editor = getSharedPreferences("SmartSolarPrefs", MODE_PRIVATE).edit();
         editor.putBoolean("isOnboardingComplete", true);
-        editor.commit();
+        editor.apply();
         navigateToMain();
     }
 
