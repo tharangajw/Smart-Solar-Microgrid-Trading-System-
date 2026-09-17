@@ -17,6 +17,8 @@ replay_pid*.log
 # .NET / C# API (api/)
 # =========================
 # Build output
+[Bb]in/
+[Oo]bj/
 api/**/bin/
 api/**/obj/
 
