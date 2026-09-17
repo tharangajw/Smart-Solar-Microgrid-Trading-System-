@@ -1,0 +1,115 @@
+# =========================
+# General / OS
+# =========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+*.log
+hs_err_pid*.log
+replay_pid*.log
+
+# =========================
+# .NET / C# API (api/)
+# =========================
+# Build output
+api/**/bin/
+api/**/obj/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio files
+.vs/
+*.vssettings
+*.vspx
+*.vspscc
+
+# NuGet
+*.nupkg
+*.snupkg
+**/packages/
+!**/packages/repositories.config
+**/NuGet.Config
+
+# Roslyn cache
+*.booproj
+*.vbproj.user
+*.csproj.user
+
+# dotnet tools
+.dotnet/
+
+# Environment / secrets
+api/**/.env
+api/**/*.env.local
+appsettings.*.json
+!appsettings.json
+
+# =========================
+# Node.js / React Web (web/)
+# =========================
+web/node_modules/
+web/.next/
+web/out/
+web/build/
+web/dist/
+web/.cache/
+web/.parcel-cache/
+web/.env
+web/.env.local
+web/.env.development.local
+web/.env.test.local
+web/.env.production.local
+web/npm-debug.log*
+web/yarn-debug.log*
+web/yarn-error.log*
+web/.pnpm-debug.log*
+
+# Vite
+web/.vite/
+
+# =========================
+# React Native / Mobile (mobile/)
+# =========================
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+mobile/.expo-shared/
+mobile/.env
+mobile/.env.local
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/android/local.properties
+mobile/android/key.properties
+mobile/ios/Pods/
+mobile/ios/build/
+mobile/*.jks
+mobile/*.p8
+mobile/*.p12
+mobile/*.key
+mobile/*.mobileprovision
+mobile/npm-debug.log*
+mobile/yarn-debug.log*
+mobile/yarn-error.log*
+
+# Metro bundler
+mobile/.metro-health-check*
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
