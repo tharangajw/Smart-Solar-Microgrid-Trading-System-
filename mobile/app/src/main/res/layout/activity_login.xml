@@ -60,8 +60,7 @@
             app:boxStrokeColor="@color/dividerColor"
             app:hintEnabled="false"
             app:startIconDrawable="@drawable/ic_email_outline"
-            app:startIconTint="@color/textColorSecondary"
-            app:startIconPadding="12dp">
+            app:startIconTint="@color/textColorSecondary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editTextNic"
@@ -96,8 +95,7 @@
             app:endIconMode="password_toggle"
             app:hintEnabled="false"
             app:startIconDrawable="@drawable/ic_lock_outline"
-            app:startIconTint="@color/textColorSecondary"
-            app:startIconPadding="12dp">
+            app:startIconTint="@color/textColorSecondary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editTextPassword"
@@ -126,12 +124,12 @@
             android:layout_marginTop="16dp"
             android:text="Sign In"
             android:textAllCaps="false"
-            android:textColor="@color/textColorSecondary"
+            android:textColor="@color/black"
             android:textSize="16sp"
             android:textStyle="bold"
-            app:backgroundTint="@color/buttonDisabled"
+            app:backgroundTint="@color/accentYellow"
             app:cornerRadius="16dp"
-            app:elevation="0dp" />
+            app:elevation="2dp" />
 
         <!-- Divider -->
         <LinearLayout

@@ -9,8 +9,6 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.button.MaterialButton
 import com.smartsolar.R
 import com.smartsolar.modules.authentication.LoginActivity
-import sliit.ead.smartsolarmicrogrid.modules.onboarding.OnboardingAdapter
-import sliit.ead.smartsolarmicrogrid.modules.onboarding.OnboardingItem
 import java.util.ArrayList
 
 class OnboardingActivity : AppCompatActivity() {

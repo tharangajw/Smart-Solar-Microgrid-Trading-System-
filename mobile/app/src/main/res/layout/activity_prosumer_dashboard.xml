@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/backgroundColor"
     android:fillViewport="true"
-    tools:context=".modules.procumer.ProsumerDashboardActivity">
+    tools:context=".modules.prosumer.ProsumerDashboardActivity">
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/backgroundColor"
-    tools:context=".modules.history.BookingHistoryActivity">
+    tools:context=".modules.history.EnergyHistoryActivity">
 
     <!-- Header -->
     <LinearLayout
