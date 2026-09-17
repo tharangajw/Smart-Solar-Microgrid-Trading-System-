@@ -1,73 +1,119 @@
-# ══════════════════════════════════════════════════════
-#  SmartSolar Microgrid — Root .gitignore
-# ══════════════════════════════════════════════════════
-
-# ── .NET / C# ─────────────────────────────────────────
-bin/
-obj/
-*.dll
-*.exe
-*.pdb
+# =========================
+# General / OS
+# =========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.log
 *.cache
-*.user
+
+# =========================
+# Web (Vite / React / Node)
+# =========================
+web/node_modules/
+web/dist/
+web/build/
+web/.env
+web/.env.local
+web/.env.development.local
+web/.env.test.local
+web/.env.production.local
+web/npm-debug.log*
+web/yarn-debug.log*
+web/yarn-error.log*
+web/.eslintcache
+web/.vite/
+
+# =========================
+# API (.NET / C#)
+# =========================
+api/bin/
+api/obj/
+api/TestResults/
+api/.vs/
+api/*.user
+api/*.userosscache
+api/*.suo
+api/*.userprefs
+api/*/*.booproj
+api/*/*.vbproj.user
+api/*/*.csproj.user
+*.rsuser
 *.suo
-*.ntvs*
-*.njsproj
-
-# NuGet
-*.nupkg
-.nuget/
-packages/
-
-# Build results
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+TestResults/
 [Dd]ebug/
+[Dd]ebugPublic/
 [Rr]elease/
+[Rr]eleases/
 x64/
 x86/
-build/
+[Aa]RM/
+[Aa]RM64/
 bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
 
-# Visual Studio
-.vs/
-*.rsuser
-*.sln.docstates
-launchSettings.json
+# =========================
+# Mobile (React Native / Flutter / Android / iOS)
+# =========================
+mobile/node_modules/
+mobile/.expo/
+mobile/dist/
+mobile/npm-debug.*
+mobile/yarn-debug.*
+mobile/yarn-error.*
 
-# Rider / JetBrains
-.idea/
-*.sln.iml
+# Android
+mobile/android/.gradle/
+mobile/android/build/
+mobile/android/app/build/
+mobile/android/local.properties
+mobile/android/*.iml
+mobile/android/.idea/
 
-# ── Node.js / React / Vite ───────────────────────────
-node_modules/
-dist/
-dist-ssr/
-*.local
+# iOS
+mobile/ios/build/
+mobile/ios/Pods/
+mobile/ios/.symlinks/
+mobile/ios/Pods.xcodeproj
+mobile/ios/DerivedData/
+mobile/ios/*.xcworkspace/xcuserdata/
+mobile/ios/*.xcodeproj/xcuserdata/
 
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Flutter (if applicable)
+mobile/.dart_tool/
+mobile/.packages
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
 
-# ── OS Files ──────────────────────────────────────────
-.DS_Store
-Thumbs.db
-Desktop.ini
-*.sw?
-
-# ── Editor ────────────────────────────────────────────
+# =========================
+# IDEs & Editors
+# =========================
 .vscode/*
-!.vscode/extensions.json
 !.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
 
-# ── Misc ──────────────────────────────────────────────
-*.env
-*.env.local
-*.env.*.local
-
-# Java error logs (from the repo root)
-hs_err_pid*.log
-replay_pid*.log
+# =========================
+# Ignore local environment configs across all
+# =========================
+**/.env
+**/.env.local
+**/.env.development
+**/.env.test
+**/.env.production
