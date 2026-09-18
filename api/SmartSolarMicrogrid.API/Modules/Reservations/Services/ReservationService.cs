@@ -1,4 +1,4 @@
-﻿using SmartSolarMicrogrid.API.Helpers;
+using SmartSolarMicrogrid.API.Helpers;
 using SmartSolarMicrogrid.API.Modules.Reservations.DTOs;
 using SmartSolarMicrogrid.API.Modules.Reservations.Exceptions;
 using SmartSolarMicrogrid.API.Modules.Reservations.Models;
@@ -10,10 +10,10 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
     {
         private readonly IReservationRepository _reservationRepository;
         private readonly ReservationModelToDTO _mapper;
-        public ReservationService(IReservationRepository reservationRepository, ReservationModelToDTO _mapper)
+        public ReservationService(IReservationRepository reservationRepository, ReservationModelToDTO mapper)
         {
             _reservationRepository = reservationRepository;
-            _mapper = _mapper;
+            _mapper = mapper;
         }
 
         public async Task<ReservationResponseDto> CreateReservationAsync(CreateREservationDto createReservationDto)
@@ -25,7 +25,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
 
             if (createReservationDto.ReservationDate > DateTime.UtcNow.AddDays(7))
             {
-                throw new InvalidReservationDateException("Reservation date cannot be more than 30 days in the future.");
+                throw new InvalidReservationDateException("Reservation date cannot be more than 7 days in the future.");
             }
 
             var reservation = new Reservation
@@ -49,7 +49,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
 
             if (existingReservation == null)
             {
-                throw new ReservationNotFoundException($"Reservation with id {id} not found.");
+                throw new ReservationNotFoundException("Reservation with not found.");
             }
 
             if (existingReservation.Status == "Cancelled" || existingReservation.Status == "Completed")
@@ -62,6 +62,16 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             if (timeUntilReservation.TotalHours < 12)
             {
                 throw new NoticePeriodViolationException("Updates require atleast 12 hours notice.");
+            }
+
+            if (updateReservationDto.ReservationDate < DateTime.UtcNow)
+            {
+                throw new InvalidReservationDateException("Updates require at least 12 hours notice.");
+            }
+
+            if (updateReservationDto.ReservationDate > (DateTime.UtcNow).AddDays(7))
+            {
+                throw new InvalidReservationDateException("Reservation must be scheduled within 7 days.");
             }
 
             existingReservation.SlotId = updateReservationDto.SlotId;
