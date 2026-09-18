@@ -1,7 +1,10 @@
 import React from 'react';
 import heroImage from '../assets/hero-solar.png';
+import { useNavigate } from 'react-router-dom';
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+
   return (
     <section id="hero" className="bg-ivory">
       <div className="max-w-7xl mx-auto px-6 pt-32 pb-20 lg:pt-40 lg:pb-28">
@@ -22,9 +25,12 @@ const HeroSection = () => {
               <a href="#" className="inline-flex items-center bg-forest text-ivory px-8 py-3.5 rounded-full hover:bg-forest-light transition-colors duration-300 font-medium text-sm tracking-wide">
                 Explore the Network
               </a>
-              <a href="#" className="inline-flex items-center border-2 border-forest/20 text-forest px-8 py-3.5 rounded-full hover:border-forest hover:bg-forest hover:text-ivory transition-all duration-300 font-medium text-sm tracking-wide">
+              <button 
+                onClick={() => navigate('/dashboard')}
+                className="inline-flex items-center border-2 border-forest/20 text-forest px-8 py-3.5 rounded-full hover:border-forest hover:bg-forest hover:text-ivory transition-all duration-300 font-medium text-sm tracking-wide"
+              >
                 Access Your Account
-              </a>
+              </button>
             </div>
           </div>
 
