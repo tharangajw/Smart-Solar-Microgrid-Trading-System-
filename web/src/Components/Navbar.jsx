@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -26,6 +28,10 @@ const Navbar = () => {
 
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
+  };
+
+  const handleLoginClick = () => {
+    navigate('/dashboard');
   };
 
   return (
@@ -75,7 +81,10 @@ const Navbar = () => {
               </a>
             ))}
           </div>
-          <button className="border border-forest text-forest hover:bg-forest hover:text-ivory rounded-full px-6 py-2 text-sm font-medium transition-all duration-300">
+          <button 
+            onClick={handleLoginClick}
+            className="border border-forest text-forest hover:bg-forest hover:text-ivory rounded-full px-6 py-2 text-sm font-medium transition-all duration-300"
+          >
             Login
           </button>
         </div>
@@ -132,7 +141,7 @@ const Navbar = () => {
             </a>
           ))}
           <button 
-            onClick={handleLinkClick}
+            onClick={handleLoginClick}
             className="border border-forest text-forest hover:bg-forest hover:text-ivory rounded-full px-6 py-2 text-sm font-medium transition-all duration-300 w-fit mt-4"
           >
             Login
