@@ -1,14 +1,18 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, CalendarDays, Battery, User } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Battery, User, Map, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const OperatorLayout = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const operator = JSON.parse(localStorage.getItem('operator_user') || '{}');
 
   const navItems = [
     { name: 'Dashboard', path: '/operator/dashboard', icon: <LayoutDashboard size={20} /> },
     { name: 'Bookings', path: '/operator/bookings', icon: <CalendarDays size={20} /> },
     { name: 'Slot Availability', path: '/operator/slots', icon: <Battery size={20} /> },
+    { name: 'Stations Map', path: '/operator/map', icon: <Map size={20} /> },
   ];
 
   return (
@@ -45,10 +49,11 @@ const OperatorLayout = () => {
               <User size={20} className="text-gray-600" />
             </div>
             <div>
-              <p className="text-sm font-medium">Operator Account</p>
-              <p className="text-xs text-gray-500">View Profile</p>
+              <p className="text-sm font-medium">{operator.fullName || 'Operator Account'}</p>
+              <p className="text-xs text-gray-500">{operator.email || 'Grid Operator'}</p>
             </div>
           </div>
+          <button onClick={() => { localStorage.removeItem('operator_token'); localStorage.removeItem('operator_user'); navigate('/operator/login'); }} className="mt-3 flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"><LogOut size={18} /> Log out</button>
         </div>
       </aside>
 

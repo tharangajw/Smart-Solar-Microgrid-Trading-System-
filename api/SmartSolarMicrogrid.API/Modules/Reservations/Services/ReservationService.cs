@@ -3,6 +3,7 @@ using SmartSolarMicrogrid.API.Modules.Reservations.DTOs;
 using SmartSolarMicrogrid.API.Modules.Reservations.Exceptions;
 using SmartSolarMicrogrid.API.Modules.Reservations.Models;
 using SmartSolarMicrogrid.API.Modules.Reservations.Repositories;
+using SmartSolarMicrogrid.API.Modules.StationsMap.Services;
 
 namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
 {
@@ -10,10 +11,12 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
     {
         private readonly IReservationRepository _reservationRepository;
         private readonly ReservationModelToDTO _mapper;
-        public ReservationService(IReservationRepository reservationRepository, ReservationModelToDTO _mapper)
+        private readonly StationService _stationService;
+        public ReservationService(IReservationRepository reservationRepository, ReservationModelToDTO _mapper, StationService stationService)
         {
             _reservationRepository = reservationRepository;
-            _mapper = _mapper;
+            this._mapper = _mapper;
+            _stationService = stationService;
         }
 
         public async Task<ReservationResponseDto> CreateReservationAsync(CreateREservationDto createReservationDto)
@@ -28,6 +31,9 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
                 throw new InvalidReservationDateException("Reservation date cannot be more than 30 days in the future.");
             }
 
+            if (!await _stationService.ReserveSlotAsync(createReservationDto.NodeId))
+                throw new StationUnavailableException("This station has no available slots.");
+
             var reservation = new Reservation
             {
                 ProsumerNic = createReservationDto.ProsumerNic,
@@ -39,8 +45,16 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
                 UpdatedAt = DateTime.UtcNow
             };
 
-            var result = await _reservationRepository.CreateReservationAsync(reservation);
-            return _mapper.MapToDto(result);
+            try
+            {
+                var result = await _reservationRepository.CreateReservationAsync(reservation);
+                return _mapper.MapToDto(result);
+            }
+            catch
+            {
+                await _stationService.ReleaseSlotAsync(createReservationDto.NodeId);
+                throw;
+            }
         }
 
         public async Task<ReservationResponseDto> UpdateReservationAsync(string id, UpdateReservationDto updateReservationDto)
@@ -94,6 +108,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             }
 
             await _reservationRepository.UpdateReservationStatusAsync(id, "Cancelled", cancelReservationDto.CancelledReason);
+            await _stationService.ReleaseSlotAsync(existingReservation.NodeId);
 
             var updatedReservation = await _reservationRepository.GetReservationByIdAsync(id);
             return _mapper.MapToDto(updatedReservation);

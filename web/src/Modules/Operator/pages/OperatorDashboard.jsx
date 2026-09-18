@@ -1,40 +1,40 @@
 import React, { useState, useEffect } from 'react';
-import { getOperatorDashboard } from '../../../Services/operatorApi';
+import { Link } from 'react-router-dom';
+import { getAllReservations, getOperatorDashboard } from '../../../Services/operatorApi';
 import StatCard from '../Components/StatCard';
 import BookingTable from '../Components/BookingTable';
 import { Calendar, CheckCircle, Clock, BatteryCharging, Zap } from 'lucide-react';
 
 const OperatorDashboard = () => {
   const [data, setData] = useState({
-    totalBookings: 0,
-    pendingBookings: 0,
-    approvedBookings: 0,
-    availableSlots: 0,
-    activeNodes: 0,
+    totalReservations: 0,
+    pendingCount: 0,
+    approvedCount: 0,
+    approvedFutureCount: 0,
+    activeStations: 0,
     recentBookings: []
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // In a real app, we'd fetch this from the API
-    // getOperatorDashboard().then(res => setData(res.data));
-    
-    // Mock data for now
-    setTimeout(() => {
-      setData({
-        totalBookings: 125,
-        pendingBookings: 12,
-        approvedBookings: 45,
-        availableSlots: 8,
-        activeNodes: 5,
-        recentBookings: [
-          { id: '1001', date: '2026-09-17T10:00:00Z', nodeName: 'Node A - Colombo', energyAmount: 50, status: 'approved' },
-          { id: '1002', date: '2026-09-17T11:30:00Z', nodeName: 'Node B - Kandy', energyAmount: 120, status: 'pending' },
-          { id: '1003', date: '2026-09-16T14:15:00Z', nodeName: 'Node A - Colombo', energyAmount: 75, status: 'completed' },
-        ]
-      });
-      setLoading(false);
-    }, 800);
+    const loadDashboard = async () => {
+      try {
+        const [dashboardResponse, reservationsResponse] = await Promise.all([
+          getOperatorDashboard(),
+          getAllReservations(),
+        ]);
+        setData({
+          ...dashboardResponse.data,
+          recentBookings: reservationsResponse.data.slice(0, 5),
+        });
+      } catch (err) {
+        setError(err.response?.data?.message || 'Unable to load dashboard data.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadDashboard();
   }, []);
 
   return (
@@ -61,28 +61,30 @@ const OperatorDashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
         <StatCard 
           title="Total Bookings" 
-          value={loading ? '...' : data.totalBookings} 
+          value={loading ? '...' : data.totalReservations} 
           icon={<Calendar size={28} />} 
         />
         <StatCard 
           title="Pending Bookings" 
-          value={loading ? '...' : data.pendingBookings} 
+          value={loading ? '...' : data.pendingCount} 
           icon={<Clock size={28} />} 
           textColor="text-amber-500"
         />
         <StatCard 
           title="Approved Bookings" 
-          value={loading ? '...' : data.approvedBookings} 
+          value={loading ? '...' : data.approvedCount} 
           icon={<CheckCircle size={28} />} 
           textColor="text-blue-500"
         />
         <StatCard 
-          title="Available Slots" 
-          value={loading ? '...' : data.availableSlots} 
+          title="Active Stations" 
+          value={loading ? '...' : data.activeStations} 
           icon={<BatteryCharging size={28} />} 
           textColor="text-emerald-500"
         />
       </div>
+
+      {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>}
 
       {/* Recent Activity */}
       <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/40 border border-white p-6 sm:p-8 relative overflow-hidden group">
@@ -94,9 +96,9 @@ const OperatorDashboard = () => {
             </div>
             Recent Bookings
           </h2>
-          <button className="text-sm font-semibold text-teal-600 hover:text-teal-700 bg-teal-50 hover:bg-teal-100 px-4 py-2 rounded-lg transition-colors">
+          <Link to="/operator/bookings" className="text-sm font-semibold text-teal-600 hover:text-teal-700 bg-teal-50 hover:bg-teal-100 px-4 py-2 rounded-lg transition-colors">
             View All
-          </button>
+          </Link>
         </div>
         <BookingTable bookings={data.recentBookings} loading={loading} />
       </div>

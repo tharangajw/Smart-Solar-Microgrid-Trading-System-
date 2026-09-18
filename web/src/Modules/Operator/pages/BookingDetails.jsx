@@ -2,31 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import StatusBadge from '../Components/StatusBadge';
 import { ArrowLeft, User, MapPin, Calendar, Zap, CreditCard } from 'lucide-react';
+import { approveReservation, getReservationById } from '../../../Services/operatorApi';
 
 const BookingDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [qrCodeId, setQrCodeId] = useState('');
+  const [approving, setApproving] = useState(false);
 
   useEffect(() => {
-    // Mock fetching booking details by ID
-    setTimeout(() => {
-      setBooking({
-        id: id,
-        transactionId: `TXN-8739-${id}`,
-        prosumerName: 'Saman Perera',
-        prosumerNIC: '19851234567V',
-        nodeName: 'Node A - Colombo',
-        nodeLocation: 'Colombo 03',
-        date: '2026-09-17T10:00:00Z',
-        energyAmount: 50,
-        status: 'approved',
-        paymentStatus: 'paid',
-        qrStatus: 'generated'
-      });
-      setLoading(false);
-    }, 600);
+    getReservationById(id)
+      .then((response) => setBooking(response.data))
+      .catch((err) => setError(err.response?.data?.message || 'Unable to load this reservation.'))
+      .finally(() => setLoading(false));
   }, [id]);
 
   if (loading) {
@@ -34,8 +25,19 @@ const BookingDetails = () => {
   }
 
   if (!booking) {
-    return <div className="p-8 text-center text-red-500">Booking not found.</div>;
+    return <div className="p-8 text-center text-red-500">{error || 'Booking not found.'}</div>;
   }
+
+  const handleApprove = async () => {
+    setApproving(true); setError('');
+    try {
+      const response = await approveReservation(booking.id);
+      setBooking({ ...booking, status: 'Approved' });
+      setQrCodeId(response.data.qrCodeId);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Unable to approve reservation.');
+    } finally { setApproving(false); }
+  };
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -48,10 +50,11 @@ const BookingDetails = () => {
         </button>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Booking #{booking.id}</h1>
-          <p className="text-sm text-gray-500">Transaction ID: {booking.transactionId}</p>
+          <p className="text-sm text-gray-500">Node: {booking.nodeId}</p>
         </div>
         <div className="ml-auto flex gap-2">
           <StatusBadge status={booking.status} />
+          {booking.status?.toLowerCase() === 'pending' && <button onClick={handleApprove} disabled={approving} className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{approving ? 'Approving…' : 'Approve'}</button>}
         </div>
       </div>
 
@@ -65,11 +68,11 @@ const BookingDetails = () => {
           <div className="space-y-3">
             <div>
               <span className="block text-sm text-gray-500">Name</span>
-              <span className="font-medium text-gray-900">{booking.prosumerName}</span>
+              <span className="font-medium text-gray-900">Prosumer</span>
             </div>
             <div>
               <span className="block text-sm text-gray-500">NIC</span>
-              <span className="font-medium text-gray-900">{booking.prosumerNIC}</span>
+              <span className="font-medium text-gray-900">{booking.prosumerNic}</span>
             </div>
           </div>
         </div>
@@ -83,11 +86,11 @@ const BookingDetails = () => {
           <div className="space-y-3">
             <div>
               <span className="block text-sm text-gray-500">Node Name</span>
-              <span className="font-medium text-gray-900">{booking.nodeName}</span>
+              <span className="font-medium text-gray-900">{booking.nodeId}</span>
             </div>
             <div>
               <span className="block text-sm text-gray-500">Location</span>
-              <span className="font-medium text-gray-900">{booking.nodeLocation}</span>
+              <span className="font-medium text-gray-900">Slot: {booking.slotId}</span>
             </div>
           </div>
         </div>
@@ -104,28 +107,30 @@ const BookingDetails = () => {
                 <Calendar size={14} /> Date & Time
               </span>
               <span className="font-medium text-gray-900">
-                {new Date(booking.date).toLocaleString()}
+                {new Date(booking.reservationDate).toLocaleString()}
               </span>
             </div>
             <div>
               <span className="block text-sm text-gray-500 flex items-center gap-1 mb-1">
                 <Zap size={14} /> Energy Amount
               </span>
-              <span className="font-medium text-gray-900">{booking.energyAmount} kWh</span>
+              <span className="font-medium text-gray-900">Slot {booking.slotId}</span>
             </div>
             <div>
               <span className="block text-sm text-gray-500 flex items-center gap-1 mb-1">
                 <CreditCard size={14} /> Payment Status
               </span>
-              <span className="font-medium text-gray-900 capitalize">{booking.paymentStatus}</span>
+              <span className="font-medium text-gray-900 capitalize">Not tracked</span>
             </div>
             <div>
               <span className="block text-sm text-gray-500 mb-1">QR Status</span>
-              <span className="font-medium text-gray-900 capitalize">{booking.qrStatus}</span>
+              <span className="font-medium text-gray-900">{qrCodeId || (booking.status?.toLowerCase() === 'approved' ? 'Generated' : 'Pending approval')}</span>
             </div>
           </div>
         </div>
       </div>
+      {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>}
+      {qrCodeId && <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-green-700">QR code ID: <code>{qrCodeId}</code></div>}
     </div>
   );
 };

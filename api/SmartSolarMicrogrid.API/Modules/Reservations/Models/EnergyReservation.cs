@@ -21,6 +21,9 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Models
 
         public string QrCodeId { get; set; } = null!;
 
+        // Links this QR transaction to the source booking that was approved.
+        public string SourceReservationId { get; set; } = null!;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

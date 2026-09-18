@@ -29,6 +29,10 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
+            catch (StationUnavailableException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpGet("{id}")]

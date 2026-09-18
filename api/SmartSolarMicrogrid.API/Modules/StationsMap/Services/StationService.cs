@@ -9,17 +9,21 @@
 using MongoDB.Driver;
 using SmartSolarMicrogrid.API.Data;
 using SmartSolarMicrogrid.API.Modules.StationsMap.Models;
+using Microsoft.AspNetCore.SignalR;
+using SmartSolarMicrogrid.API.Modules.StationsMap.Hubs;
 
 namespace SmartSolarMicrogrid.API.Modules.StationsMap.Services
 {
     public class StationService
     {
         private readonly IMongoCollection<SolarStation> _stations;
+        private readonly IHubContext<StationHub> _hubContext;
 
         // Constructor - inject MongoDB context and get the SolarStations collection
-        public StationService(MongoDbContext context)
+        public StationService(MongoDbContext context, IHubContext<StationHub> hubContext)
         {
             _stations = context.Database.GetCollection<SolarStation>("SolarStations");
+            _hubContext = hubContext;
         }
 
         /// <summary>
@@ -85,7 +89,49 @@ namespace SmartSolarMicrogrid.API.Modules.StationsMap.Services
             await _stations.UpdateOneAsync(s => s.Id == id, update);
 
             // Return updated station
-            return await _stations.Find(s => s.Id == id).FirstOrDefaultAsync();
+            var updatedStation = await _stations.Find(s => s.Id == id).FirstOrDefaultAsync();
+            if (updatedStation != null)
+            {
+                await _hubContext.Clients.All.SendAsync("ReceiveStationUpdate", updatedStation);
+            }
+            return updatedStation;
+        }
+
+        /// <summary>Atomically reserves one currently available station slot.</summary>
+        public async Task<bool> ReserveSlotAsync(string stationId)
+        {
+            var filter = Builders<SolarStation>.Filter.Eq(s => s.Id, stationId) &
+                         Builders<SolarStation>.Filter.Gt(s => s.AvailableSlots, 0) &
+                         Builders<SolarStation>.Filter.Ne(s => s.Status, "inactive");
+            var result = await _stations.UpdateOneAsync(filter, Builders<SolarStation>.Update.Inc(s => s.AvailableSlots, -1));
+            if (result.ModifiedCount == 0) return false;
+
+            var station = await GetStationByIdAsync(stationId);
+            if (station?.AvailableSlots == 0)
+                await _stations.UpdateOneAsync(s => s.Id == stationId, Builders<SolarStation>.Update.Set(s => s.Status, "full"));
+                
+            var finalStation = await GetStationByIdAsync(stationId);
+            if (finalStation != null)
+            {
+                await _hubContext.Clients.All.SendAsync("ReceiveStationUpdate", finalStation);
+            }
+            
+            return true;
+        }
+
+        /// <summary>Returns a slot when a non-final reservation is cancelled.</summary>
+        public async Task ReleaseSlotAsync(string stationId)
+        {
+            var station = await GetStationByIdAsync(stationId);
+            if (station == null || station.Status == "inactive" || station.AvailableSlots >= station.TotalSlots) return;
+            await _stations.UpdateOneAsync(s => s.Id == stationId,
+                Builders<SolarStation>.Update.Inc(s => s.AvailableSlots, 1).Set(s => s.Status, "active"));
+                
+            var finalStation = await GetStationByIdAsync(stationId);
+            if (finalStation != null)
+            {
+                await _hubContext.Clients.All.SendAsync("ReceiveStationUpdate", finalStation);
+            }
         }
 
         /// <summary>

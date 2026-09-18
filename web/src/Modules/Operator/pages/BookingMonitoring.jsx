@@ -1,32 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import BookingTable from '../Components/BookingTable';
 import { Search, Filter } from 'lucide-react';
+import { approveReservation, getAllReservations } from '../../../Services/operatorApi';
 
 const BookingMonitoring = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [approvingId, setApprovingId] = useState(null);
 
   useEffect(() => {
-    // Mock fetching data
-    setTimeout(() => {
-      setBookings([
-        { id: '1001', date: '2026-09-17T10:00:00Z', nodeName: 'Node A - Colombo', energyAmount: 50, status: 'approved' },
-        { id: '1002', date: '2026-09-17T11:30:00Z', nodeName: 'Node B - Kandy', energyAmount: 120, status: 'pending' },
-        { id: '1003', date: '2026-09-16T14:15:00Z', nodeName: 'Node A - Colombo', energyAmount: 75, status: 'completed' },
-        { id: '1004', date: '2026-09-18T09:00:00Z', nodeName: 'Node C - Galle', energyAmount: 200, status: 'pending' },
-        { id: '1005', date: '2026-09-15T16:45:00Z', nodeName: 'Node B - Kandy', energyAmount: 30, status: 'cancelled' },
-      ]);
-      setLoading(false);
-    }, 800);
+    getAllReservations()
+      .then((response) => setBookings(response.data))
+      .catch((err) => setError(err.response?.data?.message || 'Unable to load reservations.'))
+      .finally(() => setLoading(false));
   }, []);
 
   const filteredBookings = bookings.filter(booking => {
-    const matchesSearch = booking.id.includes(searchTerm) || booking.nodeName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || booking.status === statusFilter;
+    const matchesSearch = booking.id?.includes(searchTerm) || booking.nodeId?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || booking.status?.toLowerCase() === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  const handleApprove = async (id) => {
+    setApprovingId(id); setError(''); setMessage('');
+    try {
+      const response = await approveReservation(id);
+      setBookings((current) => current.map((booking) => booking.id === id ? { ...booking, status: 'Approved' } : booking));
+      setMessage(`Reservation approved. QR code ID: ${response.data.qrCodeId}`);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Unable to approve reservation.');
+    } finally { setApprovingId(null); }
+  };
 
   return (
     <div className="space-y-8 min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-2 sm:p-6 rounded-3xl">
@@ -40,6 +48,8 @@ const BookingMonitoring = () => {
           </p>
         </div>
       </div>
+      {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>}
+      {message && <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-green-700">{message}</div>}
 
       {/* Filters and Search */}
       <div className="bg-white/70 backdrop-blur-xl p-5 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col md:flex-row gap-5 items-center relative overflow-hidden group">
@@ -76,7 +86,7 @@ const BookingMonitoring = () => {
 
       {/* Data Table */}
       <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/40 border border-white p-2 sm:p-6 relative z-10">
-        <BookingTable bookings={filteredBookings} loading={loading} />
+        <BookingTable bookings={filteredBookings} loading={loading} onApprove={handleApprove} approvingId={approvingId} />
       </div>
     </div>
   );

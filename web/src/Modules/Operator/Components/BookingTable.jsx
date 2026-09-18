@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import StatusBadge from './StatusBadge';
 import { Eye } from 'lucide-react';
 
-const BookingTable = ({ bookings, loading }) => {
+const BookingTable = ({ bookings, loading, onApprove, approvingId }) => {
   if (loading) {
     return (
       <div className="py-12 flex flex-col items-center justify-center space-y-4">
@@ -60,20 +60,31 @@ const BookingTable = ({ bookings, loading }) => {
                   </span>
                 </td>
                 <td className="px-6 py-5 whitespace-nowrap text-sm text-slate-500 font-medium">
-                  {new Date(booking.date).toLocaleString(undefined, {
+                  {new Date(booking.reservationDate || booking.date).toLocaleString(undefined, {
                     month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                   })}
                 </td>
                 <td className="px-6 py-5 whitespace-nowrap text-sm text-slate-700 font-medium">
-                  {booking.nodeName}
+                  {booking.nodeName || booking.nodeId}
                 </td>
                 <td className="px-6 py-5 whitespace-nowrap text-sm text-slate-900 font-bold">
-                  {booking.energyAmount} <span className="text-slate-400 font-medium">kWh</span>
+                  {booking.energyAmount ?? booking.slotId ?? '—'}
+                  {booking.energyAmount != null && <span className="text-slate-400 font-medium"> kWh</span>}
                 </td>
                 <td className="px-6 py-5 whitespace-nowrap">
                   <StatusBadge status={booking.status} />
                 </td>
                 <td className="px-6 py-5 whitespace-nowrap text-right text-sm font-medium">
+                  {booking.status?.toLowerCase() === 'pending' && onApprove && (
+                    <button
+                      type="button"
+                      onClick={() => onApprove(booking.id)}
+                      disabled={approvingId === booking.id}
+                      className="mr-2 inline-flex items-center rounded-lg bg-teal-600 px-3 py-1.5 text-white transition hover:bg-teal-700 disabled:opacity-60"
+                    >
+                      {approvingId === booking.id ? 'Approving…' : 'Approve'}
+                    </button>
+                  )}
                   <Link 
                     to={`/operator/bookings/${booking.id}`} 
                     className="inline-flex items-center justify-center space-x-2 bg-white text-teal-600 border border-teal-100 hover:border-teal-200 hover:bg-teal-50 px-3 py-1.5 rounded-lg transition-all shadow-sm group-hover:shadow"

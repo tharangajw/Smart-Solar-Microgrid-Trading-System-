@@ -15,6 +15,9 @@ import OperatorDashboard from './Modules/Operator/Pages/OperatorDashboard';
 import BookingMonitoring from './Modules/Operator/Pages/BookingMonitoring';
 import BookingDetails from './Modules/Operator/Pages/BookingDetails';
 import SlotAvailability from './Modules/Operator/Pages/SlotAvailability';
+import OperatorLogin from './Modules/Operator/pages/OperatorLogin';
+import OperatorRoute from './Routes/OperatorRoute';
+import StationsMap from './Modules/Operator/pages/StationsMap';
 
 const LandingPage = () => (
   <div className="min-h-screen bg-ivory font-sans text-charcoal">
@@ -37,12 +40,15 @@ function App() {
         {/* Landing Page Route */}
         <Route path="/" element={<LandingPage />} />
 
-        {/* Operator Dashboard Routes */}
-        <Route path="/operator" element={<OperatorLayout />}>
-          <Route path="dashboard" element={<OperatorDashboard />} />
-          <Route path="bookings" element={<BookingMonitoring />} />
-          <Route path="bookings/:id" element={<BookingDetails />} />
-          <Route path="slots" element={<SlotAvailability />} />
+        <Route path="/operator/login" element={<OperatorLogin />} />
+        <Route element={<OperatorRoute />}>
+          <Route path="/operator" element={<OperatorLayout />}>
+            <Route path="dashboard" element={<OperatorDashboard />} />
+            <Route path="bookings" element={<BookingMonitoring />} />
+            <Route path="bookings/:id" element={<BookingDetails />} />
+            <Route path="slots" element={<SlotAvailability />} />
+            <Route path="map" element={<StationsMap />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

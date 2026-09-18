@@ -7,6 +7,7 @@
  */
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using SmartSolarMicrogrid.API.Modules.StationsMap.Services;
 
 namespace SmartSolarMicrogrid.API.Modules.StationsMap.Controllers
@@ -77,6 +78,7 @@ namespace SmartSolarMicrogrid.API.Modules.StationsMap.Controllers
         /// Body: { "availableSlots": 4 }
         /// </summary>
         [HttpPut("{id}/slots")]
+        [Authorize(Roles = "GridOperator")]
         public async Task<IActionResult> UpdateSlots(string id, [FromBody] UpdateSlotsRequest request)
         {
             try
