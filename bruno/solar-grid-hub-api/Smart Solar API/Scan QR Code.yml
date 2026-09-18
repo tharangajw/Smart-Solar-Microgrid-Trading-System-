@@ -1,0 +1,16 @@
+info:
+  name: Scan QR Code
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{base_url}}/api/operator/scan-qr"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

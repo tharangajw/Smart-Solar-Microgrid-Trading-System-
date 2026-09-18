@@ -1,0 +1,16 @@
+info:
+  name: Add New Reservation
+  type: http
+  seq: 2
+
+http:
+  method: PUT
+  url: "{{base_url}}/api/reservations"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
