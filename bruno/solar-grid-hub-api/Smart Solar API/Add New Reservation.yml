@@ -4,8 +4,18 @@ info:
   seq: 2
 
 http:
-  method: PUT
-  url: "{{base_url}}/api/reservations"
+  method: POST
+  url: http://localhost:5281/api/reservations
+  body:
+    type: json
+    data: |
+      {
+        "prosumerId": "PROSUMER_12345",
+        "nodeId": "NODE_999",
+        "capacityKWh": 15.5,
+        "scheduledTime": "2026-09-20T10:00:00Z",
+        "qrCodeId": "test-qr-001"
+      }
   auth: inherit
 
 settings:

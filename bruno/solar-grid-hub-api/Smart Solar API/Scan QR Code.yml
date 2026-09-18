@@ -5,7 +5,13 @@ info:
 
 http:
   method: POST
-  url: "{{base_url}}/api/operator/scan-qr"
+  url: http://localhost:5281/api/operator/scan-qr
+  body:
+    type: json
+    data: |
+      {
+        "qrCodeId": "41d31cff-b4ba-41d1-83f8-ef59679e055b"
+      }
   auth: inherit
 
 settings:

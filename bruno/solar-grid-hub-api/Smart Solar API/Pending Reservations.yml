@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{base_url}}/api/reservations/pending"
+  url: http://localhost:5281/api/reservations/pending
   auth: inherit
 
 settings:
