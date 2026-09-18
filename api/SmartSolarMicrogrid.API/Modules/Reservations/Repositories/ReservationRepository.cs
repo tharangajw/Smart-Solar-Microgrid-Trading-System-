@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using SmartSolarMicrogrid.API.Data;
 using SmartSolarMicrogrid.API.Modules.Reservations.Models;
 
 namespace SmartSolarMicrogrid.API.Modules.Reservations.Repositories
@@ -9,12 +10,12 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Repositories
         private readonly IMongoCollection<Reservation> _reservationsCollection;
 
         //constructor to initialize the MongoDB collection
-        public ReservationRepository(IMongoDatabase database)
+        public ReservationRepository(MongoDbContext database)
         {
             _reservationsCollection = database.GetCollection<Reservation>("EnergyReservation");
         }
         //save the reservation to the database
-        public async Task<Reservation> CreateAsync(Reservation reservation)
+        public async Task<Reservation> CreateReservationAsync(Reservation reservation)
         {
             await _reservationsCollection.InsertOneAsync(reservation);
             return reservation;

@@ -4,7 +4,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Repositories
 {
     public interface IReservationRepository
     {
-        Task<Reservation> CreateAsync(Reservation reservation);
+        Task<Reservation> CreateReservationAsync(Reservation reservation);
         Task<Reservation?> GetReservationByIdAsync(String id);
         Task<List<Reservation>> GetAllReservationsAsync();
         Task<List<Reservation>> GetReservationsByProsumerNicAsync(String nic);

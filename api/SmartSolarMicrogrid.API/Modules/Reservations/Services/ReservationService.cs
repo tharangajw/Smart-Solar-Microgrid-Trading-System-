@@ -1,0 +1,184 @@
+﻿using SmartSolarMicrogrid.API.Helpers;
+using SmartSolarMicrogrid.API.Modules.Reservations.DTOs;
+using SmartSolarMicrogrid.API.Modules.Reservations.Exceptions;
+using SmartSolarMicrogrid.API.Modules.Reservations.Models;
+using SmartSolarMicrogrid.API.Modules.Reservations.Repositories;
+
+namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
+{
+    public class ReservationService : IReservationService
+    {
+        private readonly IReservationRepository _reservationRepository;
+        private readonly ReservationModelToDTO _mapper;
+        public ReservationService(IReservationRepository reservationRepository, ReservationModelToDTO _mapper)
+        {
+            _reservationRepository = reservationRepository;
+            _mapper = _mapper;
+        }
+
+        public async Task<ReservationResponseDto> CreateReservationAsync(CreateREservationDto createReservationDto)
+        {
+            if (createReservationDto.ReservationDate < DateTime.UtcNow)
+            {
+                throw new InvalidReservationDateException("Reservation date cannot be in the past.");
+            }
+
+            if (createReservationDto.ReservationDate > DateTime.UtcNow.AddDays(7))
+            {
+                throw new InvalidReservationDateException("Reservation date cannot be more than 30 days in the future.");
+            }
+
+            var reservation = new Reservation
+            {
+                ProsumerNic = createReservationDto.ProsumerNic,
+                SlotId = createReservationDto.SlotId,
+                NodeId = createReservationDto.NodeId,
+                ReservationDate = createReservationDto.ReservationDate,
+                Status = "Pending",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            var result = await _reservationRepository.CreateReservationAsync(reservation);
+            return _mapper.MapToDto(result);
+        }
+
+        public async Task<ReservationResponseDto> UpdateReservationAsync(string id, UpdateReservationDto updateReservationDto)
+        {
+            var existingReservation = await _reservationRepository.GetReservationByIdAsync(id);
+
+            if (existingReservation == null)
+            {
+                throw new ReservationNotFoundException($"Reservation with id {id} not found.");
+            }
+
+            if (existingReservation.Status == "Cancelled" || existingReservation.Status == "Completed")
+            {
+                throw new InvalidReservationStatusException($"Cannot update reservation with status {existingReservation.Status}.");
+            }
+
+            var timeUntilReservation = existingReservation.ReservationDate - DateTime.UtcNow;
+
+            if (timeUntilReservation.TotalHours < 12)
+            {
+                throw new NoticePeriodViolationException("Updates require atleast 12 hours notice.");
+            }
+
+            existingReservation.SlotId = updateReservationDto.SlotId;
+            existingReservation.ReservationDate = updateReservationDto.ReservationDate ?? existingReservation.ReservationDate;
+            existingReservation.UpdatedAt = DateTime.UtcNow;
+
+            await _reservationRepository.UpdateReservationAsync(id, existingReservation);
+            return _mapper.MapToDto(existingReservation);
+        }
+
+        public async Task<ReservationResponseDto> CancelReservationAsync(string id, CancelReservationDto cancelReservationDto)
+        {
+            var existingReservation = await _reservationRepository.GetReservationByIdAsync(id);
+
+            if (existingReservation == null)
+            {
+                throw new ReservationNotFoundException($"Reservation with id {id} not found.");
+            }
+
+            if (existingReservation.Status == "Cancelled" || existingReservation.Status == "Completed")
+            {
+                throw new InvalidReservationStatusException($"Cannot cancel the reservation,It was already {existingReservation.Status}.");
+            }
+
+            var timeUntilReservation = existingReservation.ReservationDate - DateTime.UtcNow;
+
+            if (timeUntilReservation.TotalHours < 12)
+            {
+                throw new NoticePeriodViolationException("Updates require atleast 12 hours notice.");
+            }
+
+            await _reservationRepository.UpdateReservationStatusAsync(id, "Cancelled", cancelReservationDto.CancelledReason);
+
+            var updatedReservation = await _reservationRepository.GetReservationByIdAsync(id);
+            return _mapper.MapToDto(updatedReservation);
+        }
+
+        public async Task<ReservationResponseDto> GetReservationByIdAsync(string id)
+        {
+            var reservation = await _reservationRepository.GetReservationByIdAsync(id);
+            if (reservation == null)
+            {
+                throw new ReservationNotFoundException($"Reservation with id {id} not found.");
+            }
+            return _mapper.MapToDto(reservation);
+        }
+
+        public async Task<List<ReservationResponseDto>> GetPendingReservationsByProsumerNicAsync(string? nic)
+        {
+            List<Reservation> reservations;
+
+            if (!string.IsNullOrEmpty(nic))
+            {
+                reservations = await _reservationRepository.GetReservationsByProsumerNicAsync(nic);
+            }
+            else
+            {
+                reservations = await _reservationRepository.GetReservationByStatusAsync("Pending");
+            }
+
+            return reservations.Select(r => _mapper.MapToDto(r)).ToList();
+        }
+
+        public async Task<List<ReservationResponseDto>> GetHistoryByProsumerNicAsync(string? nic)
+        {
+            List<Reservation> reservations;
+            if (!string.IsNullOrEmpty(nic))
+            {
+                reservations = await _reservationRepository.GetReservationsByProsumerNicAsync(nic);
+            }
+            else
+            {
+                reservations = await _reservationRepository.GetAllReservationsAsync();
+            }
+
+            var history = reservations.Where(r => r.Status == "Completed" || r.Status == "Cancelled").ToList();
+            return history.Select(r => _mapper.MapToDto(r)).ToList();
+        }
+
+        public async Task<List<ReservationResponseDto>> SearchReservationsAsync(string? nic, string? status, DateTime? from, DateTime? to)
+        {
+            var reservations = await _reservationRepository.GetAllReservationsAsync();
+
+            if (!string.IsNullOrEmpty(nic))
+            {
+                reservations = reservations.Where(r => r.ProsumerNic == nic).ToList();
+            }
+            if (!string.IsNullOrEmpty(status))
+            {
+                reservations = reservations.Where(r => r.Status == status).ToList();
+            }
+            if (from.HasValue)
+            {
+                reservations = reservations.Where(r => r.ReservationDate >= from.Value).ToList();
+            }
+            if (to.HasValue)
+            {
+                reservations = reservations.Where(r => r.ReservationDate <= to.Value).ToList();
+            }
+            return reservations.Select(r => _mapper.MapToDto(r)).ToList();
+        }
+
+        public async Task<int> GetApprovedFutureCountAsync(string? nic)
+        {
+            List<Reservation> reservations;
+
+            if (!string.IsNullOrEmpty(nic))
+            {
+                reservations = await _reservationRepository.GetReservationsByProsumerNicAsync(nic);
+            }
+            else
+            {
+                reservations = await _reservationRepository.GetAllReservationsAsync();
+            }
+
+            return reservations.Count(r => r.Status == "Approved" && r.ReservationDate > DateTime.UtcNow);
+        }
+
+    }
+}
