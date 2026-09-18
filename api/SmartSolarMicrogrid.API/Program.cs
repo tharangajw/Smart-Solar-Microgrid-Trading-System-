@@ -95,7 +95,8 @@ builder.Services.AddCors(options =>
 
 // ── Controllers ──────────────────────────────────────
 builder.Services.AddScoped<SmartSolarMicrogrid.API.Modules.Reservations.Repositories.IReservationRepository, SmartSolarMicrogrid.API.Modules.Reservations.Repositories.ReservationRepository>();
-//builder.Services.AddScoped<SmartSolarMicrogrid.API.Modules.Reservations.Services.IReservationService, SmartSolarMicrogrid.API.Modules.Reservations.Services.ReservationService>();
+builder.Services.AddScoped<SmartSolarMicrogrid.API.Modules.Reservations.Services.IReservationService, SmartSolarMicrogrid.API.Modules.Reservations.Services.ReservationService>();
+builder.Services.AddScoped<SmartSolarMicrogrid.API.Helpers.ReservationModelToDTO>();
 
 builder.Services.AddControllers();
 

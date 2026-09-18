@@ -6,7 +6,7 @@
         public string ProsumerNic { get; set; }
         public string SlotId { get; set; }
         public string NodeId { get; set; }
-        public string ReservationDate { get; set; }
+        public DateTime ReservationDate { get; set; }
         public string Status { get; set; } = "Pending";
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
