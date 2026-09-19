@@ -1,12 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Navbar from './Components/Navbar';
-import HeroSection from './Components/HeroSection';
-import HowItWorks from './Components/HowItWorks';
-import StationHighlight from './Components/StationHighlight';
-import EnergyConnection from './Components/EnergyConnection';
-import MissionSection from './Components/MissionSection';
-import Footer from './Components/Footer';
+import HomePage from './Modules/Home/HomePage';
+import DashboardPage from './Modules/Dashboard/DashboardPage';
 import './App.css';
 
 // Operator Imports
@@ -37,6 +32,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+<<<<<<< HEAD
         {/* Landing Page Route */}
         <Route path="/" element={<LandingPage />} />
 
@@ -50,6 +46,10 @@ function App() {
             <Route path="map" element={<StationsMap />} />
           </Route>
         </Route>
+=======
+        <Route path="/" element={<HomePage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+>>>>>>> 91645400631f92e85731cad86b0b67ec4a48606b
       </Routes>
     </BrowserRouter>
   );
