@@ -10,6 +10,7 @@ import android.view.animation.DecelerateInterpolator
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.smartsolar.R
+import com.smartsolar.modules.authentication.LoginActivity
 import com.smartsolar.modules.onboarding.OnboardingActivity
 
 class SplashActivity : AppCompatActivity() {
@@ -21,7 +22,7 @@ class SplashActivity : AppCompatActivity() {
         val statusContainer = findViewById<View>(R.id.statusContainer)
 
         val progressAnimator = ObjectAnimator.ofInt(progressIndicator, "progress", 0, 100)
-        progressAnimator.duration = 2500
+        progressAnimator.duration = 1500
         progressAnimator.interpolator = DecelerateInterpolator()
 
         progressAnimator.addListener(object : AnimatorListenerAdapter() {
@@ -32,7 +33,9 @@ class SplashActivity : AppCompatActivity() {
                     .setListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator) {
                             statusContainer.postDelayed({
-                                startActivity(Intent(this@SplashActivity, OnboardingActivity::class.java))
+                                // Always go to Onboarding for now as requested
+                                val intent = Intent(this@SplashActivity, OnboardingActivity::class.java)
+                                startActivity(intent)
                                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
                                 finish()
                             }, 500)

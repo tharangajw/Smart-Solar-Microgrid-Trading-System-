@@ -1,10 +1,13 @@
 package com.smartsolar.modules.onboarding
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.button.MaterialButton
 import com.smartsolar.R
@@ -14,19 +17,12 @@ import java.util.ArrayList
 class OnboardingActivity : AppCompatActivity() {
 
     private lateinit var onboardingAdapter: OnboardingAdapter
-    private lateinit var layoutIndicators: View
+    private lateinit var layoutIndicators: LinearLayout
     private lateinit var buttonNext: MaterialButton
     private lateinit var textSkip: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val prefs = getSharedPreferences("SmartSolarPrefs", MODE_PRIVATE)
-        if (prefs.getBoolean("isOnboardingComplete", false)) {
-            navigateToMain()
-            return
-        }
-
         setContentView(R.layout.activity_onboarding)
 
         layoutIndicators = findViewById(R.id.layoutIndicators)
@@ -36,17 +32,18 @@ class OnboardingActivity : AppCompatActivity() {
         setupOnboardingItems()
         val viewPager = findViewById<ViewPager2>(R.id.viewPager)
         viewPager.adapter = onboardingAdapter
-        // Indicators setup omitted for brevity in this simple conversion
-        // In a real conversion I would translate the whole logic
+        setupIndicators()
+        setCurrentIndicator(0)
 
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                if (position == onboardingAdapter.itemCount - 1) {
-                    buttonNext.text = "Get Started →"
+                setCurrentIndicator(position)
+                if (position == (onboardingAdapter.itemCount - 1)) {
+                    buttonNext.text = getString(R.string.get_started)
                     textSkip.visibility = View.INVISIBLE
                 } else {
-                    buttonNext.text = "Next →"
+                    buttonNext.text = getString(R.string.next)
                     textSkip.visibility = View.VISIBLE
                 }
             }
@@ -54,7 +51,7 @@ class OnboardingActivity : AppCompatActivity() {
 
         buttonNext.setOnClickListener {
             if (viewPager.currentItem + 1 < onboardingAdapter.itemCount) {
-                viewPager.currentItem = viewPager.currentItem + 1
+                viewPager.currentItem += 1
             } else {
                 completeOnboarding()
             }
@@ -83,15 +80,62 @@ class OnboardingActivity : AppCompatActivity() {
         onboardingAdapter = OnboardingAdapter(items)
     }
 
+    private fun setupIndicators() {
+        layoutIndicators.removeAllViews()
+        val indicators = arrayOfNulls<ImageView>(onboardingAdapter.itemCount)
+        val layoutParams = LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        layoutParams.setMargins(12, 0, 12, 0)
+        for (i in indicators.indices) {
+            indicators[i] = ImageView(this)
+            indicators[i]?.let {
+                it.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        this,
+                        R.drawable.indicator_inactive
+                    )
+                )
+                it.layoutParams = layoutParams
+                layoutIndicators.addView(it)
+            }
+        }
+    }
+
+    private fun setCurrentIndicator(index: Int) {
+        val childCount = layoutIndicators.childCount
+        for (i in 0 until childCount) {
+            val imageView = layoutIndicators.getChildAt(i) as ImageView
+            if (i == index) {
+                imageView.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        this,
+                        R.drawable.indicator_active
+                    )
+                )
+            } else {
+                imageView.setImageDrawable(
+                    ContextCompat.getDrawable(
+                        this,
+                        R.drawable.indicator_inactive
+                    )
+                )
+            }
+        }
+    }
+
     private fun completeOnboarding() {
         val editor = getSharedPreferences("SmartSolarPrefs", MODE_PRIVATE).edit()
         editor.putBoolean("isOnboardingComplete", true)
         editor.apply()
-        navigateToMain()
+        navigateToLogin()
     }
 
-    private fun navigateToMain() {
-        startActivity(Intent(applicationContext, LoginActivity::class.java))
+    private fun navigateToLogin() {
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
         finish()
     }
 }

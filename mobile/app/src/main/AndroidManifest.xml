@@ -28,8 +28,6 @@
             android:theme="@style/Theme.SmartSolarMicrogrid.Onboarding"
             android:exported="false" />
 
-        <activity android:name=".MainActivity" android:exported="false" />
-
         <!-- Authentication -->
         <activity android:name=".modules.authentication.LoginActivity" android:exported="false" />
         <activity android:name=".modules.authentication.RegisterActivity" android:exported="false" />
