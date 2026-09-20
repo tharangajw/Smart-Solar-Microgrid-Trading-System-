@@ -1,0 +1,16 @@
+info:
+  name: All bookings (filter by status, date)
+  type: http
+  seq: 7
+
+http:
+  method: GET
+  url: http://localhost:5281/api/operator/bookings
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

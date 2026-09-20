@@ -1,5 +1,6 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Text.Json.Serialization;
 
 namespace SmartSolarMicrogrid.API.Modules.Users.Models
 {
@@ -8,6 +9,7 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
+        [JsonPropertyName("id")]
         public string? Id { get; set; }
 
 // National Identity Card - Primary key for prosumers
@@ -22,8 +24,9 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Models
         [BsonElement("email")]
         public string Email { get; set; } = string.Empty;
 
-// Hashed password
+// Hashed password (never returned to clients)
         [BsonElement("password")]
+        [JsonIgnore]
         public string Password { get; set; } = string.Empty;
 
 // User role: Backoffice, GridOperator, or Prosumer
@@ -40,6 +43,10 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Models
 // Account activation status
         [BsonElement("isActive")]
         public bool IsActive { get; set; } = true;
+
+// Pending | Active | Deactivated — Backoffice controls activation
+        [BsonElement("status")]
+        public string Status { get; set; } = UserAccountStatus.Active;
 
 // Account creation date
         [BsonElement("createdAt")]
@@ -60,5 +67,12 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Models
         public const string Backoffice = "Backoffice";
         public const string GridOperator = "GridOperator";
         public const string Prosumer = "Prosumer";
+    }
+
+    public static class UserAccountStatus
+    {
+        public const string Pending = "Pending";
+        public const string Active = "Active";
+        public const string Deactivated = "Deactivated";
     }
 }

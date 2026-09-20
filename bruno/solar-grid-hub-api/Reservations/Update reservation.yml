@@ -1,0 +1,23 @@
+info:
+  name: Update reservation
+  type: http
+  seq: 3
+
+http:
+  method: PUT
+  url: http://localhost:5281/api/reservations/6aad4372db3fd5aedfae6db6
+  body:
+    type: json
+    data: |-
+      {
+        "slotId": "SLOT001",
+        "reservationDate": "2026-09-18T22:00:00Z"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
