@@ -15,9 +15,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.smartsolar.R
 import com.smartsolar.modules.authentication.ProfileActivity
-import com.smartsolar.modules.history.EnergyHistoryActivity
+// Imports for reservations and history removed
 import com.smartsolar.modules.map.StationMapActivity
-import com.smartsolar.modules.reservations.CreateReservationActivity
 import com.smartsolar.utils.SessionManager
 
 class ProsumerDashboardActivity : AppCompatActivity() {
@@ -61,13 +60,7 @@ class ProsumerDashboardActivity : AppCompatActivity() {
             startActivity(Intent(this, StationMapActivity::class.java))
         }
 
-        findViewById<View>(R.id.buttonManageReservations).setOnClickListener {
-            startActivity(Intent(this, CreateReservationActivity::class.java))
-        }
-
-        findViewById<View>(R.id.buttonBookingHistory).setOnClickListener {
-            startActivity(Intent(this, EnergyHistoryActivity::class.java))
-        }
+        // Reservations and History navigation removed per user request
 
         findViewById<View>(R.id.buttonLogout).setOnClickListener {
             logout()

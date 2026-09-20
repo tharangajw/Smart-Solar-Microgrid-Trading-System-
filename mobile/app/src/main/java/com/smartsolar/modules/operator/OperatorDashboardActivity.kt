@@ -40,14 +40,7 @@ class OperatorDashboardActivity : AppCompatActivity() {
             startActivity(Intent(this, com.smartsolar.modules.map.StationMapActivity::class.java))
         }
 
-        findViewById<View>(R.id.buttonCurrentBookings).setOnClickListener {
-            // Re-using EnergyHistoryActivity as it likely shows relevant lists
-            startActivity(Intent(this, com.smartsolar.modules.history.EnergyHistoryActivity::class.java))
-        }
-
-        findViewById<View>(R.id.buttonHistory).setOnClickListener {
-            startActivity(Intent(this, com.smartsolar.modules.history.EnergyHistoryActivity::class.java))
-        }
+        // Current Bookings and History removed per user request
         
         buttonLogout.setOnClickListener {
             logout()

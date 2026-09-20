@@ -48,8 +48,6 @@
 
         <!-- Map & Reservations -->
         <activity android:name=".modules.map.StationMapActivity" android:exported="false" />
-        <activity android:name=".modules.reservations.CreateReservationActivity" android:exported="false" />
-        <activity android:name=".modules.history.EnergyHistoryActivity" android:exported="false" />
 
         <!-- QR -->
         <activity android:name=".modules.qr.QRDisplayActivity" android:exported="false" />
