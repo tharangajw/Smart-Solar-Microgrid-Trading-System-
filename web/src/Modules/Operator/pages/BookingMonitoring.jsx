@@ -37,41 +37,34 @@ const BookingMonitoring = () => {
   };
 
   return (
-    <div className="space-y-8 min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30 p-2 sm:p-6 rounded-3xl">
-      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 animate-fade-in-down">
-        <div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-blue-700 tracking-tight">
-            Booking Monitoring
-          </h1>
-          <p className="text-sm sm:text-base font-medium text-slate-500 mt-2">
-            Monitor and track energy transfer bookings in real-time
-          </p>
-        </div>
+    <div className="space-y-6 sm:space-y-8">
+      <div>
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold text-forest">Booking Monitoring</h1>
+        <p className="text-sm text-charcoal-light mt-1">Monitor and approve energy transfer bookings in real-time.</p>
       </div>
-      {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>}
-      {message && <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-green-700">{message}</div>}
+      {error && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
+      {message && <div className="rounded-xl border border-leaf/30 bg-leaf/10 px-4 py-3 text-sm text-forest">{message}</div>}
 
       {/* Filters and Search */}
-      <div className="bg-white/70 backdrop-blur-xl p-5 rounded-2xl shadow-sm border border-slate-200/60 flex flex-col md:flex-row gap-5 items-center relative overflow-hidden group">
-        <div className="absolute top-0 left-0 w-32 h-32 bg-teal-100/30 rounded-full blur-3xl -z-10 group-hover:scale-125 transition-transform duration-700"></div>
+      <div className="bg-white rounded-2xl p-5 shadow-sm border border-forest/5 flex flex-col md:flex-row gap-4 items-center">
         <div className="relative flex-1 w-full">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-teal-500" />
+            <Search className="h-5 w-5 text-sage" />
           </div>
           <input
             type="text"
-            className="block w-full pl-12 pr-4 py-3 border border-slate-200/80 rounded-xl leading-5 bg-white/50 backdrop-blur-sm placeholder-slate-400 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500 transition-all duration-300 shadow-inner"
+            className="block w-full pl-12 pr-4 py-2.5 border border-forest/10 rounded-xl text-sm font-medium text-charcoal placeholder-charcoal-light bg-ivory focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all"
             placeholder="Search by Booking ID or Node..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="relative w-full md:w-64">
+        <div className="relative w-full md:w-52">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Filter className="h-5 w-5 text-blue-500" />
+            <Filter className="h-5 w-5 text-sage" />
           </div>
           <select
-            className="block w-full pl-12 pr-4 py-3 border border-slate-200/80 rounded-xl font-medium text-slate-700 bg-white/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-300 shadow-inner appearance-none cursor-pointer"
+            className="block w-full pl-12 pr-4 py-2.5 border border-forest/10 rounded-xl text-sm font-medium text-charcoal bg-ivory focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all appearance-none cursor-pointer"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
@@ -85,7 +78,7 @@ const BookingMonitoring = () => {
       </div>
 
       {/* Data Table */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-slate-200/40 border border-white p-2 sm:p-6 relative z-10">
+      <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-forest/5">
         <BookingTable bookings={filteredBookings} loading={loading} onApprove={handleApprove} approvingId={approvingId} />
       </div>
     </div>

@@ -12,7 +12,7 @@ using SmartSolarMicrogrid.API.Modules.Dashboard.Services;
 namespace SmartSolarMicrogrid.API.Modules.Dashboard.Controllers
 {
     [ApiController]
-    [Route("api/operator")]
+    [Route("api/operator-dashboard")]
     public class OperatorDashboardController : ControllerBase
     {
         private readonly OperatorDashboardService _dashboardService;

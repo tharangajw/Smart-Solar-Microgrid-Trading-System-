@@ -57,30 +57,30 @@ const OperatorLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated background glows */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+    <div className="min-h-screen bg-ivory flex items-center justify-center p-4 relative overflow-hidden font-sans">
+      {/* Background decorations */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-leaf/20 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-solar-soft/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
       <div className="relative w-full max-w-md">
         {/* Logo / Brand */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-teal-400 to-blue-500 rounded-2xl shadow-2xl shadow-teal-500/30 mb-4">
-            <Zap size={32} className="text-white" />
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-forest rounded-2xl shadow-lg mb-4">
+            <Zap size={32} className="text-ivory" />
           </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">
-            Smart Solar Grid
+          <h1 className="font-display text-3xl font-semibold text-forest tracking-tight">
+            SmartSolar Grid
           </h1>
-          <p className="text-teal-400 font-medium mt-1">Grid Operator Portal</p>
+          <p className="text-sage font-medium mt-2">Grid Operator Portal</p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl p-8">
-          <h2 className="text-xl font-bold text-white mb-6">Sign In to Dashboard</h2>
+        <div className="bg-white border border-forest/10 rounded-3xl shadow-xl p-8">
+          <h2 className="font-display text-xl font-semibold text-forest mb-6">Sign In to Dashboard</h2>
 
           {/* Error Alert */}
           {error && (
-            <div className="mb-5 flex items-start gap-3 bg-red-500/10 border border-red-500/30 text-red-300 px-4 py-3 rounded-xl text-sm font-medium">
+            <div className="mb-5 flex items-start gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">
               <AlertCircle size={18} className="mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
@@ -89,12 +89,12 @@ const OperatorLogin = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-semibold text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-charcoal mb-2">
                 Email Address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail size={18} className="text-slate-400" />
+                  <Mail size={18} className="text-sage" />
                 </div>
                 <input
                   id="operator-email"
@@ -104,19 +104,19 @@ const OperatorLogin = () => {
                   onChange={handleChange}
                   required
                   placeholder="operator@smartsolar.com"
-                  className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-ivory border border-forest/10 rounded-xl text-charcoal placeholder-charcoal-light font-medium focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all"
                 />
               </div>
             </div>
 
             {/* Password Field */}
             <div>
-              <label className="block text-sm font-semibold text-slate-300 mb-2">
+              <label className="block text-sm font-medium text-charcoal mb-2">
                 Password
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock size={18} className="text-slate-400" />
+                  <Lock size={18} className="text-sage" />
                 </div>
                 <input
                   id="operator-password"
@@ -126,7 +126,7 @@ const OperatorLogin = () => {
                   onChange={handleChange}
                   required
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 font-medium focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-ivory border border-forest/10 rounded-xl text-charcoal placeholder-charcoal-light font-medium focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all"
                 />
               </div>
             </div>
@@ -136,7 +136,7 @@ const OperatorLogin = () => {
               id="operator-login-btn"
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 text-white font-bold rounded-xl shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed active:scale-95"
+              className="w-full py-3.5 bg-forest hover:bg-forest-light text-ivory font-semibold rounded-xl shadow-md transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
@@ -149,7 +149,7 @@ const OperatorLogin = () => {
             </button>
           </form>
 
-          <p className="text-center text-xs text-slate-500 mt-6">
+          <p className="text-center text-xs text-charcoal-light mt-6">
             Grid Operator accounts are created by Backoffice staff only.
           </p>
         </div>

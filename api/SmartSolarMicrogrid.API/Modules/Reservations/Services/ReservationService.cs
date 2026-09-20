@@ -1,4 +1,4 @@
-﻿using SmartSolarMicrogrid.API.Helpers;
+using SmartSolarMicrogrid.API.Helpers;
 using SmartSolarMicrogrid.API.Modules.Reservations.DTOs;
 using SmartSolarMicrogrid.API.Modules.Reservations.Exceptions;
 using SmartSolarMicrogrid.API.Modules.Reservations.Models;
@@ -10,10 +10,12 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
     public class ReservationService : IReservationService
     {
         private readonly IReservationRepository _reservationRepository;
+        private readonly StationService _stationService;
         private readonly ReservationModelToDTO _mapper;
-        public ReservationService(IReservationRepository reservationRepository, ReservationModelToDTO mapper)
+        public ReservationService(IReservationRepository reservationRepository, StationService stationService, ReservationModelToDTO mapper)
         {
             _reservationRepository = reservationRepository;
+            _stationService = stationService;
             _mapper = mapper;
         }
 

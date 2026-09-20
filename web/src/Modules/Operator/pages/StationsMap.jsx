@@ -55,5 +55,47 @@ export default function StationsMap() {
     return () => markers.forEach((marker) => marker.setMap(null));
   }, [visibleStations]);
 
-  return <div className="space-y-5"><div className="flex items-end justify-between"><div><h1 className="text-3xl font-extrabold text-teal-700">Stations Map</h1><p className="mt-1 text-slate-500">Live microgrid station availability · real-time via SignalR</p></div>{lastUpdated && <span className="text-xs text-slate-500">Updated {lastUpdated.toLocaleTimeString()}</span>}</div><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search a station" className="w-full max-w-md rounded-xl border border-slate-200 p-3" />{error && <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-800">{error}</div>}<div className="grid gap-5 lg:grid-cols-[1fr_300px]"><div ref={mapElement} className="h-[560px] rounded-2xl bg-slate-100 shadow" /> <aside className="rounded-2xl bg-white p-5 shadow">{selected ? <><h2 className="text-xl font-bold">{selected.name}</h2><dl className="mt-4 space-y-3 text-sm"><div><dt className="text-slate-500">Location</dt><dd>{selected.location}</dd></div><div><dt className="text-slate-500">Capacity</dt><dd>{selected.capacityKWh} kWh</dd></div><div><dt className="text-slate-500">Available slots</dt><dd>{selected.availableSlots} / {selected.totalSlots}</dd></div><div><dt className="text-slate-500">Status</dt><dd className="capitalize">{selected.status}</dd></div></dl></> : <p className="text-slate-500">Select a station marker to view details.</p>}</aside></div></div>;
+  return <div className="space-y-6 sm:space-y-8">
+    <div className="flex items-end justify-between">
+      <div>
+        <h1 className="font-display text-2xl sm:text-3xl font-semibold text-forest">Stations Map</h1>
+        <p className="text-sm text-charcoal-light mt-1">Live microgrid station availability · real-time via SignalR</p>
+      </div>
+      {lastUpdated && <span className="text-xs text-charcoal-light bg-forest/5 px-3 py-1 rounded-full">Updated {lastUpdated.toLocaleTimeString()}</span>}
+    </div>
+    
+    <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search a station" className="w-full max-w-md rounded-xl border border-forest/10 bg-ivory p-3 text-sm font-medium text-charcoal focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all" />
+    
+    {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+    
+    <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
+      <div ref={mapElement} className="h-[560px] rounded-2xl border border-forest/10 shadow-sm" /> 
+      <aside className="rounded-2xl bg-white border border-forest/5 p-6 shadow-sm">
+        {selected ? <>
+          <h2 className="font-display text-xl font-semibold text-forest">{selected.name}</h2>
+          <dl className="mt-6 space-y-4 text-sm">
+            <div className="flex justify-between border-b border-forest/5 pb-2">
+              <dt className="text-charcoal-light font-medium">Location</dt>
+              <dd className="text-charcoal font-semibold text-right max-w-[150px]">{selected.location}</dd>
+            </div>
+            <div className="flex justify-between border-b border-forest/5 pb-2">
+              <dt className="text-charcoal-light font-medium">Capacity</dt>
+              <dd className="text-charcoal font-semibold">{selected.capacityKWh} kWh</dd>
+            </div>
+            <div className="flex justify-between border-b border-forest/5 pb-2">
+              <dt className="text-charcoal-light font-medium">Available slots</dt>
+              <dd className="text-charcoal font-semibold">{selected.availableSlots} / {selected.totalSlots}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-charcoal-light font-medium">Status</dt>
+              <dd className="capitalize text-forest font-semibold flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${selected.status === 'Active' || selected.status === 'active' ? 'bg-leaf' : 'bg-red-400'}`}></span>
+                {selected.status}
+              </dd>
+            </div>
+          </dl>
+        </> : <p className="text-sm text-charcoal-light text-center py-8">Select a station marker to view details.</p>}
+      </aside>
+    </div>
+  </div>;
 }
