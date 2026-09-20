@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { 
   LayoutDashboard, 
   Users, 
@@ -12,18 +12,19 @@ import {
   LogOut,
   X
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   
   const navItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard', active: true },
+    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
     { name: 'Users', icon: Users, path: '#' },
     { name: 'Prosumers', icon: Zap, path: '#' },
     { name: 'Microgrid Stations', icon: BatteryCharging, path: '#' },
     { name: 'Energy Slots', icon: Clock, path: '#' },
-    { name: 'Reservations', icon: CalendarCheck, path: '#' },
+    { name: 'Reservations', icon: CalendarCheck, path: '/reservations' },
     { name: 'Transactions', icon: ReceiptText, path: '#' },
     { name: 'Reports', icon: BarChart3, path: '#' },
     { name: 'Settings', icon: Settings, path: '#' },
@@ -87,12 +88,13 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
+            const isActive = location.pathname.startsWith(item.path) && item.path !== '#';
             return (
               <a
                 key={item.name}
                 href={item.path}
                 className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  item.active 
+                  isActive
                     ? 'bg-forest text-ivory shadow-md shadow-forest/20' 
                     : 'text-charcoal-light hover:bg-forest/5 hover:text-forest'
                 }`}

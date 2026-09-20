@@ -1,13 +1,33 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Sidebar from './components/Sidebar';
+import DashboardHeader from './components/DashboardHeader';
 import SummaryCard from './components/SummaryCard';
 import { Users, UserPlus, ShieldCheck } from 'lucide-react';
 import { getAllUsers, getPendingActivations } from '../../Services/backofficeApi';
 
 const DashboardPage = () => {
-  const [pendingCount, setPendingCount] = useState(0);
-  const [prosumerCount, setProsumerCount] = useState(0);
-  const [activeCount, setActiveCount] = useState(0);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [recentReservations, setRecentReservations] = useState([]);
+  const [loadingReservations, setLoadingReservations] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchRecent = async () => {
+      try {
+        const response = await fetch('/api/reservations/pending');
+        if (response.ok) {
+          const data = await response.json();
+          setRecentReservations(Array.isArray(data) ? data.slice(0, 3) : []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch recent reservations:', err);
+      } finally {
+        setLoadingReservations(false);
+      }
+    };
+    fetchRecent();
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -25,29 +45,188 @@ const DashboardPage = () => {
     load();
   }, []);
 
+  const getStatusColor = (status) => {
+    switch(status?.toLowerCase()) {
+      case 'completed': return 'bg-leaf/20 text-forest-light';
+      case 'active': return 'bg-solar/20 text-solar-dark text-yellow-700';
+      case 'pending': return 'bg-gray-100 text-charcoal-light';
+      case 'cancelled': return 'bg-red-100 text-red-600';
+      default: return 'bg-gray-100 text-charcoal-light';
+    }
+  };
+
   return (
-    <div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
-        <SummaryCard
-          title="Pending Activations"
-          value={String(pendingCount)}
-          subtitle="waiting for Backoffice approval"
-          icon={UserPlus}
-        />
-        <SummaryCard
-          title="Active Prosumers"
-          value={String(activeCount)}
-          subtitle="can log in on mobile"
-          icon={ShieldCheck}
-          trend="up"
-          trendValue="live"
-        />
-        <SummaryCard
-          title="Total Prosumers"
-          value={String(prosumerCount)}
-          subtitle="registered via mobile"
-          icon={Users}
-        />
+    <div className="flex h-screen bg-ivory font-sans text-charcoal overflow-hidden">
+      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      
+      <div className="flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden">
+        <DashboardHeader onMenuClick={toggleSidebar} />
+        
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+            <SummaryCard 
+              title="Total Prosumers" 
+              value="1,248" 
+              subtitle="vs last month"
+              icon={Users}
+              trend="up"
+              trendValue="12%"
+            />
+            <SummaryCard 
+              title="Active Stations" 
+              value="42" 
+              subtitle="online right now"
+              icon={BatteryCharging}
+              trend="up"
+              trendValue="3"
+            />
+            <SummaryCard 
+              title="Today's Reservations" 
+              value="156" 
+              subtitle="scheduled for today"
+              icon={CalendarCheck}
+              trend="up"
+              trendValue="24%"
+            />
+            <SummaryCard 
+              title="Available Slots" 
+              value="89" 
+              subtitle="open for booking"
+              icon={Zap}
+              trend="down"
+              trendValue="5%"
+            />
+          </div>
+
+          {/* Main Content Area Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            
+            {/* Left Column (Spans 2 on desktop) */}
+            <div className="lg:col-span-2 space-y-6 lg:space-y-8">
+              
+              {/* Recent Reservations Section */}
+              <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-forest/5">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="font-display text-lg font-semibold text-forest">Recent Reservations</h2>
+                  <Link to="/reservations" className="text-sm font-medium text-sage hover:text-forest transition-colors">
+                    View All
+                  </Link>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="text-xs text-charcoal-light uppercase bg-forest/5 border-b border-forest/10 rounded-t-lg">
+                      <tr>
+                        <th className="px-4 py-3 rounded-tl-lg font-medium">User NIC</th>
+                        <th className="px-4 py-3 font-medium">Station/Node</th>
+                        <th className="px-4 py-3 font-medium">Date</th>
+                        <th className="px-4 py-3 rounded-tr-lg font-medium">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {loadingReservations ? (
+                        <tr>
+                          <td colSpan="4" className="px-4 py-6 text-center text-charcoal-light">Loading...</td>
+                        </tr>
+                      ) : recentReservations.length === 0 ? (
+                        <tr>
+                          <td colSpan="4" className="px-4 py-6 text-center text-charcoal-light">No recent reservations found.</td>
+                        </tr>
+                      ) : (
+                        recentReservations.map((res) => (
+                          <tr 
+                            key={res.id} 
+                            onClick={() => navigate(`/reservations/${res.id}`)}
+                            className="border-b border-forest/5 hover:bg-forest/5/50 transition-colors cursor-pointer"
+                          >
+                            <td className="px-4 py-3 font-medium text-charcoal">{res.prosumerNic}</td>
+                            <td className="px-4 py-3 text-charcoal-light">{res.nodeId}</td>
+                            <td className="px-4 py-3 text-charcoal-light">
+                              {new Date(res.reservationDate).toLocaleString()}
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-1 rounded-md text-xs font-medium ${getStatusColor(res.status)}`}>
+                                {res.status || 'Pending'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              {/* Energy Slot Availability */}
+              <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-forest/5">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="font-display text-lg font-semibold text-forest">Energy Slot Overview</h2>
+                  <button className="text-sm font-medium text-sage hover:text-forest transition-colors">
+                    Manage
+                  </button>
+                </div>
+                
+                <div className="h-48 flex items-center justify-center bg-ivory/50 rounded-xl border border-dashed border-forest/20 text-charcoal-light text-sm">
+                  [Energy Availability Chart Placeholder]
+                </div>
+              </section>
+
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-6 lg:space-y-8">
+              
+              {/* Station Status */}
+              <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-forest/5">
+                <h2 className="font-display text-lg font-semibold text-forest mb-6">Microgrid Status</h2>
+                
+                <div className="space-y-4">
+                  {[
+                    { name: 'North Campus Solar', capacity: '85%', status: 'optimal' },
+                    { name: 'Library Hub', capacity: '42%', status: 'warning' },
+                    { name: 'Engineering Bldg', capacity: '98%', status: 'optimal' },
+                  ].map((station, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-forest/5 transition-colors border border-transparent hover:border-forest/10">
+                      <div>
+                        <p className="font-medium text-sm text-charcoal">{station.name}</p>
+                        <p className="text-xs text-charcoal-light mt-0.5">Capacity: {station.capacity}</p>
+                      </div>
+                      <div className={`w-2 h-2 rounded-full ${station.status === 'optimal' ? 'bg-leaf' : 'bg-solar'}`}></div>
+                    </div>
+                  ))}
+                </div>
+                <button className="w-full mt-4 py-2 text-sm font-medium border border-forest/20 rounded-xl text-forest hover:bg-forest hover:text-ivory transition-colors">
+                  View All Stations
+                </button>
+              </section>
+
+              {/* Recent Transactions */}
+              <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-forest/5">
+                <h2 className="font-display text-lg font-semibold text-forest mb-6">Recent Transactions</h2>
+                
+                <div className="space-y-4">
+                  {[
+                    { id: 'TRX-892', amount: '+ 12.50', type: 'Credit', time: '2h ago' },
+                    { id: 'TRX-891', amount: '- 4.20', type: 'Debit', time: '5h ago' },
+                    { id: 'TRX-890', amount: '+ 8.00', type: 'Credit', time: '1d ago' },
+                  ].map((trx, i) => (
+                    <div key={i} className="flex items-center justify-between border-b border-forest/5 pb-3 last:border-0 last:pb-0">
+                      <div>
+                        <p className="font-medium text-sm text-charcoal">{trx.id}</p>
+                        <p className="text-xs text-charcoal-light mt-0.5">{trx.time}</p>
+                      </div>
+                      <div className={`text-sm font-medium ${trx.type === 'Credit' ? 'text-forest' : 'text-charcoal'}`}>
+                        {trx.amount}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+            </div>
+          </div>
+        </main>
       </div>
 
       <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-forest/5">
