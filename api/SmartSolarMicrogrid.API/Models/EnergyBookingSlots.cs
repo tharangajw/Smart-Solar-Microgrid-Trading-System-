@@ -1,8 +1,18 @@
+// ============================================================================
+// Module: Smart Solar Microgrid Trading System - C# Web API
+// File: EnergyBookingSlots.cs
+// Description: Data Model representing an Energy Storage Slot allocated for power
+//              drop-off or charging at a Solar Microgrid Station Node.
+// ============================================================================
+
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace SmartSolarMicrogrid.API.Models
 {
+    /// <summary>
+    /// Energy Storage Slot entity stored in MongoDB EnergyBookingSlots collection
+    /// </summary>
     public class EnergyBookingSlots
     {
         [BsonId]

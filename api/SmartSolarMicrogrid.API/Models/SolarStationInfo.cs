@@ -1,8 +1,16 @@
+// ============================================================================
+// Module: Smart Solar Microgrid Trading System - C# Web API
+// File: SolarStationInfo.cs
+// Description: Data Model representing a Solar Microgrid Hub/Node including GPS
+//              location, total capacity kW, battery slot specs, and operating schedule.
+// ============================================================================
+
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace SmartSolarMicrogrid.API.Models
 {
+    // GPS Coordinates Value Object
     public class GpsCoordinates
     {
         [BsonElement("lat")]
@@ -12,6 +20,7 @@ namespace SmartSolarMicrogrid.API.Models
         public double Lng { get; set; }
     }
 
+    // Battery Specs Value Object
     public class BatteryInfo
     {
         [BsonElement("totalSlots")]
@@ -21,6 +30,7 @@ namespace SmartSolarMicrogrid.API.Models
         public double SlotCapacityKWh { get; set; }
     }
 
+    // Operational Schedule Item
     public class ScheduleItem
     {
         [BsonElement("day")]
@@ -33,6 +43,9 @@ namespace SmartSolarMicrogrid.API.Models
         public string CloseTime { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Solar Microgrid Station entity stored in MongoDB SolarStationInfo collection
+    /// </summary>
     public class SolarStationInfo
     {
         [BsonId]

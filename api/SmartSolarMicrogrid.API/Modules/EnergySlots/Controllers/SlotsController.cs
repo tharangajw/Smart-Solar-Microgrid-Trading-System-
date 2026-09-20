@@ -1,3 +1,10 @@
+// ============================================================================
+// Module: Smart Solar Microgrid Trading System - C# Web API
+// File: SlotsController.cs
+// Description: Manages battery energy booking slots including creation, time overlap
+//              prevention, node totalSlots validation, and status lifecycle state updates.
+// ============================================================================
+
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using SmartSolarMicrogrid.API.Data;
@@ -5,6 +12,7 @@ using SmartSolarMicrogrid.API.Models;
 
 namespace SmartSolarMicrogrid.API.Modules.EnergySlots.Controllers
 {
+    // DTO for status update payload
     public class SlotStatusUpdateDto
     {
         public string Status { get; set; } = string.Empty;
@@ -16,18 +24,20 @@ namespace SmartSolarMicrogrid.API.Modules.EnergySlots.Controllers
     {
         private readonly MongoDbContext _context;
 
+        // Constructor injecting database context
         public SlotsController(MongoDbContext context)
         {
             _context = context;
         }
 
         /// <summary>
-        /// POST /api/slots - Create a booking slot for a node's battery slot.
-        /// Rejects if node is inactive, slotNumber exceeds battery totalSlots, or time overlaps.
+        /// POST /api/slots - Create a battery energy slot for a node
+        /// Validates node status, totalSlots range, and time overlap collisions
         /// </summary>
         [HttpPost]
         public async Task<IActionResult> CreateSlot([FromBody] EnergyBookingSlots slot)
         {
+            // Validate incoming payload
             if (slot == null || string.IsNullOrWhiteSpace(slot.NodeId))
             {
                 return BadRequest(new { error = "Invalid slot payload: nodeId is required" });
@@ -38,7 +48,7 @@ namespace SmartSolarMicrogrid.API.Modules.EnergySlots.Controllers
                 return BadRequest(new { error = "startTime must be earlier than endTime" });
             }
 
-            // 1. Node validation
+            // 1. Verify Node exists and is ACTIVE
             var node = await _context.SolarStations.Find(x => x.Id == slot.NodeId).FirstOrDefaultAsync();
             if (node == null)
             {
@@ -50,7 +60,7 @@ namespace SmartSolarMicrogrid.API.Modules.EnergySlots.Controllers
                 return BadRequest(new { error = "Cannot create slot for an INACTIVE node" });
             }
 
-            // 2. Slot number range check
+            // 2. Validate slotNumber against node totalSlots capacity
             if (node.Battery != null && node.Battery.TotalSlots > 0)
             {
                 if (slot.SlotNumber < 1 || slot.SlotNumber > node.Battery.TotalSlots)
@@ -62,7 +72,7 @@ namespace SmartSolarMicrogrid.API.Modules.EnergySlots.Controllers
                 }
             }
 
-            // 3. Time overlap check for same nodeId & slotNumber
+            // 3. Prevent time overlap collision for the same node & battery slot
             var filterBuilder = Builders<EnergyBookingSlots>.Filter;
             var overlapFilter = filterBuilder.Eq(x => x.NodeId, slot.NodeId) &
                                 filterBuilder.Eq(x => x.SlotNumber, slot.SlotNumber) &
@@ -80,7 +90,8 @@ namespace SmartSolarMicrogrid.API.Modules.EnergySlots.Controllers
                 });
             }
 
-            slot.Id = null; // Ensure fresh ObjectId
+            // Save slot record to MongoDB
+            slot.Id = null;
             slot.Status = string.IsNullOrWhiteSpace(slot.Status) ? "AVAILABLE" : slot.Status.ToUpper();
             slot.CreatedAt = DateTime.UtcNow;
             slot.UpdatedAt = DateTime.UtcNow;
@@ -91,7 +102,7 @@ namespace SmartSolarMicrogrid.API.Modules.EnergySlots.Controllers
         }
 
         /// <summary>
-        /// GET /api/slots - List slots with ?nodeId=, ?status=, ?available=true filters
+        /// GET /api/slots - Query energy slots with optional filters (nodeId, status, available)
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetSlots(
@@ -124,7 +135,7 @@ namespace SmartSolarMicrogrid.API.Modules.EnergySlots.Controllers
         }
 
         /// <summary>
-        /// GET /api/slots/{id} - Get a single slot detail
+        /// GET /api/slots/{id} - Get single battery slot details
         /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSlotById(string id)
@@ -139,7 +150,7 @@ namespace SmartSolarMicrogrid.API.Modules.EnergySlots.Controllers
         }
 
         /// <summary>
-        /// PUT /api/slots/{id} - Update slot status (AVAILABLE → RESERVED → BOOKED → COMPLETED / CANCELLED)
+        /// PUT /api/slots/{id} - Update energy slot lifecycle status
         /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateSlotStatus(string id, [FromBody] SlotStatusUpdateDto dto)

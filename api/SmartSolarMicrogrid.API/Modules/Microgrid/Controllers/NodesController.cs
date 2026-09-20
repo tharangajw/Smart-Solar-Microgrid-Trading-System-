@@ -1,3 +1,10 @@
+// ============================================================================
+// Module: Smart Solar Microgrid Trading System - C# Web API
+// File: NodesController.cs
+// Description: Handles Microgrid Solar Station Nodes management including CRUD,
+//              Haversine GPS distance filtering, and active reservation deactivation checks.
+// ============================================================================
+
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using SmartSolarMicrogrid.API.Data;
@@ -11,34 +18,38 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
     {
         private readonly MongoDbContext _context;
 
+        // Constructor initializing database context
         public NodesController(MongoDbContext context)
         {
             _context = context;
         }
 
         /// <summary>
-        /// POST /api/nodes - Create a new solar station node
+        /// POST /api/nodes - Create a new solar microgrid station node
         /// </summary>
         [HttpPost]
         public async Task<IActionResult> CreateNode([FromBody] SolarStationInfo node)
         {
+            // Validate payload
             if (node == null)
             {
                 return BadRequest(new { message = "Invalid node payload" });
             }
 
-            node.Id = null; // Let MongoDB generate ObjectId
+            // Assign default metadata and generate ObjectId
+            node.Id = null;
             node.Status = string.IsNullOrWhiteSpace(node.Status) ? "ACTIVE" : node.Status;
             node.CreatedAt = DateTime.UtcNow;
             node.UpdatedAt = DateTime.UtcNow;
 
+            // Insert into MongoDB collection
             await _context.SolarStations.InsertOneAsync(node);
 
             return CreatedAtAction(nameof(GetNodeById), new { id = node.Id }, node);
         }
 
         /// <summary>
-        /// GET /api/nodes - List all nodes with status and near-me filtering options
+        /// GET /api/nodes - List all nodes with status and near-me GPS radius filtering options
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetNodes(
@@ -48,6 +59,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
             [FromQuery] double? lng,
             [FromQuery] double? radiusKm)
         {
+            // Build query filter
             var filterBuilder = Builders<SolarStationInfo>.Filter;
             var filter = filterBuilder.Empty;
 
@@ -56,11 +68,13 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
                 filter &= filterBuilder.Eq(x => x.Status, status.ToUpper());
             }
 
+            // Fetch nodes from MongoDB
             var nodes = await _context.SolarStations.Find(filter).ToListAsync();
 
+            // Perform Haversine distance filtering if nearMe requested
             if (nearMe == true && lat.HasValue && lng.HasValue)
             {
-                double maxRadius = radiusKm ?? 50.0; // default 50 km radius if not provided
+                double maxRadius = radiusKm ?? 50.0;
                 var nodesWithDistance = nodes
                     .Select(n => new
                     {
@@ -79,7 +93,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
         }
 
         /// <summary>
-        /// GET /api/nodes/{id} - Get details for a single node
+        /// GET /api/nodes/{id} - Retrieve single station node details
         /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetNodeById(string id)
@@ -94,7 +108,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
         }
 
         /// <summary>
-        /// PUT /api/nodes/{id} - Edit a node (capacity, schedule, GPS, etc.)
+        /// PUT /api/nodes/{id} - Edit existing node configuration and operational schedule
         /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateNode(string id, [FromBody] SolarStationInfo nodeUpdate)
@@ -105,6 +119,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
                 return NotFound(new { message = "Node not found" });
             }
 
+            // Apply updates
             existingNode.Name = string.IsNullOrWhiteSpace(nodeUpdate.Name) ? existingNode.Name : nodeUpdate.Name;
             existingNode.Code = string.IsNullOrWhiteSpace(nodeUpdate.Code) ? existingNode.Code : nodeUpdate.Code;
             if (nodeUpdate.Gps != null) existingNode.Gps = nodeUpdate.Gps;
@@ -122,9 +137,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
         }
 
         /// <summary>
-        /// DELETE /api/nodes/{id} - Deactivate node with business rule checks
-        /// Business Rule: Check EnergyBookingSlots collection for active (RESERVED/BOOKED, still not ended) reservations.
-        /// If active reservations exist, return 409 Conflict. Otherwise set status = INACTIVE.
+        /// DELETE /api/nodes/{id} - Deactivate node enforcing active reservation business rules
         /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeactivateNode(string id)
@@ -135,6 +148,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
                 return NotFound(new { message = "Node not found" });
             }
 
+            // Check if active energy slot reservations exist
             var now = DateTime.UtcNow;
             var filterBuilder = Builders<EnergyBookingSlots>.Filter;
             var activeReservationsFilter = filterBuilder.Eq(x => x.NodeId, id) &
@@ -143,6 +157,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
 
             long activeCount = await _context.EnergyBookingSlots.CountDocumentsAsync(activeReservationsFilter);
 
+            // Block deactivation if active reservations present
             if (activeCount > 0)
             {
                 return Conflict(new
@@ -152,6 +167,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
                 });
             }
 
+            // Perform soft deactivation
             var update = Builders<SolarStationInfo>.Update
                 .Set(x => x.Status, "INACTIVE")
                 .Set(x => x.UpdatedAt, DateTime.UtcNow);
@@ -164,9 +180,10 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
             return Ok(node);
         }
 
+        // Helper method calculating distance between coordinates using Haversine formula
         private static double CalculateDistanceKm(double lat1, double lon1, double lat2, double lon2)
         {
-            const double r = 6371.0; // Earth radius in kilometers
+            const double r = 6371.0;
             var dLat = ToRadians(lat2 - lat1);
             var dLon = ToRadians(lon2 - lon1);
             var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
@@ -176,6 +193,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
             return r * c;
         }
 
+        // Convert degrees to radians
         private static double ToRadians(double deg) => deg * (Math.PI / 180.0);
     }
 }
