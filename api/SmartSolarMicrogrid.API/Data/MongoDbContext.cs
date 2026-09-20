@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using SmartSolarMicrogrid.API.Models;
 
 namespace SmartSolarMicrogrid.API.Data;
 
@@ -24,6 +25,16 @@ public class MongoDbContext
     {
         return _database.GetCollection<T>(collectionName);
     }
+
+    /// <summary>
+    /// Collection getter for SolarStationInfo (Nodes).
+    /// </summary>
+    public IMongoCollection<SolarStationInfo> SolarStations => GetCollection<SolarStationInfo>("SolarStationInfo");
+
+    /// <summary>
+    /// Collection getter for EnergyBookingSlots.
+    /// </summary>
+    public IMongoCollection<EnergyBookingSlots> EnergyBookingSlots => GetCollection<EnergyBookingSlots>("EnergyBookingSlots");
 
     /// <summary>
     /// Returns the underlying IMongoDatabase for advanced operations.

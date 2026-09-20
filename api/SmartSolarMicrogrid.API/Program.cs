@@ -8,10 +8,21 @@ builder.Services.Configure<MongoDbSettings>(
 
 builder.Services.AddSingleton<MongoDbContext>();
 
+// ── CORS Policy ──────────────────────────────────────
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 // ── OpenAPI / Swagger ────────────────────────────────
 builder.Services.AddOpenApi();
 
-// ── Controllers ──────────────────────────────────────
+// ── Controllers & Services ────────────────────────────
 builder.Services.AddScoped<SmartSolarMicrogrid.API.Modules.Reservations.Repositories.IReservationRepository, SmartSolarMicrogrid.API.Modules.Reservations.Repositories.ReservationRepository>();
 builder.Services.AddScoped<SmartSolarMicrogrid.API.Modules.Reservations.Services.IReservationService, SmartSolarMicrogrid.API.Modules.Reservations.Services.ReservationService>();
 builder.Services.AddScoped<SmartSolarMicrogrid.API.Helpers.ReservationModelToDTO>();
@@ -26,7 +37,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-// app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 
 app.MapControllers();
 
