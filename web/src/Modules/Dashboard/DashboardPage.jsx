@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import DashboardHeader from './components/DashboardHeader';
 import SummaryCard from './components/SummaryCard';
@@ -6,9 +7,39 @@ import { Users, BatteryCharging, CalendarCheck, Zap } from 'lucide-react';
 
 const DashboardPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [recentReservations, setRecentReservations] = useState([]);
+  const [loadingReservations, setLoadingReservations] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchRecent = async () => {
+      try {
+        const response = await fetch('/api/reservations/pending');
+        if (response.ok) {
+          const data = await response.json();
+          setRecentReservations(Array.isArray(data) ? data.slice(0, 3) : []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch recent reservations:', err);
+      } finally {
+        setLoadingReservations(false);
+      }
+    };
+    fetchRecent();
+  }, []);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const getStatusColor = (status) => {
+    switch(status?.toLowerCase()) {
+      case 'completed': return 'bg-leaf/20 text-forest-light';
+      case 'active': return 'bg-solar/20 text-solar-dark text-yellow-700';
+      case 'pending': return 'bg-gray-100 text-charcoal-light';
+      case 'cancelled': return 'bg-red-100 text-red-600';
+      default: return 'bg-gray-100 text-charcoal-light';
+    }
   };
 
   return (
@@ -65,46 +96,50 @@ const DashboardPage = () => {
               <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-forest/5">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="font-display text-lg font-semibold text-forest">Recent Reservations</h2>
-                  <button className="text-sm font-medium text-sage hover:text-forest transition-colors">
+                  <Link to="/reservations" className="text-sm font-medium text-sage hover:text-forest transition-colors">
                     View All
-                  </button>
+                  </Link>
                 </div>
                 
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm text-left">
                     <thead className="text-xs text-charcoal-light uppercase bg-forest/5 border-b border-forest/10 rounded-t-lg">
                       <tr>
-                        <th className="px-4 py-3 rounded-tl-lg font-medium">User</th>
-                        <th className="px-4 py-3 font-medium">Station</th>
-                        <th className="px-4 py-3 font-medium">Time Slot</th>
+                        <th className="px-4 py-3 rounded-tl-lg font-medium">User NIC</th>
+                        <th className="px-4 py-3 font-medium">Station/Node</th>
+                        <th className="px-4 py-3 font-medium">Date</th>
                         <th className="px-4 py-3 rounded-tr-lg font-medium">Status</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr className="border-b border-forest/5 hover:bg-forest/5/50 transition-colors">
-                        <td className="px-4 py-3 font-medium text-charcoal">Alex M.</td>
-                        <td className="px-4 py-3 text-charcoal-light">North Campus Solar</td>
-                        <td className="px-4 py-3 text-charcoal-light">09:00 - 10:00 AM</td>
-                        <td className="px-4 py-3">
-                          <span className="bg-leaf/20 text-forest-light px-2 py-1 rounded-md text-xs font-medium">Completed</span>
-                        </td>
-                      </tr>
-                      <tr className="border-b border-forest/5 hover:bg-forest/5/50 transition-colors">
-                        <td className="px-4 py-3 font-medium text-charcoal">Sarah J.</td>
-                        <td className="px-4 py-3 text-charcoal-light">Library Hub</td>
-                        <td className="px-4 py-3 text-charcoal-light">11:30 - 12:30 PM</td>
-                        <td className="px-4 py-3">
-                          <span className="bg-solar/20 text-solar-dark px-2 py-1 rounded-md text-xs font-medium text-yellow-700">Active</span>
-                        </td>
-                      </tr>
-                      <tr className="border-b border-forest/5 hover:bg-forest/5/50 transition-colors">
-                        <td className="px-4 py-3 font-medium text-charcoal">Michael T.</td>
-                        <td className="px-4 py-3 text-charcoal-light">Engineering Bldg</td>
-                        <td className="px-4 py-3 text-charcoal-light">02:00 - 04:00 PM</td>
-                        <td className="px-4 py-3">
-                          <span className="bg-gray-100 text-charcoal-light px-2 py-1 rounded-md text-xs font-medium">Pending</span>
-                        </td>
-                      </tr>
+                      {loadingReservations ? (
+                        <tr>
+                          <td colSpan="4" className="px-4 py-6 text-center text-charcoal-light">Loading...</td>
+                        </tr>
+                      ) : recentReservations.length === 0 ? (
+                        <tr>
+                          <td colSpan="4" className="px-4 py-6 text-center text-charcoal-light">No recent reservations found.</td>
+                        </tr>
+                      ) : (
+                        recentReservations.map((res) => (
+                          <tr 
+                            key={res.id} 
+                            onClick={() => navigate(`/reservations/${res.id}`)}
+                            className="border-b border-forest/5 hover:bg-forest/5/50 transition-colors cursor-pointer"
+                          >
+                            <td className="px-4 py-3 font-medium text-charcoal">{res.prosumerNic}</td>
+                            <td className="px-4 py-3 text-charcoal-light">{res.nodeId}</td>
+                            <td className="px-4 py-3 text-charcoal-light">
+                              {new Date(res.reservationDate).toLocaleString()}
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={`px-2 py-1 rounded-md text-xs font-medium ${getStatusColor(res.status)}`}>
+                                {res.status || 'Pending'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
