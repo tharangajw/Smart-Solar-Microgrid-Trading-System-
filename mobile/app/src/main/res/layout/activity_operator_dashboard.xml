@@ -4,99 +4,174 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
-    tools:context=".modules.operator.OperatorDashboardActivity">
+    android:background="@color/backgroundColor">
 
-    <TextView
-        android:id="@+id/textViewGreeting"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Grid Operator Dashboard"
-        android:textColor="@color/textColorPrimary"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
+    <!-- Header -->
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardOperatorStats"
+        android:id="@+id/headerCard"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_margin="-4dp"
+        app:cardBackgroundColor="@color/colorPrimary"
+        app:cardCornerRadius="40dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="32dp">
+
+            <TextView
+                android:id="@+id/textViewGreeting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Grid Operator"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Control Centre"
+                android:textColor="#AACBFF"
+                android:textSize="14sp"
+                app:layout_constraintTop_toBottomOf="@id/textViewGreeting"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <ImageView
+                android:id="@+id/buttonLogout"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_social_circle"
+                android:backgroundTint="#40FFFFFF"
+                android:padding="10dp"
+                android:src="@android:drawable/ic_lock_power_off"
+                app:tint="@color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Stats Container -->
+    <LinearLayout
+        android:id="@+id/layoutStats"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        app:cardBackgroundColor="@color/backgroundCard"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="4dp"
-        app:strokeColor="@color/backgroundCardBorder"
-        app:strokeWidth="1dp"
-        app:layout_constraintTop_toBottomOf="@+id/textViewGreeting">
+        android:orientation="horizontal"
+        android:padding="16dp"
+        app:layout_constraintTop_toBottomOf="@id/headerCard"
+        android:layout_marginTop="-40dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/textViewAvailableBattery"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorPrimary" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Battery Slots"
+                    android:textSize="12sp"
+                    android:textColor="@color/textColorSecondary" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Station Status"
-                android:textColor="@color/textColorSecondary"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="1"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/textViewPendingJobs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/accentYellow" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pending Jobs"
+                    android:textSize="12sp"
+                    android:textColor="@color/textColorSecondary" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
 
-            <TextView
-                android:id="@+id/textViewAvailableBattery"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Available Battery Slots: 0"
-                android:textColor="@color/textColorPrimary"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/textViewPendingJobs"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Pending Verification Jobs: 0"
-                android:textColor="@color/textColorPrimary"
-                android:textSize="16sp" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+    <TextView
+        android:id="@+id/labelTools"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Operational Tools"
+        android:textColor="@color/textColorPrimary"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/layoutStats"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonScanQr"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="48dp"
-        android:padding="16dp"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="16dp"
         android:text="Scan Prosumer QR Code"
-        android:textColor="@color/white"
+        android:textAllCaps="false"
+        android:textSize="16sp"
         android:textStyle="bold"
+        app:cornerRadius="16dp"
         app:icon="@android:drawable/ic_menu_camera"
-        app:iconTint="@color/white"
-        app:iconGravity="textStart"
-        app:cornerRadius="12dp"
-        app:backgroundTint="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardOperatorStats" />
+        app:layout_constraintTop_toBottomOf="@id/labelTools" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/buttonViewMap"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="24dp"
         android:layout_marginTop="16dp"
-        android:padding="12dp"
-        android:text="View Station Map"
+        android:text="View Solar Station Map"
+        android:textAllCaps="false"
+        android:textSize="16sp"
         android:textColor="@color/colorPrimary"
-        android:textStyle="bold"
+        app:backgroundTint="@color/white"
         app:strokeColor="@color/colorPrimary"
         app:strokeWidth="1dp"
-        app:backgroundTint="@android:color/transparent"
-        app:cornerRadius="12dp"
+        app:cornerRadius="16dp"
+        app:icon="@android:drawable/ic_dialog_map"
+        app:iconTint="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonScanQr" />
+        app:layout_constraintTop_toBottomOf="@id/buttonScanQr" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

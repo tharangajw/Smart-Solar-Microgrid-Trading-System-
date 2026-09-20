@@ -53,17 +53,35 @@
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <ImageView
-                    android:id="@+id/buttonProfile"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="@drawable/bg_avatar_circle"
-                    android:padding="8dp"
-                    android:src="@android:drawable/ic_menu_myplaces"
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:tint="@color/white"
-                    android:contentDescription="Profile" />
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageView
+                        android:id="@+id/buttonProfile"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="@drawable/bg_avatar_circle"
+                        android:padding="8dp"
+                        android:src="@android:drawable/ic_menu_myplaces"
+                        app:tint="@color/white"
+                        android:contentDescription="Profile" />
+
+                    <ImageView
+                        android:id="@+id/buttonLogout"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="12dp"
+                        android:background="@drawable/bg_social_circle"
+                        android:backgroundTint="#40FFFFFF"
+                        android:padding="12dp"
+                        android:src="@android:drawable/ic_lock_power_off"
+                        app:tint="@color/white"
+                        android:contentDescription="Logout" />
+                </LinearLayout>
 
                 <!-- Energy Stats inside Header -->
                 <LinearLayout
@@ -85,9 +103,10 @@
                             android:textColor="#D1C4E9"
                             android:textSize="12sp" />
                         <TextView
+                            android:id="@+id/textViewEnergySoldValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="124 kWh"
+                            android:text="0 kWh"
                             android:textColor="@color/white"
                             android:textSize="22sp"
                             android:textStyle="bold" />
@@ -105,9 +124,10 @@
                             android:textColor="#D1C4E9"
                             android:textSize="12sp" />
                         <TextView
+                            android:id="@+id/textViewEarningsValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="LKR 4,500"
+                            android:text="LKR 0"
                             android:textColor="@color/white"
                             android:textSize="22sp"
                             android:textStyle="bold" />
@@ -215,8 +235,9 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Stats Card -->
+                <!-- Analytics/Counts Card -->
                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/buttonAnalytics"
                     android:layout_width="0dp"
                     android:layout_height="140dp"
                     android:layout_columnWeight="1"
@@ -229,11 +250,18 @@
                         android:gravity="center"
                         android:orientation="vertical"
                         android:padding="16dp">
+                        <TextView
+                            android:id="@+id/textViewBookingCounts"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 / 0"
+                            android:textSize="24sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorPrimary"/>
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="📊" android:textSize="32sp"/>
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp" android:text="Analytics"
-                            android:textColor="@color/textColorPrimary" android:textStyle="bold"/>
+                            android:layout_marginTop="4dp" android:text="Pending / Approved"
+                            android:textSize="12sp"
+                            android:textColor="@color/textColorSecondary" android:textStyle="bold"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 

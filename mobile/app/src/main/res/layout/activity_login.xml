@@ -37,12 +37,12 @@
             android:textStyle="bold"
             android:fontFamily="sans-serif-black" />
 
-        <!-- Email Field -->
+        <!-- NIC / Email Field -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="E-mail"
+            android:text="NIC / Email"
             android:textColor="@color/black"
             android:textSize="14sp"
             android:textStyle="bold" />
@@ -59,15 +59,15 @@
             app:boxCornerRadiusTopStart="16dp"
             app:boxStrokeColor="@color/dividerColor"
             app:hintEnabled="false"
-            app:startIconDrawable="@drawable/ic_email_outline"
+            app:startIconDrawable="@drawable/ic_person_outline"
             app:startIconTint="@color/textColorSecondary">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/editTextNic"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Input your email"
-                android:inputType="textEmailAddress"
+                android:hint="Input your NIC or Email"
+                android:inputType="text"
                 android:textSize="14sp" />
         </com.google.android.material.textfield.TextInputLayout>
 

@@ -25,14 +25,14 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
                 return BadRequest(ModelState); 
             }
 
-            var result = await _userService.LoginAsync(request);
+            var (response, errorMessage) = await _userService.LoginAsync(request);
 
-            if (result == null)
+            if (response == null)
             {
-                return Unauthorized(new { message = "Invalid credentials or account inactive" });
+                return Unauthorized(new { message = errorMessage ?? "Invalid credentials" });
             }
 
-            return Ok(result);
+            return Ok(response);
         }
 
 // Prosumer registration endpoint

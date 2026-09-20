@@ -1,12 +1,10 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 
-// Public / Backoffice imports
 import HomePage from './Modules/Home/HomePage';
 import DashboardPage from './Modules/Dashboard/DashboardPage';
 
-// Operator imports — folder is lowercase 'pages'
 import OperatorLayout from './Modules/Operator/Layout/OperatorLayout';
 import OperatorDashboard from './Modules/Operator/pages/OperatorDashboard';
 import BookingMonitoring from './Modules/Operator/pages/BookingMonitoring';
@@ -16,15 +14,29 @@ import OperatorLogin from './Modules/Operator/pages/OperatorLogin';
 import StationsMap from './Modules/Operator/pages/StationsMap';
 import OperatorRoute from './Routes/OperatorRoute';
 
+import BackofficeLayout from './Modules/Backoffice/Layout/BackofficeLayout';
+import BackofficeLogin from './Modules/Backoffice/pages/BackofficeLogin';
+import PendingActivationsPage from './Modules/Backoffice/pages/PendingActivationsPage';
+import ProsumerManagementPage from './Modules/Backoffice/pages/ProsumerManagementPage';
+import BackofficeRoute from './Routes/BackofficeRoute';
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/dashboard" element={<Navigate to="/backoffice/dashboard" replace />} />
 
-        {/* Operator Routes */}
+        <Route path="/backoffice/login" element={<BackofficeLogin />} />
+        <Route element={<BackofficeRoute />}>
+          <Route path="/backoffice" element={<BackofficeLayout />}>
+            <Route index element={<Navigate to="pending" replace />} />
+            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="pending" element={<PendingActivationsPage />} />
+            <Route path="prosumers" element={<ProsumerManagementPage />} />
+          </Route>
+        </Route>
+
         <Route path="/operator/login" element={<OperatorLogin />} />
         <Route element={<OperatorRoute />}>
           <Route path="/operator" element={<OperatorLayout />}>

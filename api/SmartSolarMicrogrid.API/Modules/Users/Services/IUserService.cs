@@ -7,7 +7,7 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
     public interface IUserService
     {
     // Authenticate user and generate JWT token
-        Task<LoginResponse?> LoginAsync(LoginRequest request);
+        Task<(LoginResponse? Response, string? ErrorMessage)> LoginAsync(LoginRequest request);
 
     // Register new prosumer
         Task<User?> RegisterProsumerAsync(RegisterRequest request);

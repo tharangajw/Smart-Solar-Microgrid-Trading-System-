@@ -41,6 +41,7 @@ namespace SmartSolarMicrogrid.API.Data
                     PhoneNumber = "0771234567",
                     Address = "Smart Solar HQ, Colombo",
                     IsActive = true,
+                    Status = UserAccountStatus.Active,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -77,6 +78,7 @@ namespace SmartSolarMicrogrid.API.Data
                 PhoneNumber = "0771234568",
                 Address = "Smart Solar Operations, Colombo",
                 IsActive = true,
+                Status = UserAccountStatus.Active,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };

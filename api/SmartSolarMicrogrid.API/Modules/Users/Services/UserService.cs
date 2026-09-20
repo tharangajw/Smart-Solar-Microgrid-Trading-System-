@@ -1,5 +1,6 @@
 using BCrypt.Net;
 using Microsoft.IdentityModel.Tokens;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using SmartSolarMicrogrid.API.Data;
 using SmartSolarMicrogrid.API.Modules.Authentication.Models;
@@ -7,6 +8,7 @@ using SmartSolarMicrogrid.API.Modules.Users.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SmartSolarMicrogrid.API.Modules.Users.Services
 {
@@ -23,32 +25,54 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
         }
 
         // Authenticate user and generate JWT token
-        public async Task<LoginResponse?> LoginAsync(LoginRequest request)
+        public async Task<(LoginResponse? Response, string? ErrorMessage)> LoginAsync(LoginRequest request)
         {
-            var user = await _context.Users
-                .Find(Builders<User>.Filter.Eq(u => u.Email, request.Email))
-                .FirstOrDefaultAsync();
+            var identifier = (request.Email ?? request.Nic ?? string.Empty).Trim();
+            var user = await FindUserByEmailOrNicAsync(identifier);
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
+            if (user == null || string.IsNullOrEmpty(user.Password) || !BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             {
-                return null;
+                return (null, "Invalid NIC/email or password");
             }
 
             if (!user.IsActive)
             {
-                return null;
+                var message = user.Status == UserAccountStatus.Deactivated
+                    ? "Account is deactivated. Contact a Backoffice officer to reactivate it."
+                    : "Account is pending Backoffice activation. You can log in after an officer approves your registration.";
+                return (null, message);
             }
 
             var token = GenerateJwtToken(user);
 
-            return new LoginResponse
+            return (new LoginResponse
             {
                 Token = token,
                 UserId = user.Id ?? string.Empty,
                 Email = user.Email,
                 Role = user.Role,
-                FullName = user.FullName
-            };
+                FullName = user.FullName,
+                Nic = user.Nic
+            }, null);
+        }
+
+        // Find a user by exact NIC or case-insensitive email
+        private async Task<User?> FindUserByEmailOrNicAsync(string identifier)
+        {
+            if (string.IsNullOrWhiteSpace(identifier))
+            {
+                return null;
+            }
+
+            var nicFilter = Builders<User>.Filter.Eq(u => u.Nic, identifier);
+            var emailFilter = Builders<User>.Filter.Regex(
+                u => u.Email,
+                new BsonRegularExpression($"^{Regex.Escape(identifier)}$", "i")
+            );
+
+            return await _context.Users
+                .Find(Builders<User>.Filter.Or(nicFilter, emailFilter))
+                .FirstOrDefaultAsync();
         }
 
         // Register new prosumer
@@ -84,7 +108,8 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
                 PhoneNumber = request.PhoneNumber,
                 Address = request.Address,
                 SolarCapacityKw = request.SolarCapacityKw,
-                IsActive = false, // Pending activation by backoffice
+                IsActive = false,
+                Status = UserAccountStatus.Pending,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -132,6 +157,7 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
                 PhoneNumber = request.PhoneNumber,
                 Address = request.Address,
                 IsActive = true,
+                Status = UserAccountStatus.Active,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
@@ -178,7 +204,8 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
             return await _context.Users
                 .Find(Builders<User>.Filter.And(
                     Builders<User>.Filter.Eq(u => u.Role, UserRoles.Prosumer),
-                    Builders<User>.Filter.Eq(u => u.IsActive, false)
+                    Builders<User>.Filter.Eq(u => u.IsActive, false),
+                    Builders<User>.Filter.Ne(u => u.Status, UserAccountStatus.Deactivated)
                 ))
                 .ToListAsync();
         }
@@ -225,9 +252,7 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
         // Activate user account (Backoffice only)
         public async Task<(bool Success, string Message)> ActivateUserAsync(string id)
         {
-            var user = await _context.Users
-                .Find(Builders<User>.Filter.Eq(u => u.Id, id))
-                .FirstOrDefaultAsync();
+            var user = await FindUserForActivationAsync(id);
 
             if (user == null)
             {
@@ -240,9 +265,11 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
             }
 
             var result = await _context.Users.UpdateOneAsync(
-                Builders<User>.Filter.Eq(u => u.Id, id),
+                Builders<User>.Filter.Eq(u => u.Id, user.Id),
                 Builders<User>.Update
                     .Set(u => u.IsActive, true)
+                    .Set("isActive", true)
+                    .Set(u => u.Status, UserAccountStatus.Active)
                     .Set(u => u.UpdatedAt, DateTime.UtcNow)
             );
 
@@ -275,6 +302,7 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
                 Builders<User>.Filter.Eq(u => u.Id, id),
                 Builders<User>.Update
                     .Set(u => u.IsActive, false)
+                    .Set(u => u.Status, UserAccountStatus.Deactivated)
                     .Set(u => u.UpdatedAt, DateTime.UtcNow)
             );
 

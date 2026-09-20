@@ -31,7 +31,7 @@ const Navbar = () => {
   };
 
   const handleLoginClick = () => {
-    navigate('/dashboard');
+    navigate('/backoffice/login');
   };
 
   return (
@@ -81,11 +81,17 @@ const Navbar = () => {
               </a>
             ))}
           </div>
+          <button
+            onClick={() => navigate('/operator/login')}
+            className="text-charcoal-light hover:text-forest transition-colors text-sm font-medium tracking-wide uppercase"
+          >
+            Operator
+          </button>
           <button 
             onClick={handleLoginClick}
             className="border border-forest text-forest hover:bg-forest hover:text-ivory rounded-full px-6 py-2 text-sm font-medium transition-all duration-300"
           >
-            Login
+            Backoffice Login
           </button>
         </div>
 
@@ -140,11 +146,17 @@ const Navbar = () => {
               {link.name}
             </a>
           ))}
+          <button
+            onClick={() => navigate('/operator/login')}
+            className="text-charcoal hover:text-forest transition-colors text-sm font-medium tracking-wide uppercase py-2 text-left"
+          >
+            Operator
+          </button>
           <button 
             onClick={handleLoginClick}
             className="border border-forest text-forest hover:bg-forest hover:text-ivory rounded-full px-6 py-2 text-sm font-medium transition-all duration-300 w-fit mt-4"
           >
-            Login
+            Backoffice Login
           </button>
         </div>
       </div>

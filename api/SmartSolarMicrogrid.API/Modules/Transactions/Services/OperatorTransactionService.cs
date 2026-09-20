@@ -127,6 +127,7 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Services
             // Update the source Reservation status to Approved
             var update = Builders<Reservation>.Update
                 .Set(r => r.Status, "Approved")
+                .Set(r => r.QrCodeId, qrCodeId)
                 .Set(r => r.UpdatedAt, DateTime.UtcNow);
             await _reservations.UpdateOneAsync(r => r.Id == reservationId, update);
 

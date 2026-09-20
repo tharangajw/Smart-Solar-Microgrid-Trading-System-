@@ -15,6 +15,7 @@ namespace SmartSolarMicrogrid.API.Helpers
                 NodeId = r.NodeId,
                 ReservationDate = r.ReservationDate,
                 Status = r.Status,
+                QrCodeId = r.QrCodeId,
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
                 CancelledReason = r.CancelledReason
