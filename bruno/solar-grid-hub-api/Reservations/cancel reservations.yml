@@ -1,0 +1,16 @@
+info:
+  name: cancel reservations
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: http://localhost:5281/api/reservations/
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
