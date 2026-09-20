@@ -26,7 +26,7 @@ const HeroSection = () => {
                 Explore the Network
               </a>
               <button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/login')}
                 className="inline-flex items-center border-2 border-forest/20 text-forest px-8 py-3.5 rounded-full hover:border-forest hover:bg-forest hover:text-ivory transition-all duration-300 font-medium text-sm tracking-wide"
               >
                 Access Your Account

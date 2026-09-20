@@ -1,4 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.Facebook;
+using AspNet.Security.OAuth.Apple;
 using Microsoft.IdentityModel.Tokens;
 using SmartSolarMicrogrid.API.Data;
 using SmartSolarMicrogrid.API.Modules.Users.Services;
@@ -66,6 +69,26 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtAudience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!))
     };
+})
+.AddGoogle(options =>
+{
+    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+    options.CallbackPath = "/signin-google";
+})
+.AddFacebook(options =>
+{
+    options.AppId = builder.Configuration["Authentication:Facebook:AppId"];
+    options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+    options.CallbackPath = "/signin-facebook";
+})
+.AddApple(options =>
+{
+    options.ClientId = builder.Configuration["Authentication:Apple:ClientId"];
+    options.ClientSecret = builder.Configuration["Authentication:Apple:ClientSecret"];
+    options.TeamId = builder.Configuration["Authentication:Apple:TeamId"];
+    options.KeyId = builder.Configuration["Authentication:Apple:KeyId"];
+    options.CallbackPath = "/signin-apple";
 });
 
 builder.Services.AddAuthorization();

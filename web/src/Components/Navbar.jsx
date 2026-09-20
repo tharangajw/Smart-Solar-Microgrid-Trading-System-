@@ -31,7 +31,7 @@ const Navbar = () => {
   };
 
   const handleLoginClick = () => {
-    navigate('/dashboard');
+    navigate('/login');
   };
 
   return (
