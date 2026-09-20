@@ -19,13 +19,8 @@ import BackofficeLogin from './Modules/Backoffice/pages/BackofficeLogin';
 import PendingActivationsPage from './Modules/Backoffice/pages/PendingActivationsPage';
 import ProsumerManagementPage from './Modules/Backoffice/pages/ProsumerManagementPage';
 import BackofficeRoute from './Routes/BackofficeRoute';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import HomePage from './Modules/Home/HomePage';
-import DashboardPage from './Modules/Dashboard/DashboardPage';
 import ReservationsPage from './Modules/Reservations/ReservationsPage';
 import ReservationDetailPage from './Modules/Reservations/ReservationDetailPage';
-import './App.css';
-
 function App() {
   return (
     <BrowserRouter>

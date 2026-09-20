@@ -3,13 +3,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import DashboardHeader from './components/DashboardHeader';
 import SummaryCard from './components/SummaryCard';
-import { Users, UserPlus, ShieldCheck } from 'lucide-react';
+import { Users, UserPlus, ShieldCheck, BatteryCharging, CalendarCheck, Zap } from 'lucide-react';
 import { getAllUsers, getPendingActivations } from '../../Services/backofficeApi';
 
 const DashboardPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [recentReservations, setRecentReservations] = useState([]);
   const [loadingReservations, setLoadingReservations] = useState(true);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [prosumerCount, setProsumerCount] = useState(0);
+  const [activeCount, setActiveCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -60,7 +63,7 @@ const DashboardPage = () => {
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       
       <div className="flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden">
-        <DashboardHeader onMenuClick={toggleSidebar} />
+        <DashboardHeader onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
         
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
           {/* Summary Cards */}
