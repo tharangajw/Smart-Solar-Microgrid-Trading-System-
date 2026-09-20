@@ -69,7 +69,9 @@ class CreateReservationActivity : AppCompatActivity() {
 
     private fun loadStations(autoComplete: AutoCompleteTextView) {
         stationsList = repository.getStations()
-        val displayList = stationsList.map { "${it.name} (${it.availableSlots} slots)" }
+        val displayList = stationsList.map {
+            "${it.name} (${it.capacityKwh} kWh · ${it.availableSlots} slots)"
+        }
         val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, displayList)
         autoComplete.setAdapter(adapter)
         autoComplete.setOnItemClickListener { _, _, position, _ ->

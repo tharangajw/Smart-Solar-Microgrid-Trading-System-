@@ -11,6 +11,7 @@ viewpager2 = "1.1.0"
 zxing-core = "3.5.3"
 kotlin = "2.1.0"
 coreKtx = "1.15.0"
+splashscreen = "1.0.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -23,6 +24,7 @@ constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayo
 viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing-core" }
+splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

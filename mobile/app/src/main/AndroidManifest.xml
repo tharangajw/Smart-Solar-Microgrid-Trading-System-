@@ -21,11 +21,11 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDda2g4EWOyS9c575rkVlvj46V7n_sI9rg" />
+            android:value="AIzaSyDur1-LM7qsjVebqYe67cfUHhg8lbp5Xzs" />
 
         <activity
             android:name=".modules.splash.SplashActivity"
-            android:theme="@style/Theme.SmartSolarMicrogrid.Onboarding"
+            android:theme="@style/Theme.App.Starting"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

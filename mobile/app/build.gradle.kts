@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.material)
     implementation(libs.activity)
+    implementation(libs.splashscreen)
     implementation(libs.constraintlayout)
     implementation(libs.viewpager2)
     implementation(libs.zxing.core)

@@ -8,13 +8,16 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.smartsolar.R
-import com.smartsolar.modules.authentication.LoginActivity
 import com.smartsolar.modules.onboarding.OnboardingActivity
 
 class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Install the SplashScreen API for Android 12+
+        installSplashScreen()
+        
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
 
@@ -33,7 +36,7 @@ class SplashActivity : AppCompatActivity() {
                     .setListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator) {
                             statusContainer.postDelayed({
-                                // Always go to Onboarding for now as requested
+                                // Navigate to Onboarding as requested: Splash -> Onboarding -> Login
                                 val intent = Intent(this@SplashActivity, OnboardingActivity::class.java)
                                 startActivity(intent)
                                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)

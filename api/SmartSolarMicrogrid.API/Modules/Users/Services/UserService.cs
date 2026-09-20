@@ -252,7 +252,7 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
         // Activate user account (Backoffice only)
         public async Task<(bool Success, string Message)> ActivateUserAsync(string id)
         {
-            var user = await FindUserForActivationAsync(id);
+            var user = await GetUserByIdAsync(id);
 
             if (user == null)
             {

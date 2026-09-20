@@ -44,6 +44,13 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/textViewStationLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Location: N/A" />
+
+            <TextView
                 android:id="@+id/textViewStationCapacity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

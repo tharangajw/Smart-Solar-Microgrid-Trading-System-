@@ -28,7 +28,11 @@ class ReservationRepository(private val context: Context) {
                         name = obj.optString("name", "Station $i"),
                         latitude = obj.optDouble("latitude", 0.0),
                         longitude = obj.optDouble("longitude", 0.0),
-                        capacityKwh = obj.optDouble("capacityKwh", 0.0),
+                        capacityKwh = if (obj.has("capacityKWh")) {
+                            obj.optDouble("capacityKWh", 0.0)
+                        } else {
+                            obj.optDouble("capacityKwh", 0.0)
+                        },
                         availableSlots = obj.optInt("availableSlots", 0)
                     ))
                 }

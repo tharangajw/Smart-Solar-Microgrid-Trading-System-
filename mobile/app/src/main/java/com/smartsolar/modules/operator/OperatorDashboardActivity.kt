@@ -9,9 +9,7 @@ package com.smartsolar.modules.operator
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.StrictMode
 import android.view.View
-import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.smartsolar.R
@@ -25,11 +23,8 @@ class OperatorDashboardActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_operator_dashboard)
 
-        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
-
-        val buttonScanQr = findViewById<Button>(R.id.buttonScanQr)
-        val buttonViewMap = findViewById<Button>(R.id.buttonViewMap)
+        val buttonScanQr = findViewById<View>(R.id.buttonScanQr)
+        val buttonViewMap = findViewById<View>(R.id.buttonViewMap)
         val textBattery = findViewById<TextView>(R.id.textViewAvailableBattery)
         val textJobs = findViewById<TextView>(R.id.textViewPendingJobs)
         val buttonLogout = findViewById<View>(R.id.buttonLogout)
@@ -44,6 +39,15 @@ class OperatorDashboardActivity : AppCompatActivity() {
         buttonViewMap.setOnClickListener {
             startActivity(Intent(this, com.smartsolar.modules.map.StationMapActivity::class.java))
         }
+
+        findViewById<View>(R.id.buttonCurrentBookings).setOnClickListener {
+            // Re-using EnergyHistoryActivity as it likely shows relevant lists
+            startActivity(Intent(this, com.smartsolar.modules.history.EnergyHistoryActivity::class.java))
+        }
+
+        findViewById<View>(R.id.buttonHistory).setOnClickListener {
+            startActivity(Intent(this, com.smartsolar.modules.history.EnergyHistoryActivity::class.java))
+        }
         
         buttonLogout.setOnClickListener {
             logout()
@@ -52,16 +56,24 @@ class OperatorDashboardActivity : AppCompatActivity() {
 
     /** Fetches station status and pending counts from API */
     private fun loadOperatorStats(textBattery: TextView, textJobs: TextView) {
-        val response = ApiClient.get(this, "operator/dashboard")
-        if (response != null) {
-            try {
-                val json = JSONObject(response)
-                textBattery.text = json.optString("availableSlots", "0")
-                textJobs.text = json.optString("pendingCount", "0")
-            } catch (e: Exception) {
-                e.printStackTrace()
+        Thread {
+            val response = ApiClient.get(this, "operator/dashboard")
+            runOnUiThread {
+                if (response != null) {
+                    try {
+                        val json = JSONObject(response)
+                        // Backend might return availableSlots as a count, UI expects status
+                        val slots = json.optString("availableSlots", "0")
+                        val pending = json.optString("pendingCount", "0")
+                        
+                        textBattery.text = if (slots.toIntOrNull() != null) "$slots kWh" else slots
+                        textJobs.text = if (pending.toInt() < 10) "0$pending" else pending
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
             }
-        }
+        }.start()
     }
 
     /** Logout logic – clears local persistence */
