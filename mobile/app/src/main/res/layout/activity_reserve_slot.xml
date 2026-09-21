@@ -14,53 +14,12 @@
         android:orientation="vertical">
 
         <!-- Header -->
-        <com.google.android.material.card.MaterialCardView
+        <include
+            android:id="@+id/customTopBar"
+            layout="@layout/view_custom_top_bar"
             android:layout_width="match_parent"
-            android:layout_height="160dp"
-            android:layout_marginBottom="-20dp"
-            app:cardBackgroundColor="@color/colorPrimary"
-            app:cardCornerRadius="36dp"
-            app:cardElevation="6dp">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="28dp">
-
-                <ImageView
-                    android:id="@+id/buttonBack"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/bg_social_circle"
-                    android:backgroundTint="#40FFFFFF"
-                    android:padding="10dp"
-                    android:src="@android:drawable/ic_menu_revert"
-                    android:contentDescription="Back"
-                    app:tint="@color/white"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Reserve a Slot"
-                    android:textColor="@color/white"
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Book your solar energy slot"
-                    android:textColor="#D1C4E9"
-                    android:textSize="13sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </com.google.android.material.card.MaterialCardView>
+            android:layout_height="wrap_content"
+            app:elevation="8dp" />
 
         <!-- Form Card -->
         <com.google.android.material.card.MaterialCardView
@@ -116,11 +75,37 @@
                     android:layout_marginBottom="20dp"
                     android:background="@color/dividerColor" />
 
+                <!-- Slot Picker -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Select Slot"
+                    android:textColor="@color/textColorPrimary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <Spinner
+                    android:id="@+id/spinnerSlot"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:background="@drawable/bg_input_outlined"
+                    android:padding="14dp"
+                    android:spinnerMode="dropdown" />
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:background="@color/dividerColor" />
+
                 <!-- Date Picker -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Select Date"
+                    android:text="Reservation Date"
                     android:textColor="@color/textColorPrimary"
                     android:textSize="14sp"
                     android:textStyle="bold"

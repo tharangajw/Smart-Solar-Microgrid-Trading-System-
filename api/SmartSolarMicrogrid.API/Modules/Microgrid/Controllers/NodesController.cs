@@ -43,7 +43,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
             node.UpdatedAt = DateTime.UtcNow;
 
             // Insert into MongoDB collection
-            await _context.SolarStations.InsertOneAsync(node);
+            await _context.SolarStationInfos.InsertOneAsync(node);
 
             return CreatedAtAction(nameof(GetNodeById), new { id = node.Id }, node);
         }
@@ -69,7 +69,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
             }
 
             // Fetch nodes from MongoDB
-            var nodes = await _context.SolarStations.Find(filter).ToListAsync();
+            var nodes = await _context.SolarStationInfos.Find(filter).ToListAsync();
 
             // Perform Haversine distance filtering if nearMe requested
             if (nearMe == true && lat.HasValue && lng.HasValue)
@@ -98,7 +98,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetNodeById(string id)
         {
-            var node = await _context.SolarStations.Find(x => x.Id == id).FirstOrDefaultAsync();
+            var node = await _context.SolarStationInfos.Find(x => x.Id == id).FirstOrDefaultAsync();
             if (node == null)
             {
                 return NotFound(new { message = "Node not found" });
@@ -113,7 +113,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateNode(string id, [FromBody] SolarStationInfo nodeUpdate)
         {
-            var existingNode = await _context.SolarStations.Find(x => x.Id == id).FirstOrDefaultAsync();
+            var existingNode = await _context.SolarStationInfos.Find(x => x.Id == id).FirstOrDefaultAsync();
             if (existingNode == null)
             {
                 return NotFound(new { message = "Node not found" });
@@ -131,7 +131,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
             }
             existingNode.UpdatedAt = DateTime.UtcNow;
 
-            await _context.SolarStations.ReplaceOneAsync(x => x.Id == id, existingNode);
+            await _context.SolarStationInfos.ReplaceOneAsync(x => x.Id == id, existingNode);
 
             return Ok(existingNode);
         }
@@ -142,7 +142,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeactivateNode(string id)
         {
-            var node = await _context.SolarStations.Find(x => x.Id == id).FirstOrDefaultAsync();
+            var node = await _context.SolarStationInfos.Find(x => x.Id == id).FirstOrDefaultAsync();
             if (node == null)
             {
                 return NotFound(new { message = "Node not found" });
@@ -172,7 +172,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
                 .Set(x => x.Status, "INACTIVE")
                 .Set(x => x.UpdatedAt, DateTime.UtcNow);
 
-            await _context.SolarStations.UpdateOneAsync(x => x.Id == id, update);
+            await _context.SolarStationInfos.UpdateOneAsync(x => x.Id == id, update);
 
             node.Status = "INACTIVE";
             node.UpdatedAt = DateTime.UtcNow;

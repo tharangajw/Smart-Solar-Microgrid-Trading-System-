@@ -16,27 +16,35 @@
         <!-- Top Card: Welcome, Role, NIC (Full Width) -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="240dp"
+            android:layout_marginBottom="16dp"
             app:cardBackgroundColor="@color/colorPrimary"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.LoginHeader"
             app:cardElevation="6dp"
-            android:layout_marginBottom="16dp">
+            app:strokeWidth="0dp"
+            app:cardPreventCornerOverlap="false"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.App.LoginHeader">
 
             <!-- Background Image (blended) -->
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/onboardimage"
+                android:alpha="0.25"
                 android:scaleType="centerCrop"
-                android:alpha="0.15" />
+                android:src="@drawable/onboardimage" />
+
+            <!-- Gradient Overlay for better text readability -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#40000000" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="32dp"
-                android:paddingBottom="40dp"
                 android:paddingStart="24dp"
-                android:paddingEnd="24dp">
+                android:paddingTop="60dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="40dp">
 
                 <TextView
                     android:id="@+id/textWelcomeName"

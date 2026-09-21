@@ -148,29 +148,14 @@ class MyBookingsActivity : BaseNavActivity() {
             layoutEmpty.visibility = View.GONE
             recycler.visibility = View.VISIBLE
             recycler.adapter = BookingAdapter(this, list, showCancel) { booking ->
-                cancelBooking(booking)
+                viewBookingDetails(booking)
             }
         }
     }
 
-    /** Cancel a booking via PUT /reservations/{id}/cancel */
-    private fun cancelBooking(booking: Booking) {
-        val body = JSONObject().apply { put("reason", "Cancelled by prosumer") }
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            val result = ApiClient.put(this@MyBookingsActivity, "Reservations/${booking.id}/cancel", body)
-
-            withContext(Dispatchers.Main) {
-                if (result.isSuccess) {
-                    Toast.makeText(this@MyBookingsActivity,
-                        "Booking cancelled successfully.", Toast.LENGTH_SHORT).show()
-                    // Refresh list
-                    loadBookings()
-                } else {
-                    Toast.makeText(this@MyBookingsActivity,
-                        "Cancel failed: ${result.message}", Toast.LENGTH_LONG).show()
-                }
-            }
-        }
+    private fun viewBookingDetails(booking: Booking) {
+        val intent = android.content.Intent(this, ReservationDetailActivity::class.java)
+        intent.putExtra("BOOKING_ID", booking.id)
+        startActivity(intent)
     }
 }

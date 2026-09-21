@@ -3,6 +3,7 @@ package com.smartsolar.modules.common
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -52,6 +53,7 @@ abstract class BaseNavActivity : AppCompatActivity() {
         val currentMenuItemId = getMenuItemId()
         if (currentMenuItemId != 0) {
             bottomNav.selectedItemId = currentMenuItemId
+            updateTopBarTitle(currentMenuItemId)
         }
 
         bottomNav.setOnItemSelectedListener { item: MenuItem ->
@@ -68,21 +70,46 @@ abstract class BaseNavActivity : AppCompatActivity() {
                     }
                     startActivity(intent)
                 }
-                R.id.nav_map -> {
-                    startActivity(Intent(this, StationMapActivity::class.java))
-                }
-                R.id.nav_bookings -> {
-                    startActivity(Intent(this, MyBookingsActivity::class.java))
-                }
-                R.id.nav_profile -> {
-                    startActivity(Intent(this, ProfileActivity::class.java))
-                }
-                // nav_alerts logic could go here when implemented
+                R.id.nav_map -> startActivity(Intent(this, StationMapActivity::class.java))
+                R.id.nav_bookings -> startActivity(Intent(this, MyBookingsActivity::class.java))
+                R.id.nav_profile -> startActivity(Intent(this, ProfileActivity::class.java))
             }
-
-            // Disable standard transition animation to make navigation look seamless
             overridePendingTransition(0, 0)
             true
+        }
+        
+        // Handle Back button click
+        findViewById<android.widget.ImageButton>(R.id.btnNavBack)?.setOnClickListener {
+            onBackPressed()
+        }
+    }
+
+    private fun updateTopBarTitle(menuItemId: Int) {
+        val customTopBar = findViewById<View>(R.id.customTopBar)
+        val titleText = findViewById<android.widget.TextView>(R.id.textNavTitle)
+        val subtitleText = findViewById<android.widget.TextView>(R.id.textNavSubtitle)
+        val btnBack = findViewById<android.widget.ImageButton>(R.id.btnNavBack)
+        val role = SessionManager(this).getRole()?.lowercase() ?: ""
+        
+        when (menuItemId) {
+            R.id.nav_home -> {
+                customTopBar?.visibility = View.GONE
+            }
+            R.id.nav_map -> {
+                customTopBar?.visibility = View.VISIBLE
+                titleText?.text = "Station Map"
+                subtitleText?.text = "Find nearby nodes"
+                btnBack?.visibility = android.view.View.VISIBLE
+            }
+            R.id.nav_bookings -> {
+                customTopBar?.visibility = View.VISIBLE
+                titleText?.text = "My Bookings"
+                subtitleText?.text = "Manage your slots"
+                btnBack?.visibility = android.view.View.VISIBLE
+            }
+            R.id.nav_profile -> {
+                customTopBar?.visibility = View.GONE
+            }
         }
     }
 

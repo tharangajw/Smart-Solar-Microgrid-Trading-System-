@@ -47,6 +47,10 @@
         <activity android:name=".modules.prosumer.ProsumerDashboardActivity" android:exported="false" />
         <activity android:name=".modules.prosumer.ReserveSlotActivity" android:exported="false" />
         <activity android:name=".modules.prosumer.MyBookingsActivity" android:exported="false" />
+        <activity android:name=".modules.prosumer.SearchBookingActivity" android:exported="false" />
+        <activity android:name=".modules.prosumer.ReservationDetailActivity" android:exported="false" />
+        <activity android:name=".modules.prosumer.UpdateReservationActivity" android:exported="false" />
+        <activity android:name=".modules.prosumer.BookingSummaryActivity" android:exported="false" />
 
         <!-- Map & Reservations -->
         <activity android:name=".modules.map.StationMapActivity" android:exported="false" />

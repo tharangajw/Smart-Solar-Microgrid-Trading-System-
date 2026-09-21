@@ -68,13 +68,8 @@ class BookingAdapter(
         holder.textStatus.background.mutate().setTint(Color.parseColor(bgColor))
         holder.textStatus.setTextColor(Color.parseColor(textColor))
 
-        // Show cancel only for pending/approved in the upcoming tab
-        val canCancel = showCancel &&
-                (booking.status.equals("Pending", ignoreCase = true) ||
-                 booking.status.equals("Approved", ignoreCase = true))
-
-        holder.buttonCancel.visibility = if (canCancel) View.VISIBLE else View.GONE
-        holder.buttonCancel.setOnClickListener { onCancel(booking) }
+        holder.buttonCancel.visibility = View.GONE
+        holder.itemView.setOnClickListener { onCancel(booking) }
     }
 
     override fun getItemCount() = bookings.size
