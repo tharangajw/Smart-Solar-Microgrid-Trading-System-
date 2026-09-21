@@ -45,6 +45,8 @@
 
         <!-- Prosumer -->
         <activity android:name=".modules.prosumer.ProsumerDashboardActivity" android:exported="false" />
+        <activity android:name=".modules.prosumer.ReserveSlotActivity" android:exported="false" />
+        <activity android:name=".modules.prosumer.MyBookingsActivity" android:exported="false" />
 
         <!-- Map & Reservations -->
         <activity android:name=".modules.map.StationMapActivity" android:exported="false" />

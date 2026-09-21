@@ -24,13 +24,17 @@ import com.smartsolar.R
 import com.smartsolar.data.remote.ApiClient
 import org.json.JSONArray
 
-class StationMapActivity : AppCompatActivity(), OnMapReadyCallback {
+import com.smartsolar.modules.common.BaseNavActivity
+
+class StationMapActivity : BaseNavActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
 
+    override fun getLayoutResourceId() = R.layout.activity_map
+    override fun getMenuItemId() = R.id.nav_map
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_map)
 
         // Initialise the Google Map fragment
         val mapFragment = supportFragmentManager

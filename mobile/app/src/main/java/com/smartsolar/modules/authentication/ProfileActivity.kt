@@ -16,16 +16,20 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.smartsolar.modules.common.BaseNavActivity
 import com.smartsolar.R
 import com.smartsolar.data.local.UserDao
 import com.smartsolar.data.remote.ApiClient
 import com.smartsolar.models.User
 import org.json.JSONObject
 
-class ProfileActivity : AppCompatActivity() {
+class ProfileActivity : BaseNavActivity() {
+
+    override fun getLayoutResourceId() = R.layout.activity_profile
+    override fun getMenuItemId() = R.id.nav_profile
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_profile)
 
         // Allow network on main thread for simplicity (assignment scope)
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()

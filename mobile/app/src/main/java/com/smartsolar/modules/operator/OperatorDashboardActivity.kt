@@ -12,16 +12,20 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.smartsolar.modules.common.BaseNavActivity
 import com.smartsolar.R
 import com.smartsolar.data.remote.ApiClient
 import com.smartsolar.modules.qr.QRScannerActivity
 import com.smartsolar.utils.SessionManager
 import org.json.JSONObject
 
-class OperatorDashboardActivity : AppCompatActivity() {
+class OperatorDashboardActivity : BaseNavActivity() {
+
+    override fun getLayoutResourceId() = R.layout.activity_operator_dashboard
+    override fun getMenuItemId() = R.id.nav_home
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_operator_dashboard)
 
         val buttonScanQr = findViewById<View>(R.id.buttonScanQr)
         val buttonViewMap = findViewById<View>(R.id.buttonViewMap)

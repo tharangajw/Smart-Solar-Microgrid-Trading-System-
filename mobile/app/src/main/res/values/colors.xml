@@ -3,43 +3,61 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <!-- Purple Modern Palette -->
-    <color name="colorPrimary">#6C63FF</color>
-    <color name="colorPrimaryDark">#4B44B5</color>
-    <color name="colorAccent">#FFD600</color>
+    <!-- ── Web Palette (exact match) ──────────────────────── -->
+    <!-- Forest greens -->
+    <color name="colorPrimary">#1B4332</color>       <!-- forest -->
+    <color name="colorPrimaryLight">#2D6A4F</color>   <!-- forest-light -->
+    <color name="colorPrimaryDark">#142e24</color>    <!-- forest-dark -->
+
+    <!-- Solar / Gold accent -->
+    <color name="colorAccent">#D4A843</color>         <!-- solar -->
+    <color name="colorAccentSoft">#E8C96A</color>     <!-- solar-soft -->
+
+    <!-- Sage & Leaf -->
+    <color name="colorSage">#52796F</color>           <!-- sage -->
+    <color name="colorLeaf">#A7C4A0</color>           <!-- leaf -->
 
     <!-- Backgrounds -->
-    <color name="backgroundColor">#F8F9FE</color>
-    <color name="backgroundCard">#FFFFFF</color>
-    <color name="backgroundCardBorder">#F0F0F0</color>
+    <color name="backgroundColor">#FFFBF0</color>     <!-- ivory -->
+    <color name="backgroundCard">#F5F0E8</color>      <!-- cream -->
+    <color name="backgroundCardBorder">#E8E0D0</color>
 
     <!-- Text -->
-    <color name="textColorPrimary">#2D3436</color>
-    <color name="textColorSecondary">#636E72</color>
-    <color name="textColorHint">#B2BEC3</color>
+    <color name="textColorPrimary">#2D2D2D</color>    <!-- charcoal -->
+    <color name="textColorSecondary">#5C5C5C</color>  <!-- charcoal-light -->
+    <color name="textColorHint">#A0A0A0</color>
 
-    <!-- Indicators -->
-    <color name="indicatorActive">#6C63FF</color>
-    <color name="indicatorInactive">#D1D1D1</color>
-
-    <!-- Accents -->
-    <color name="accentPurple">#6C63FF</color>
-    <color name="accentYellow">#FFD600</color>
-    <color name="accentGreen">#00B894</color>
-    <color name="dangerRed">#FF7675</color>
-
-    <!-- Inputs -->
-    <color name="inputBackground">#F8F9FE</color>
-    <color name="inputBorder">#E0E0E0</color>
-    <color name="inputFocusBorder">#6C63FF</color>
+    <!-- Status badge colors (matching web StatusBadge.jsx) -->
+    <color name="statusPending">#92400E</color>        <!-- yellow-800 text -->
+    <color name="statusPendingBg">#FEF3C7</color>      <!-- yellow-100 -->
+    <color name="statusApproved">#1E40AF</color>       <!-- blue-800 text -->
+    <color name="statusApprovedBg">#DBEAFE</color>     <!-- blue-100 -->
+    <color name="statusCompleted">#166534</color>      <!-- green-800 text -->
+    <color name="statusCompletedBg">#DCFCE7</color>    <!-- green-100 -->
+    <color name="statusCancelled">#991B1B</color>      <!-- red-800 text -->
+    <color name="statusCancelledBg">#FEE2E2</color>    <!-- red-100 -->
+    <color name="dangerRed">#DC2626</color>            <!-- red-600 -->
 
     <!-- UI Helpers -->
-    <color name="colorLink">#6C63FF</color>
-    <color name="buttonDisabled">#E0E0E0</color>
-    <color name="dividerColor">#F0F0F0</color>
+    <color name="indicatorActive">#1B4332</color>     <!-- forest -->
+    <color name="indicatorInactive">#D1D1D1</color>
+    <color name="accentPurple">#1B4332</color>        <!-- maps old purple refs → forest -->
+    <color name="accentYellow">#D4A843</color>        <!-- solar -->
+    <color name="accentGreen">#2D6A4F</color>         <!-- forest-light -->
+    <color name="colorLink">#1B4332</color>
 
-    <!-- Onboarding (Dark Bottom) -->
-    <color name="onboardingBackground">#0F192E</color>
-    <color name="onboardingTextPrimary">#FFFFFF</color>
-    <color name="onboardingTextSecondary">#B2BEC3</color>
+    <!-- Inputs -->
+    <color name="inputBackground">#FFFBF0</color>     <!-- ivory -->
+    <color name="inputBorder">#D4A843</color>         <!-- solar -->
+    <color name="inputFocusBorder">#1B4332</color>    <!-- forest -->
+
+    <!-- Misc -->
+    <color name="buttonDisabled">#E0E0E0</color>
+    <color name="dividerColor">#E8E0D0</color>
+    <color name="colorLink2">#2D6A4F</color>
+
+    <!-- Onboarding (web colors) -->
+    <color name="onboardingBackground">#FFFBF0</color>
+    <color name="onboardingTextPrimary">#1B4332</color>
+    <color name="onboardingTextSecondary">#5C5C5C</color>
 </resources>

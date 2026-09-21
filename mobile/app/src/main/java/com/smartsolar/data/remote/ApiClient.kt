@@ -13,7 +13,7 @@ data class ApiResult(val isSuccess: Boolean, val body: String?, val message: Str
 
 object ApiClient {
 
-    private const val BASE_URL = "http://192.168.1.25:5281/api"
+    private const val BASE_URL = "http://10.0.2.2:5281/api" // 10.0.2.2 = host machine localhost from emulator
 
     fun get(context: Context, endpoint: String): String? {
         return try {

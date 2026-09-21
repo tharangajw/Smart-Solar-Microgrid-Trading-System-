@@ -1,78 +1,172 @@
 package com.smartsolar.modules.prosumer
 
-/*
- * ProsumerDashboardActivity.kt
- * Main dashboard for Solar Prosumers.
- * Shows energy stats, active/pending counts, and navigation to Map, Booking, and History.
- * Author: Member 4 – Operator Product
- */
-
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
-import android.os.StrictMode
 import android.view.View
+import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.smartsolar.R
-import com.smartsolar.modules.authentication.ProfileActivity
-// Imports for reservations and history removed
-import com.smartsolar.modules.map.StationMapActivity
+import com.smartsolar.data.remote.ApiClient
+import com.smartsolar.modules.common.BaseNavActivity
 import com.smartsolar.utils.SessionManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 
-class ProsumerDashboardActivity : AppCompatActivity() {
+class ProsumerDashboardActivity : BaseNavActivity() {
 
-    private lateinit var prosumerRepository: ProsumerRepository
+    override fun getLayoutResourceId() = R.layout.activity_prosumer_dashboard
+    override fun getMenuItemId() = R.id.nav_home
+
+    private lateinit var textPendingCount: TextView
+    private lateinit var textUpcomingCount: TextView
+    private lateinit var cardNextBooking: View
+    private lateinit var layoutEmptyNextBooking: View
+    private lateinit var progressBar: ProgressBar
+
+    private lateinit var textNextDate: TextView
+    private lateinit var textNextNode: TextView
+    private lateinit var textNextStatus: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_prosumer_dashboard)
 
-        // Native Android Policy for main-thread network (Assignment scope convenience)
-        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
-
-        prosumerRepository = ProsumerRepository(this)
-
-        val textViewName = findViewById<TextView>(R.id.textViewName)
-        val textEnergySold = findViewById<TextView>(R.id.textViewEnergySoldValue)
-        val textEarnings = findViewById<TextView>(R.id.textViewEarningsValue)
-        val textBookingCounts = findViewById<TextView>(R.id.textViewBookingCounts)
-
-        // Load identity from SessionManager (Persistent store)
         val session = SessionManager(this)
-        textViewName.text = "${session.getName() ?: "Prosumer"}!"
 
-        // Fetch dashboard stats from central API
-        val stats = prosumerRepository.getDashboardStats()
-        textEnergySold.text = "${stats["energySold"] ?: "0"} kWh"
-        textEarnings.text = "LKR ${stats["earnings"] ?: "0"}"
-        
-        val pending = stats["pendingBookings"] ?: "0"
-        val approved = stats["approvedFutureCount"] ?: "0"
-        textBookingCounts.text = "$pending / $approved"
+        // Setup Header
+        val name = session.getName() ?: session.getNic() ?: "Prosumer"
+        findViewById<TextView>(R.id.textWelcomeName).text = "Hello, $name!"
+        findViewById<TextView>(R.id.textNic).text = "NIC: ${session.getNic()}"
 
-        // Navigation actions
-        findViewById<View>(R.id.buttonProfile).setOnClickListener {
-            startActivity(Intent(this, ProfileActivity::class.java))
+        // Bind Views
+        textPendingCount = findViewById(R.id.textPendingCount)
+        textUpcomingCount = findViewById(R.id.textUpcomingCount)
+        cardNextBooking = findViewById(R.id.cardNextBooking)
+        layoutEmptyNextBooking = findViewById(R.id.layoutEmptyNextBooking)
+        progressBar = findViewById(R.id.progressDashboard)
+
+        textNextDate = findViewById(R.id.textNextDate)
+        textNextNode = findViewById(R.id.textNextNode)
+        textNextStatus = findViewById(R.id.textNextStatus)
+
+        // View All click handler
+        findViewById<View>(R.id.textViewAllBookings).setOnClickListener {
+            startActivity(Intent(this, MyBookingsActivity::class.java))
+            overridePendingTransition(0, 0)
         }
 
-        findViewById<View>(R.id.buttonMap).setOnClickListener {
-            startActivity(Intent(this, StationMapActivity::class.java))
-        }
+        // Fetch data
+        loadDashboardData(session.getNic() ?: "")
+    }
 
-        // Reservations and History navigation removed per user request
+    private fun loadDashboardData(nic: String) {
+        progressBar.visibility = View.VISIBLE
+        cardNextBooking.visibility = View.GONE
+        layoutEmptyNextBooking.visibility = View.GONE
 
-        findViewById<View>(R.id.buttonLogout).setOnClickListener {
-            logout()
+        lifecycleScope.launch(Dispatchers.IO) {
+            val response = ApiClient.get(this@ProsumerDashboardActivity, "Reservations/pending?nic=$nic")
+
+            withContext(Dispatchers.Main) {
+                progressBar.visibility = View.GONE
+
+                if (response != null) {
+                    try {
+                        val array = if (response.trim().startsWith("[")) {
+                            JSONArray(response)
+                        } else {
+                            val obj = JSONObject(response)
+                            when {
+                                obj.has("data") -> obj.getJSONArray("data")
+                                obj.has("value") -> obj.getJSONArray("value")
+                                else -> JSONArray()
+                            }
+                        }
+
+                        var pendingCount = 0
+                        var approvedCount = 0
+                        var nextBooking: JSONObject? = null
+
+                        for (i in 0 until array.length()) {
+                            val item = array.getJSONObject(i)
+                            val status = item.optString("status", "Pending")
+
+                            if (status.equals("Pending", ignoreCase = true)) {
+                                pendingCount++
+                            } else if (status.equals("Approved", ignoreCase = true)) {
+                                approvedCount++
+                            }
+
+                            // Keep the first item as the "Next" booking (assuming API sorts by date)
+                            if (nextBooking == null) {
+                                nextBooking = item
+                            }
+                        }
+
+                        // Update Counts
+                        textPendingCount.text = pendingCount.toString()
+                        textUpcomingCount.text = approvedCount.toString()
+
+                        // Update Next Booking Card
+                        if (nextBooking != null) {
+                            val isoDate = nextBooking.optString("reservationDate", "–")
+                            val nodeId = nextBooking.optString("nodeId", "Unknown Node")
+                            val status = nextBooking.optString("status", "Pending")
+
+                            textNextDate.text = formatDate(isoDate)
+                            textNextNode.text = "Node: $nodeId"
+                            textNextStatus.text = status
+
+                            // Apply web colors to status badge
+                            val (bgColor, textColor) = when (status.lowercase()) {
+                                "pending"   -> "#FEF3C7" to "#92400E"
+                                "approved"  -> "#DBEAFE" to "#1E40AF"
+                                "completed" -> "#DCFCE7" to "#166534"
+                                "cancelled" -> "#FEE2E2" to "#991B1B"
+                                else        -> "#F5F0E8" to "#5C5C5C"
+                            }
+                            textNextStatus.background.mutate().setTint(Color.parseColor(bgColor))
+                            textNextStatus.setTextColor(Color.parseColor(textColor))
+
+                            cardNextBooking.visibility = View.VISIBLE
+                            layoutEmptyNextBooking.visibility = View.GONE
+                        } else {
+                            cardNextBooking.visibility = View.GONE
+                            layoutEmptyNextBooking.visibility = View.VISIBLE
+                        }
+
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        textPendingCount.text = "-"
+                        textUpcomingCount.text = "-"
+                        layoutEmptyNextBooking.visibility = View.VISIBLE
+                    }
+                } else {
+                    textPendingCount.text = "-"
+                    textUpcomingCount.text = "-"
+                    layoutEmptyNextBooking.visibility = View.VISIBLE
+                }
+            }
         }
     }
 
-    /** Clear session and return to Login */
-    private fun logout() {
-        SessionManager(this).logout()
-        val intent = Intent(this, com.smartsolar.modules.authentication.LoginActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finish()
+    private fun formatDate(isoDate: String): String {
+        return try {
+            val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
+            parser.timeZone = TimeZone.getTimeZone("UTC")
+            // Example format: Sep 24, 2026 - 10:00 AM
+            val displayFmt = SimpleDateFormat("MMM dd, yyyy - hh:mm a", Locale.getDefault())
+            val date = parser.parse(isoDate)
+            if (date != null) displayFmt.format(date) else isoDate
+        } catch (_: Exception) {
+            isoDate.take(10)
+        }
     }
 }
