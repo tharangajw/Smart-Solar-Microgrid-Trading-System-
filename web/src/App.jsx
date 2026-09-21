@@ -1,5 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import MicrogridNodesPage from './Modules/Microgrid/MicrogridNodesPage';
+import EnergySlotsPage from './Modules/EnergySlots/EnergySlotsPage';
+import MapPage from './Modules/Map/MapPage';
 import './App.css';
 
 import HomePage from './Modules/Home/HomePage';
@@ -51,6 +54,9 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/reservations" element={<ReservationsPage />} />
         <Route path="/reservations/:id" element={<ReservationDetailPage />} />
+        <Route path="/microgrid" element={<MicrogridNodesPage />} />
+        <Route path="/map" element={<MapPage />} />
+        <Route path="/slots" element={<EnergySlotsPage />} />
       </Routes>
     </BrowserRouter>
   );

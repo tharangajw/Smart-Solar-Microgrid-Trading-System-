@@ -151,4 +151,5 @@ using (var scope = app.Services.CreateScope())
     await seeder.SeedAsync();
 }
 
+// Launch application server
 app.Run();
