@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import DashboardHeader from './components/DashboardHeader';
 import SummaryCard from './components/SummaryCard';
+import EnergyAnalyticsChart from '../../Components/EnergyAnalyticsChart';
 import { Users, UserPlus, ShieldCheck, BatteryCharging, CalendarCheck, Zap } from 'lucide-react';
 import { getAllUsers, getPendingActivations } from '../../Services/backofficeApi';
 import backofficeApi from '../../Services/backofficeApi';
@@ -172,14 +173,12 @@ const DashboardPage = () => {
               <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-forest/5">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="font-display text-lg font-semibold text-forest">Energy Slot Overview</h2>
-                  <button className="text-sm font-medium text-sage hover:text-forest transition-colors">
+                  <Link to="/slots" className="text-sm font-medium text-sage hover:text-forest transition-colors">
                     Manage
-                  </button>
+                  </Link>
                 </div>
                 
-                <div className="h-48 flex items-center justify-center bg-ivory/50 rounded-xl border border-dashed border-forest/20 text-charcoal-light text-sm">
-                  [Energy Availability Chart Placeholder]
-                </div>
+                <EnergyAnalyticsChart />
               </section>
 
             </div>

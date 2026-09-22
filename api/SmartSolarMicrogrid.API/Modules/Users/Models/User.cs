@@ -1,5 +1,10 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+/*
+ * File: User.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 using System.Text.Json.Serialization;
 
 namespace SmartSolarMicrogrid.API.Modules.Users.Models

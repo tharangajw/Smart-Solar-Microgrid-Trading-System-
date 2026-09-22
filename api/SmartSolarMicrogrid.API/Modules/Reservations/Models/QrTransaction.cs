@@ -1,9 +1,14 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+/*
+ * File: QrTransaction.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 
 namespace SmartSolarMicrogrid.API.Modules.Reservations.Models
 {
-    public class EnergyReservation
+    public class QrTransaction
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]

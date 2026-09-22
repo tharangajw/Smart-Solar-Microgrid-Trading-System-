@@ -32,6 +32,7 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Controllers
         /// total/pending/approved/completed reservation counts, active stations, future approved count.
         /// </summary>
         [HttpGet("dashboard")]
+// Handles the GetDashboard operation.
         public async Task<IActionResult> GetDashboard()
         {
             // Delegate to service for statistics aggregation
@@ -45,6 +46,7 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Controllers
         /// Used by the operator Booking Monitoring page for live data.
         /// </summary>
         [HttpGet("reservations")]
+// Handles the GetReservations operation.
         public async Task<IActionResult> GetReservations([FromQuery] string? status)
         {
             // Fetch live reservations from the service layer
@@ -54,11 +56,12 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Controllers
 
         /// <summary>
         /// POST /api/operator/approve/{reservationId}
-        /// Approves a Pending reservation and generates a QR code (EnergyReservation).
+        /// Approves a Pending reservation and generates a QR code (QrTransaction).
         /// Returns the unique QrCodeId to be displayed to the prosumer.
         /// Body: none required – reservationId is in the route.
         /// </summary>
         [HttpPost("approve/{reservationId}")]
+// Handles the ApproveReservation operation.
         public async Task<IActionResult> ApproveReservation(string reservationId)
         {
             try
@@ -84,10 +87,11 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Controllers
         /// <summary>
         /// POST /api/operator/scan-qr
         /// Verifies a scanned QR code and finalises the energy transfer transaction.
-        /// The operator scans the prosumer's QR code; this marks the EnergyReservation as Done.
+        /// The operator scans the prosumer's QR code; this marks the QrTransaction as Done.
         /// Body: { "qrCodeId": "uuid-string" }
         /// </summary>
         [HttpPost("scan-qr")]
+// Handles the ScanQrCode operation.
         public async Task<IActionResult> ScanQrCode([FromBody] ScanQrRequest request)
         {
             try

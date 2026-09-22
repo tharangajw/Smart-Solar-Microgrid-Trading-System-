@@ -5,7 +5,7 @@
  * Responsibilities:
  *   – Dashboard statistics aggregation across Reservations and SolarStations collections
  *   – Listing reservations with optional status filter for operator monitoring
- *   – Approving a Reservation and generating a unique QR Code (EnergyReservation record)
+ *   – Approving a Reservation and generating a unique QR Code (QrTransaction record)
  *   – Verifying a scanned QR code and finalising the energy transfer (marking as Done)
  * Author: Member 4 – Operator Product
  */
@@ -19,7 +19,7 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Services
     public class OperatorTransactionService
     {
         private readonly IMongoCollection<Reservation> _reservations;
-        private readonly IMongoCollection<EnergyReservation> _energyReservations;
+        private readonly IMongoCollection<QrTransaction> _qrTransactions;
         private readonly MongoDbContext _context;
 
         // Constructor – inject MongoDbContext and obtain typed collections
@@ -27,7 +27,7 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Services
         {
             _context = context;
             _reservations = context.Reservations;
-            _energyReservations = context.EnergyReservations;
+            _qrTransactions = context.QrTransactions;
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Services
         /// Approves a pending reservation and generates a secure QR code transaction record.
         /// Business rules:
         ///   – Reservation must exist and be in Pending status
-        ///   – Creates an EnergyReservation with a UUID as the QrCodeId
+        ///   – Creates an QrTransaction with a UUID as the QrCodeId
         ///   – Updates the source Reservation status to Approved
         /// Returns the generated QrCodeId for display/sharing with the prosumer.
         /// </summary>
@@ -108,8 +108,8 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Services
             // Generate a unique QR code identifier (UUID)
             var qrCodeId = Guid.NewGuid().ToString();
 
-            // Create the EnergyReservation document that carries the QR code
-            var energyReservation = new EnergyReservation
+            // Create the QrTransaction document that carries the QR code
+            var qrTransaction = new QrTransaction
             {
                 ProsumerId = reservation.ProsumerNic,
                 NodeId = reservation.NodeId,
@@ -121,8 +121,8 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Services
                 CreatedAt = DateTime.UtcNow
             };
 
-            // Persist the EnergyReservation record
-            await _energyReservations.InsertOneAsync(energyReservation);
+            // Persist the QrTransaction record
+            await _qrTransactions.InsertOneAsync(qrTransaction);
 
             // Update the source Reservation status to Approved
             var update = Builders<Reservation>.Update
@@ -137,38 +137,38 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Services
         /// <summary>
         /// Verifies a scanned QR code and finalises the energy transfer transaction.
         /// Business rules:
-        ///   – EnergyReservation with the given QrCodeId must exist
+        ///   – QrTransaction with the given QrCodeId must exist
         ///   – Status must be Approved (not already Done or Cancelled)
-        ///   – Sets EnergyReservation status to Done
+        ///   – Sets QrTransaction status to Done
         ///   – Sets corresponding Reservation status to Completed
         /// </summary>
         /// <param name="qrCodeId">The UUID QR code scanned by the operator</param>
         public async Task<bool> VerifyAndFinalizeTransactionAsync(string qrCodeId)
         {
-            // Find the EnergyReservation matching the scanned QR code
-            var energyReservation = await _energyReservations
+            // Find the QrTransaction matching the scanned QR code
+            var qrTransaction = await _qrTransactions
                 .Find(r => r.QrCodeId == qrCodeId)
                 .FirstOrDefaultAsync();
 
-            if (energyReservation == null)
+            if (qrTransaction == null)
                 throw new KeyNotFoundException("Invalid QR Code. No matching reservation found.");
 
-            if (energyReservation.Status != "Approved")
+            if (qrTransaction.Status != "Approved")
                 throw new InvalidOperationException(
-                    $"Cannot finalise reservation. Status must be Approved, current: {energyReservation.Status}");
+                    $"Cannot finalise reservation. Status must be Approved, current: {qrTransaction.Status}");
 
-            // Mark EnergyReservation as Done
-            var energyUpdate = Builders<EnergyReservation>.Update
+            // Mark QrTransaction as Done
+            var energyUpdate = Builders<QrTransaction>.Update
                 .Set(r => r.Status, "Done");
-            var result = await _energyReservations
-                .UpdateOneAsync(r => r.Id == energyReservation.Id, energyUpdate);
+            var result = await _qrTransactions
+                .UpdateOneAsync(r => r.Id == qrTransaction.Id, energyUpdate);
 
             // Also update the parent Reservation to Completed for consistency
             var reservationUpdate = Builders<Reservation>.Update
                 .Set(r => r.Status, "Completed")
                 .Set(r => r.UpdatedAt, DateTime.UtcNow);
             await _reservations.UpdateOneAsync(
-                r => r.Id == energyReservation.SourceReservationId,
+                r => r.Id == qrTransaction.SourceReservationId,
                 reservationUpdate);
 
             return result.ModifiedCount > 0;

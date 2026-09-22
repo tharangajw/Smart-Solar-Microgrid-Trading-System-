@@ -1,6 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication;
 using SmartSolarMicrogrid.API.Modules.Authentication.Models;
+/*
+ * File: AuthController.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 using SmartSolarMicrogrid.API.Modules.Users.Services;
 
 namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
@@ -12,6 +17,7 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
     {
         private readonly IUserService _userService;
 
+// Initializes the AuthController instance.
         public AuthController(IUserService userService)
         {
             _userService = userService;
@@ -19,6 +25,7 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
 
 //  User login endpoint
         [HttpPost("login")]
+// Handles the Login operation.
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (!ModelState.IsValid)
@@ -38,6 +45,7 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
 
 // Prosumer registration endpoint
         [HttpPost("register")]
+// Handles the Register operation.
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             if (!ModelState.IsValid)
