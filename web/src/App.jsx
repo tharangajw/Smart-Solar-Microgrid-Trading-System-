@@ -1,16 +1,9 @@
 import React from 'react';
-<<<<<<< HEAD
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import MicrogridNodesPage from './Modules/Microgrid/MicrogridNodesPage';
-import EnergySlotsPage from './Modules/EnergySlots/EnergySlotsPage';
-import MapPage from './Modules/Map/MapPage';
-=======
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomePage from './Modules/Home/HomePage';
 import DashboardPage from './Modules/Dashboard/DashboardPage';
 import Login from './Modules/Authentication/Login';
 import Register from './Modules/Authentication/Register';
->>>>>>> 860e13e70d6836791b86a175b30a7eb2d83b60ec
 import './App.css';
 
 import HomePage from './Modules/Home/HomePage';
