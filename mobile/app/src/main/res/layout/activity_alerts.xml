@@ -10,7 +10,10 @@
         android:id="@+id/recyclerAlerts"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="90dp"
+        android:paddingBottom="24dp"
         android:clipToPadding="false" />
 
     <LinearLayout
@@ -20,6 +23,7 @@
         android:gravity="center"
         android:orientation="vertical"
         android:padding="32dp"
+        android:paddingTop="90dp"
         android:visibility="gone">
 
         <TextView

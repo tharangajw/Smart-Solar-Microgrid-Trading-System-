@@ -15,13 +15,13 @@ namespace SmartSolarMicrogrid.API.Modules.Dashboard.Services
 {
     public class OperatorDashboardService
     {
-        private readonly IMongoCollection<EnergyReservation> _reservations;
+        private readonly IMongoCollection<QrTransaction> _reservations;
         private readonly IMongoCollection<SolarStation> _stations;
 
         // Constructor - inject MongoDB context and get required collections
         public OperatorDashboardService(MongoDbContext context)
         {
-            _reservations = context.Database.GetCollection<EnergyReservation>("EnergyReservations");
+            _reservations = context.Database.GetCollection<QrTransaction>("QrTransactions");
             _stations = context.Database.GetCollection<SolarStation>("SolarStations");
         }
 
@@ -69,24 +69,24 @@ namespace SmartSolarMicrogrid.API.Modules.Dashboard.Services
         /// Returns all reservations with optional filtering by status and search term.
         /// Search matches on prosumer ID or node ID (case-insensitive).
         /// </summary>
-        public async Task<List<EnergyReservation>> GetAllBookingsAsync(string? status, string? search)
+        public async Task<List<QrTransaction>> GetAllBookingsAsync(string? status, string? search)
         {
             // Start with a filter that matches everything
-            var filter = Builders<EnergyReservation>.Filter.Empty;
+            var filter = Builders<QrTransaction>.Filter.Empty;
 
             // Apply status filter if provided and not "all"
             if (!string.IsNullOrEmpty(status) && status.ToLower() != "all")
             {
-                filter = filter & Builders<EnergyReservation>.Filter.Eq(r => r.Status, status);
+                filter = filter & Builders<QrTransaction>.Filter.Eq(r => r.Status, status);
             }
 
             // Apply text search filter if provided (searches ProsumerId and NodeId)
             if (!string.IsNullOrEmpty(search))
             {
-                var searchFilter = Builders<EnergyReservation>.Filter.Or(
-                    Builders<EnergyReservation>.Filter.Regex(r => r.ProsumerId,
+                var searchFilter = Builders<QrTransaction>.Filter.Or(
+                    Builders<QrTransaction>.Filter.Regex(r => r.ProsumerId,
                         new MongoDB.Bson.BsonRegularExpression(search, "i")),
-                    Builders<EnergyReservation>.Filter.Regex(r => r.NodeId,
+                    Builders<QrTransaction>.Filter.Regex(r => r.NodeId,
                         new MongoDB.Bson.BsonRegularExpression(search, "i"))
                 );
                 filter = filter & searchFilter;

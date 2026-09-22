@@ -47,7 +47,7 @@ class LoginActivity : AppCompatActivity() {
         val headerImage = findViewById<ImageView>(R.id.headerImage)
 
         // Secret Setup: Long-press the header image to change Server IP
-        headerImage.setOnLongClickListener {
+        headerImage?.setOnLongClickListener {
             showServerIpDialog(sessionManager)
             true
         }
@@ -84,11 +84,35 @@ class LoginActivity : AppCompatActivity() {
                     if (result.isSuccess && result.body != null) {
                         try {
                             val json = JSONObject(result.body)
-                            val token = json.getString("token")
-                            val role = json.getString("role")
-                            val name = json.optString("fullName", "User")
+                            val token = json.optString("token", json.optString("accessToken", json.optString("jwtToken", "")))
+
+                            // Robust Role Extraction
+                            var role = json.optString("role", json.optString("Role", json.optString("userRole", "")))
+                            if (role.isEmpty() && json.has("user")) {
+                                val userObj = json.optJSONObject("user")
+                                if (userObj != null) {
+                                    role = userObj.optString("role", userObj.optString("Role", ""))
+                                }
+                            }
+                            if (role.isEmpty() && json.has("roles")) {
+                                val rolesArr = json.optJSONArray("roles")
+                                if (rolesArr != null && rolesArr.length() > 0) {
+                                    role = rolesArr.optString(0, "")
+                                }
+                            }
+                            if (role.isEmpty()) role = "Prosumer"
+
+                            // Robust Name Extraction
+                            var name = json.optString("fullName", json.optString("name", "User"))
+                            if (name == "User" && json.has("user")) {
+                                val userObj = json.optJSONObject("user")
+                                if (userObj != null) {
+                                    name = userObj.optString("fullName", userObj.optString("name", "User"))
+                                }
+                            }
+
                             val nic = json.optString("nic", identifier)
-                            val userId = json.optString("userId", "0")
+                            val userId = json.optString("userId", json.optString("id", "0"))
                             val email = json.optString("email", "")
 
                             // 1. Save to SharedPreferences
@@ -102,7 +126,12 @@ class LoginActivity : AppCompatActivity() {
 
                             try {
                                 // 3. Route based on role
-                                val destination = if (role.equals("GridOperator", ignoreCase = true)) {
+                                val isOperator = role.contains("operator", ignoreCase = true) ||
+                                                 role.contains("grid", ignoreCase = true) ||
+                                                 role.contains("station", ignoreCase = true) ||
+                                                 role.contains("admin", ignoreCase = true)
+
+                                val destination = if (isOperator) {
                                     OperatorDashboardActivity::class.java
                                 } else {
                                     ProsumerDashboardActivity::class.java
@@ -128,7 +157,7 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        textViewRegister.setOnClickListener {
+        textViewRegister?.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
     }

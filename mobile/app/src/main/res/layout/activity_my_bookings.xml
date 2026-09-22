@@ -6,56 +6,17 @@
     android:layout_height="match_parent"
     android:background="@color/backgroundColor"
     android:orientation="vertical"
+    android:paddingTop="80dp"
     tools:context=".modules.prosumer.MyBookingsActivity">
-
-    <!-- Header -->
-    <com.google.android.material.card.MaterialCardView
-        android:layout_width="match_parent"
-        android:layout_height="140dp"
-        android:layout_marginBottom="-20dp"
-        app:cardBackgroundColor="@color/colorPrimary"
-        app:cardCornerRadius="36dp"
-        app:cardElevation="6dp">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="28dp">
-
-            <ImageView
-                android:id="@+id/buttonBack"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/bg_social_circle"
-                android:backgroundTint="#40FFFFFF"
-                android:padding="10dp"
-                android:src="@android:drawable/ic_menu_revert"
-                android:contentDescription="Back"
-                app:tint="@color/white"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="My Bookings"
-                android:textColor="@color/white"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
 
     <!-- Tab Layout -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="52dp"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
         android:background="@color/backgroundColor"
         app:tabGravity="fill"
         app:tabMode="fixed"

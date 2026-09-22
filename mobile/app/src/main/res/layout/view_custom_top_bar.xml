@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="0dp"
     app:cardCornerRadius="0dp"
-    app:cardElevation="0dp"
+    app:cardElevation="4dp"
     app:cardBackgroundColor="@color/colorPrimary"
     android:fitsSystemWindows="true">
 
@@ -15,7 +15,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="16dp"
-        android:paddingBottom="24dp"
+        android:paddingBottom="20dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp">
 
@@ -27,15 +27,15 @@
             android:background="@drawable/bg_social_circle"
             android:backgroundTint="#20FFFFFF"
             android:rotation="180"
-            android:rotationX="0"
             android:src="@drawable/ic_arrow_right"
             android:visibility="visible"
+            android:contentDescription="Back"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:tint="@color/white" />
 
-        <!-- Title / Greeting Container -->
+        <!-- Title / Subtitle Container -->
         <LinearLayout
             android:id="@+id/layoutNavTitle"
             android:layout_width="0dp"
@@ -44,13 +44,14 @@
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/btnNavBack"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <TextView
                 android:id="@+id/textNavSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Welcome back"
+                android:text="Welcome"
                 android:textColor="#D1C4E9"
                 android:textSize="12sp" />
 
@@ -60,15 +61,11 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:text="Prosumer Dashboard"
+                android:text="SolarLink"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold" />
         </LinearLayout>
-
-        <!-- Notification Bell -->
-
-        <!-- Profile Avatar -->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

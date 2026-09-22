@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.smartsolar.R
 import com.smartsolar.data.remote.ApiClient
-import com.smartsolar.modules.prosumer.BookingSummaryActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,7 +33,9 @@ class UpdateReservationActivity : AppCompatActivity() {
         bookingId = intent.getStringExtra("BOOKING_ID")
         nodeId = intent.getStringExtra("NODE_ID")
 
-        findViewById<View>(R.id.buttonBack).setOnClickListener { finish() }
+        findViewById<View>(R.id.btnNavBack)?.setOnClickListener { finish() }
+        findViewById<TextView>(R.id.textNavTitle)?.text = "Update Reservation"
+        findViewById<TextView>(R.id.textNavSubtitle)?.text = "Modify booking details"
 
         if (bookingId == null || nodeId == null) {
             Toast.makeText(this, "Invalid booking data", Toast.LENGTH_SHORT).show()
@@ -68,6 +69,10 @@ class UpdateReservationActivity : AppCompatActivity() {
                 Toast.makeText(this, "Please select a new slot", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
+            if (!check12HourRule(selectedSlot!!.startTime)) {
+                return@setOnClickListener
+            }
             
             val body = JSONObject().apply {
                 put("slotId", selectedSlot!!.id)
@@ -95,6 +100,23 @@ class UpdateReservationActivity : AppCompatActivity() {
         }
 
         fetchSlots()
+    }
+
+    private fun check12HourRule(reservationDateStr: String?): Boolean {
+        if (reservationDateStr.isNullOrEmpty()) return true
+        try {
+            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+            val date = format.parse(reservationDateStr.replace("Z", "").take(19))
+            if (date != null) {
+                val diffMillis = date.time - System.currentTimeMillis()
+                val diffHours = diffMillis / (1000 * 60 * 60)
+                if (diffHours < 12) {
+                    Toast.makeText(this, "Updates and cancellations require at least 12 hours' notice.", Toast.LENGTH_LONG).show()
+                    return false
+                }
+            }
+        } catch (_: Exception) {}
+        return true
     }
 
     private fun fetchSlots() {

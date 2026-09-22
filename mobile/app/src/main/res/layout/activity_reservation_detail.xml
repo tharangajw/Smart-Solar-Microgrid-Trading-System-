@@ -4,38 +4,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F5F5">
+    android:background="@color/backgroundColor">
 
     <!-- Top Bar -->
-    <LinearLayout
+    <include
+        android:id="@+id/customTopBar"
+        layout="@layout/view_custom_top_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="@color/colorPrimary"
-        android:padding="16dp"
-        android:gravity="center_vertical">
-        <ImageView
-            android:id="@+id/buttonBack"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@android:drawable/ic_menu_revert"
-            android:tint="@color/white" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Reservation Details"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginStart="16dp" />
-    </LinearLayout>
+        app:elevation="4dp" />
 
     <ProgressBar
         android:id="@+id/progressDetail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="32dp"/>
+        android:layout_marginTop="32dp" />
 
     <LinearLayout
         android:id="@+id/layoutContent"
@@ -44,70 +28,203 @@
         android:orientation="vertical"
         android:padding="16dp"
         android:visibility="gone">
-        
-        <androidx.cardview.widget.CardView
+
+        <!-- Main Ticket/Details Card -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/white"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/dividerColor">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
-                
-                <TextView android:text="ID" android:textSize="12sp" android:textColor="#888"/>
-                <TextView android:id="@+id/textId" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textStyle="bold" android:layout_marginBottom="8dp"/>
-                
-                <TextView android:text="Node" android:textSize="12sp" android:textColor="#888"/>
-                <TextView android:id="@+id/textNode" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textStyle="bold" android:layout_marginBottom="8dp"/>
-                
-                <TextView android:text="Slot" android:textSize="12sp" android:textColor="#888"/>
-                <TextView android:id="@+id/textSlot" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textStyle="bold" android:layout_marginBottom="8dp"/>
+                android:padding="20dp">
 
-                <TextView android:text="Date &amp; Time" android:textSize="12sp" android:textColor="#888"/>
-                <TextView android:id="@+id/textDate" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textStyle="bold" android:layout_marginBottom="8dp"/>
-                
-                <TextView android:text="Status" android:textSize="12sp" android:textColor="#888"/>
-                <TextView android:id="@+id/textStatus" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textStyle="bold" android:layout_marginBottom="8dp"/>
+                <!-- Header Row: ID + Status Badge -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp">
 
-                <TextView android:text="Created At" android:textSize="12sp" android:textColor="#888"/>
-                <TextView android:id="@+id/textCreated" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textStyle="bold"/>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_alignParentStart="true"
+                        android:layout_toStartOf="@+id/textStatus">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Booking Reference"
+                            android:textColor="@color/textColorSecondary"
+                            android:textSize="11sp"
+                            android:textAllCaps="true"
+                            android:letterSpacing="0.05" />
+
+                        <TextView
+                            android:id="@+id/textId"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/colorPrimary" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/textStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/bg_status_badge"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:text="Approved" />
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/textFullId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/textColorHint"
+                    android:textSize="11sp"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/dividerColor"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Grid Station Node -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Grid Station Node"
+                    android:textColor="@color/textColorSecondary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/textNode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="15sp"
+                    android:textColor="@color/textColorPrimary"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Slot -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Time Slot"
+                    android:textColor="@color/textColorSecondary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/textSlot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="15sp"
+                    android:textColor="@color/textColorPrimary"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Scheduled Date -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Scheduled Date"
+                    android:textColor="@color/textColorSecondary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/textDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="15sp"
+                    android:textColor="@color/textColorPrimary"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Created At -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Booking Created On"
+                    android:textColor="@color/textColorSecondary"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/textCreated"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@color/textColorPrimary"
+                    android:textStyle="bold" />
+
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <Button
+        <!-- View QR Code Action Button -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonViewQR"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="View Transaction QR Code"
-            android:textStyle="bold"
-            android:backgroundTint="@color/accentGreen"
-            android:textColor="@color/white"
+            android:layout_height="54dp"
             android:layout_marginBottom="16dp"
+            android:text="View Transaction QR Code"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:textStyle="bold"
             android:visibility="gone"
-            app:icon="@android:drawable/ic_menu_camera"/>
+            app:backgroundTint="@color/accentGreen"
+            app:cornerRadius="12dp"
+            app:icon="@android:drawable/ic_menu_camera" />
 
+        <!-- Edit & Cancel Action Buttons -->
         <LinearLayout
             android:id="@+id/layoutActions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-            <Button
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonEdit"
                 android:layout_width="0dp"
+                android:layout_height="54dp"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                android:layout_height="wrap_content"
                 android:text="Edit"
-                android:layout_marginEnd="8dp"/>
-            <Button
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/colorPrimary"
+                app:cornerRadius="12dp" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonCancel"
                 android:layout_width="0dp"
+                android:layout_height="54dp"
+                android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                android:layout_height="wrap_content"
                 android:text="Cancel"
-                android:backgroundTint="#F44336"
                 android:textColor="@color/white"
-                android:layout_marginStart="8dp"/>
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:backgroundTint="#F44336"
+                app:cornerRadius="12dp" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

@@ -134,13 +134,17 @@ class StationMapActivity : BaseNavActivity(), OnMapReadyCallback {
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(cameraTarget, 10f))
 
                         // Show station details card on marker click
-                        mMap.setOnMarkerClickListener { marker ->
-                            val cardView = findViewById<View>(R.id.cardStationDetails)
-                            val textName = findViewById<TextView>(R.id.textViewStationName)
-                            val textLocation = findViewById<TextView>(R.id.textViewStationLocation)
-                            val textCapacity = findViewById<TextView>(R.id.textViewStationCapacity)
-                            val textSlots = findViewById<TextView>(R.id.textViewAvailableSlots)
+                        val cardView = findViewById<View>(R.id.cardStationDetails)
+                        val textName = findViewById<TextView>(R.id.textViewStationName)
+                        val textLocation = findViewById<TextView>(R.id.textViewStationLocation)
+                        val textCapacity = findViewById<TextView>(R.id.textViewStationCapacity)
+                        val textSlots = findViewById<TextView>(R.id.textViewAvailableSlots)
+                        val buttonBookSlot = findViewById<android.widget.Button>(R.id.buttonBookSlot)
 
+                        var selectedStationTag: String? = null
+
+                        mMap.setOnMarkerClickListener { marker ->
+                            selectedStationTag = marker.tag as? String
                             textName.text = marker.title
                             val snippetParts = marker.snippet?.split("|") ?: listOf()
                             textLocation.text = snippetParts.getOrElse(0) { "Location: N/A" }.trim()
@@ -148,6 +152,16 @@ class StationMapActivity : BaseNavActivity(), OnMapReadyCallback {
                             textSlots.text = snippetParts.getOrElse(2) { "Slots: N/A" }.trim()
                             cardView.visibility = View.VISIBLE
                             false
+                        }
+
+                        buttonBookSlot.setOnClickListener {
+                            if (selectedStationTag != null) {
+                                val intent = android.content.Intent(this, com.smartsolar.modules.prosumer.ReserveSlotActivity::class.java)
+                                intent.putExtra("STATION_ID", selectedStationTag)
+                                startActivity(intent)
+                            } else {
+                                Toast.makeText(this, "Please select a station first", Toast.LENGTH_SHORT).show()
+                            }
                         }
 
                     } catch (e: Exception) {

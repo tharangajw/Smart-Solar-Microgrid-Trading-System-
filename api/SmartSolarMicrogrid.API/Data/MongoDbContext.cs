@@ -40,8 +40,8 @@ public class MongoDbContext
         _database.GetCollection<Reservation>("EnergyReservation");
 
     /// <summary>Approved energy reservations that carry a QR code for operator scanning.</summary>
-    public IMongoCollection<EnergyReservation> EnergyReservations =>
-        _database.GetCollection<EnergyReservation>("EnergyReservations");
+    public IMongoCollection<QrTransaction> QrTransactions =>
+        _database.GetCollection<QrTransaction>("QrTransactions");
 
     /// <summary>Solar microgrid station/node records with GPS locations.</summary>
     public IMongoCollection<SolarStation> SolarStations =>

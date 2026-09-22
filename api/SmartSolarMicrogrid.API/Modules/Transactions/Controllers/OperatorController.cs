@@ -54,7 +54,7 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Controllers
 
         /// <summary>
         /// POST /api/operator/approve/{reservationId}
-        /// Approves a Pending reservation and generates a QR code (EnergyReservation).
+        /// Approves a Pending reservation and generates a QR code (QrTransaction).
         /// Returns the unique QrCodeId to be displayed to the prosumer.
         /// Body: none required – reservationId is in the route.
         /// </summary>
@@ -84,7 +84,7 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Controllers
         /// <summary>
         /// POST /api/operator/scan-qr
         /// Verifies a scanned QR code and finalises the energy transfer transaction.
-        /// The operator scans the prosumer's QR code; this marks the EnergyReservation as Done.
+        /// The operator scans the prosumer's QR code; this marks the QrTransaction as Done.
         /// Body: { "qrCodeId": "uuid-string" }
         /// </summary>
         [HttpPost("scan-qr")]

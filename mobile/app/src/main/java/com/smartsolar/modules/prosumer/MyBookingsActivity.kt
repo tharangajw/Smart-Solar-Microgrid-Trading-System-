@@ -57,7 +57,7 @@ class MyBookingsActivity : BaseNavActivity() {
         recycler.layoutManager = LinearLayoutManager(this)
 
         // Back button
-        findViewById<View>(R.id.buttonBack)?.setOnClickListener { finish() }
+        findViewById<View>(R.id.btnNavBack)?.setOnClickListener { finish() }
 
         // Tabs
         tabLayout.addTab(tabLayout.newTab().setText("📅  Upcoming"))
