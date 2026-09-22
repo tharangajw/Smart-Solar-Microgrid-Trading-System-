@@ -29,6 +29,7 @@ namespace SmartSolarMicrogrid.API.Modules.Dashboard.Controllers
         /// Includes: total bookings, pending count, approved count, available slots, active nodes.
         /// </summary>
         [HttpGet("dashboard")]
+// Handles the GetDashboard operation.
         public async Task<IActionResult> GetDashboard()
         {
             // Fetch all dashboard stats from service layer

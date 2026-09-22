@@ -1,5 +1,10 @@
 ﻿using MongoDB.Driver;
 using SmartSolarMicrogrid.API.Data;
+/*
+ * File: ReservationRepository.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 using SmartSolarMicrogrid.API.Modules.Reservations.Models;
 
 namespace SmartSolarMicrogrid.API.Modules.Reservations.Repositories

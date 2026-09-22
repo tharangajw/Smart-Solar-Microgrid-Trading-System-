@@ -48,6 +48,7 @@ namespace SmartSolarMicrogrid.API.Modules.StationsMap.Controllers
         /// Returns all stations. Used for operator web dashboard map overview.
         /// </summary>
         [HttpGet]
+// Handles the GetAllStations operation.
         public async Task<IActionResult> GetAllStations()
         {
             // Return full list of stations
@@ -61,6 +62,7 @@ namespace SmartSolarMicrogrid.API.Modules.StationsMap.Controllers
         /// Used when a user taps a map marker to see station details.
         /// </summary>
         [HttpGet("{id}")]
+// Handles the GetStationById operation.
         public async Task<IActionResult> GetStationById(string id)
         {
             // Fetch station by MongoDB ObjectId
@@ -79,6 +81,7 @@ namespace SmartSolarMicrogrid.API.Modules.StationsMap.Controllers
         /// </summary>
         [HttpPut("{id}/slots")]
         [Authorize(Roles = "GridOperator")]
+// Handles the UpdateSlots operation.
         public async Task<IActionResult> UpdateSlots(string id, [FromBody] UpdateSlotsRequest request)
         {
             try

@@ -1,5 +1,10 @@
 using BCrypt.Net;
 using Microsoft.IdentityModel.Tokens;
+/*
+ * File: UserService.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 using MongoDB.Bson;
 using MongoDB.Driver;
 using SmartSolarMicrogrid.API.Data;
@@ -18,6 +23,7 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
         private readonly MongoDbContext _context;
         private readonly IConfiguration _configuration;
 
+// Initializes the UserService instance.
         public UserService(MongoDbContext context, IConfiguration configuration)
         {
             _context = context;

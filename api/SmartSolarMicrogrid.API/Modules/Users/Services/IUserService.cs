@@ -1,5 +1,10 @@
 using SmartSolarMicrogrid.API.Modules.Authentication.Models;
 using SmartSolarMicrogrid.API.Modules.Users.Models;
+/*
+ * File: IUserService.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 
 namespace SmartSolarMicrogrid.API.Modules.Users.Services
 {

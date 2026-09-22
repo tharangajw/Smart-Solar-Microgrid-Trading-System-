@@ -1,5 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 
+/*
+ * File: RegisterRequest.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 namespace SmartSolarMicrogrid.API.Modules.Authentication.Models
 {
 // Registration request model for prosumers

@@ -1,5 +1,10 @@
 using BCrypt.Net;
 using MongoDB.Driver;
+/*
+ * File: DatabaseSeeder.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 using SmartSolarMicrogrid.API.Modules.Users.Models;
 using SmartSolarMicrogrid.API.Modules.StationsMap.Models;
 
@@ -10,6 +15,7 @@ namespace SmartSolarMicrogrid.API.Data
     {
         private readonly MongoDbContext _context;
 
+// Initializes the DatabaseSeeder instance.
         public DatabaseSeeder(MongoDbContext context)
         {
             _context = context;

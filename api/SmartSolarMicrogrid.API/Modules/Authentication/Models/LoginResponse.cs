@@ -1,5 +1,10 @@
 namespace SmartSolarMicrogrid.API.Modules.Authentication.Models
 {
+/*
+ * File: LoginResponse.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 // Login response model with JWT token
     public class LoginResponse
     {

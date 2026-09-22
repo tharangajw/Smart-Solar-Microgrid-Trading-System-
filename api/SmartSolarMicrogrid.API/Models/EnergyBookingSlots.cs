@@ -1,5 +1,10 @@
 // ============================================================================
 // Module: Smart Solar Microgrid Trading System - C# Web API
+/*
+ * File: EnergyBookingSlots.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 // File: EnergyBookingSlots.cs
 // Description: Data Model representing an Energy Storage Slot allocated for power
 //              drop-off or charging at a Solar Microgrid Station Node.

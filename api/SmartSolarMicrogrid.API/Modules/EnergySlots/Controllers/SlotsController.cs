@@ -1,5 +1,10 @@
 // ============================================================================
 // Module: Smart Solar Microgrid Trading System - C# Web API
+/*
+ * File: SlotsController.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 // File: SlotsController.cs
 // Description: Manages battery energy booking slots including creation, time overlap
 //              prevention, node totalSlots validation, and status lifecycle state updates.
@@ -35,6 +40,7 @@ namespace SmartSolarMicrogrid.API.Modules.EnergySlots.Controllers
         /// Validates node status, totalSlots range, and time overlap collisions
         /// </summary>
         [HttpPost]
+// Handles the CreateSlot operation.
         public async Task<IActionResult> CreateSlot([FromBody] EnergyBookingSlots slot)
         {
             // Validate incoming payload
@@ -138,6 +144,7 @@ namespace SmartSolarMicrogrid.API.Modules.EnergySlots.Controllers
         /// GET /api/slots/{id} - Get single battery slot details
         /// </summary>
         [HttpGet("{id}")]
+// Handles the GetSlotById operation.
         public async Task<IActionResult> GetSlotById(string id)
         {
             var slot = await _context.EnergyBookingSlots.Find(x => x.Id == id).FirstOrDefaultAsync();
@@ -153,6 +160,7 @@ namespace SmartSolarMicrogrid.API.Modules.EnergySlots.Controllers
         /// PUT /api/slots/{id} - Update energy slot lifecycle status
         /// </summary>
         [HttpPut("{id}")]
+// Handles the UpdateSlotStatus operation.
         public async Task<IActionResult> UpdateSlotStatus(string id, [FromBody] SlotStatusUpdateDto dto)
         {
             if (dto == null || string.IsNullOrWhiteSpace(dto.Status))

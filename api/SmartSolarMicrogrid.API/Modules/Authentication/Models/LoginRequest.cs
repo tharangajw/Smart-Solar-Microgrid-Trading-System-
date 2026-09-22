@@ -1,5 +1,10 @@
 namespace SmartSolarMicrogrid.API.Modules.Authentication.Models
 {
+/*
+ * File: LoginRequest.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 // Login request model — Email field also accepts NIC (mobile "NIC / Email" field)
     public class LoginRequest
     {

@@ -1,5 +1,10 @@
 ﻿namespace SmartSolarMicrogrid.API.Modules.Reservations.DTOs
 {
+/*
+ * File: CreateREservationDto.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
     public class CreateREservationDto
     {
         public string ProsumerNic { get; set; }

@@ -1,5 +1,10 @@
 ﻿using SmartSolarMicrogrid.API.Modules.Reservations.Models;
 
+/*
+ * File: IReservationRepository.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 namespace SmartSolarMicrogrid.API.Modules.Reservations.Repositories
 {
     public interface IReservationRepository

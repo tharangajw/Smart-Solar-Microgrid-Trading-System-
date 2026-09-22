@@ -1,5 +1,10 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+/*
+ * File: Reservation.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 
 namespace SmartSolarMicrogrid.API.Modules.Reservations.Models
 {

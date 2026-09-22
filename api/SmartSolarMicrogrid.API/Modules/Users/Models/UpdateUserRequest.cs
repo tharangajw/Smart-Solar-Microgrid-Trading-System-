@@ -1,5 +1,10 @@
 namespace SmartSolarMicrogrid.API.Modules.Users.Models
 {
+/*
+ * File: UpdateUserRequest.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 // Update user request model
     public class UpdateUserRequest
     {

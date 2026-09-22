@@ -1,5 +1,10 @@
 using SmartSolarMicrogrid.API.Helpers;
 using SmartSolarMicrogrid.API.Modules.Reservations.DTOs;
+/*
+ * File: ReservationService.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 using SmartSolarMicrogrid.API.Modules.Reservations.Exceptions;
 using SmartSolarMicrogrid.API.Modules.Reservations.Models;
 using SmartSolarMicrogrid.API.Modules.Reservations.Repositories;
@@ -12,6 +17,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
         private readonly IReservationRepository _reservationRepository;
         private readonly StationService _stationService;
         private readonly ReservationModelToDTO _mapper;
+// Initializes the ReservationService instance.
         public ReservationService(IReservationRepository reservationRepository, StationService stationService, ReservationModelToDTO mapper)
         {
             _reservationRepository = reservationRepository;
@@ -19,6 +25,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             _mapper = mapper;
         }
 
+// Handles the CreateReservationAsync operation.
         public async Task<ReservationResponseDto> CreateReservationAsync(CreateREservationDto createReservationDto)
         {
             if (createReservationDto.ReservationDate < DateTime.UtcNow)
@@ -57,6 +64,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             }
         }
 
+// Handles the UpdateReservationAsync operation.
         public async Task<ReservationResponseDto> UpdateReservationAsync(string id, UpdateReservationDto updateReservationDto)
         {
             var existingReservation = await _reservationRepository.GetReservationByIdAsync(id);
@@ -96,6 +104,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             return _mapper.MapToDto(existingReservation);
         }
 
+// Handles the CancelReservationAsync operation.
         public async Task<ReservationResponseDto> CancelReservationAsync(string id, CancelReservationDto cancelReservationDto)
         {
             var existingReservation = await _reservationRepository.GetReservationByIdAsync(id);
@@ -124,6 +133,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             return _mapper.MapToDto(updatedReservation);
         }
 
+// Handles the GetReservationByIdAsync operation.
         public async Task<ReservationResponseDto> GetReservationByIdAsync(string id)
         {
             var reservation = await _reservationRepository.GetReservationByIdAsync(id);
@@ -134,6 +144,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             return _mapper.MapToDto(reservation);
         }
 
+// Handles the GetPendingReservationsByProsumerNicAsync operation.
         public async Task<List<ReservationResponseDto>> GetPendingReservationsByProsumerNicAsync(string? nic)
         {
             List<Reservation> reservations;
@@ -150,6 +161,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             return reservations.Select(r => _mapper.MapToDto(r)).ToList();
         }
 
+// Handles the GetHistoryByProsumerNicAsync operation.
         public async Task<List<ReservationResponseDto>> GetHistoryByProsumerNicAsync(string? nic)
         {
             List<Reservation> reservations;
@@ -166,6 +178,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             return history.Select(r => _mapper.MapToDto(r)).ToList();
         }
 
+// Handles the SearchReservationsAsync operation.
         public async Task<List<ReservationResponseDto>> SearchReservationsAsync(string? nic, string? status, DateTime? from, DateTime? to)
         {
             var reservations = await _reservationRepository.GetAllReservationsAsync();
@@ -189,6 +202,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             return reservations.Select(r => _mapper.MapToDto(r)).ToList();
         }
 
+// Handles the GetApprovedFutureCountAsync operation.
         public async Task<int> GetApprovedFutureCountAsync(string? nic)
         {
             List<Reservation> reservations;

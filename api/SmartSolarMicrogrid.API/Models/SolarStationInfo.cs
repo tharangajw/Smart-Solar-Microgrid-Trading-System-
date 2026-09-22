@@ -1,5 +1,10 @@
 // ============================================================================
 // Module: Smart Solar Microgrid Trading System - C# Web API
+/*
+ * File: SolarStationInfo.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 // File: SolarStationInfo.cs
 // Description: Data Model representing a Solar Microgrid Hub/Node including GPS
 //              location, total capacity kW, battery slot specs, and operating schedule.

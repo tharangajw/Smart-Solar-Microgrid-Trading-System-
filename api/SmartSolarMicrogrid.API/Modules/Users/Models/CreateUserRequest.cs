@@ -1,5 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 
+/*
+ * File: CreateUserRequest.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 namespace SmartSolarMicrogrid.API.Modules.Users.Models
 {
 // Create user request for Backoffice users

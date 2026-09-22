@@ -1,5 +1,10 @@
 // ============================================================================
 // Module: Smart Solar Microgrid Trading System - C# Web API
+/*
+ * File: NodesController.cs
+ * Project: Smart Solar Microgrid Trading System
+ * Description: Implements the models, services, controllers, or infrastructure for this module.
+ */
 // File: NodesController.cs
 // Description: Handles Microgrid Solar Station Nodes management including CRUD,
 //              Haversine GPS distance filtering, and active reservation deactivation checks.
@@ -28,6 +33,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
         /// POST /api/nodes - Create a new solar microgrid station node
         /// </summary>
         [HttpPost]
+// Handles the CreateNode operation.
         public async Task<IActionResult> CreateNode([FromBody] SolarStationInfo node)
         {
             // Validate payload
@@ -96,6 +102,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
         /// GET /api/nodes/{id} - Retrieve single station node details
         /// </summary>
         [HttpGet("{id}")]
+// Handles the GetNodeById operation.
         public async Task<IActionResult> GetNodeById(string id)
         {
             var node = await _context.SolarStationInfos.Find(x => x.Id == id).FirstOrDefaultAsync();
@@ -111,6 +118,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
         /// PUT /api/nodes/{id} - Edit existing node configuration and operational schedule
         /// </summary>
         [HttpPut("{id}")]
+// Handles the UpdateNode operation.
         public async Task<IActionResult> UpdateNode(string id, [FromBody] SolarStationInfo nodeUpdate)
         {
             var existingNode = await _context.SolarStationInfos.Find(x => x.Id == id).FirstOrDefaultAsync();
@@ -140,6 +148,7 @@ namespace SmartSolarMicrogrid.API.Modules.Microgrid.Controllers
         /// DELETE /api/nodes/{id} - Deactivate node enforcing active reservation business rules
         /// </summary>
         [HttpDelete("{id}")]
+// Handles the DeactivateNode operation.
         public async Task<IActionResult> DeactivateNode(string id)
         {
             var node = await _context.SolarStationInfos.Find(x => x.Id == id).FirstOrDefaultAsync();
