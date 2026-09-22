@@ -6,9 +6,6 @@ import Login from './Modules/Authentication/Login';
 import Register from './Modules/Authentication/Register';
 import './App.css';
 
-import HomePage from './Modules/Home/HomePage';
-import DashboardPage from './Modules/Dashboard/DashboardPage';
-
 import OperatorLayout from './Modules/Operator/Layout/OperatorLayout';
 import OperatorDashboard from './Modules/Operator/pages/OperatorDashboard';
 import BookingMonitoring from './Modules/Operator/pages/BookingMonitoring';
@@ -25,6 +22,9 @@ import ProsumerManagementPage from './Modules/Backoffice/pages/ProsumerManagemen
 import BackofficeRoute from './Routes/BackofficeRoute';
 import ReservationsPage from './Modules/Reservations/ReservationsPage';
 import ReservationDetailPage from './Modules/Reservations/ReservationDetailPage';
+import MicrogridNodesPage from './Modules/Microgrid/MicrogridNodesPage';
+import MapPage from './Modules/Map/MapPage';
+import EnergySlotsPage from './Modules/EnergySlots/EnergySlotsPage';
 function App() {
   return (
     <BrowserRouter>

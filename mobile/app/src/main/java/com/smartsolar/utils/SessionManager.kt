@@ -36,11 +36,13 @@ class SessionManager(context: Context) {
     fun getServerIp(): String = prefs.getString(KEY_SERVER_IP, DEFAULT_IP) ?: DEFAULT_IP
 
     /** Save user session after successful login */
-    fun saveSession(token: String, role: String, nic: String) {
+    fun saveSession(token: String, role: String, nic: String, name: String, email: String) {
         prefs.edit()
             .putString(KEY_TOKEN, token)
             .putString(KEY_ROLE, role)
             .putString(KEY_NIC, nic)
+            .putString(KEY_NAME, name)
+            .putString(KEY_EMAIL, email)
             .apply()
     }
 

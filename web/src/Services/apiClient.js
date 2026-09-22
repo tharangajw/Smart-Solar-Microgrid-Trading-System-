@@ -1,5 +1,23 @@
 const API_BASE_URL = 'http://localhost:5281/api';
 
+export async function request(path, options = {}) {
+  const token = localStorage.getItem('token');
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`API request failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export const apiClient = {
   async login(email, password) {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {

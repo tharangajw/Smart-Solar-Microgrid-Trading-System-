@@ -47,14 +47,19 @@ class MyBookingsActivity : BaseNavActivity() {
         recycler     = findViewById(R.id.recyclerBookings)
         layoutEmpty  = findViewById(R.id.layoutEmpty)
         progressBar  = findViewById(R.id.progressBookings)
+        val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
+
+        if (recycler == null || layoutEmpty == null || progressBar == null || tabLayout == null) {
+            android.util.Log.e("MyBookings", "UI components not found")
+            return
+        }
 
         recycler.layoutManager = LinearLayoutManager(this)
 
         // Back button
-        findViewById<View>(R.id.buttonBack).setOnClickListener { finish() }
+        findViewById<View>(R.id.buttonBack)?.setOnClickListener { finish() }
 
         // Tabs
-        val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
         tabLayout.addTab(tabLayout.newTab().setText("📅  Upcoming"))
         tabLayout.addTab(tabLayout.newTab().setText("📁  History"))
 

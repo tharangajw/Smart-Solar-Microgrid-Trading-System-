@@ -13,7 +13,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -23,7 +22,6 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.smartsolar.R
 import com.smartsolar.data.remote.ApiClient
 import org.json.JSONArray
-
 import com.smartsolar.modules.common.BaseNavActivity
 
 class StationMapActivity : BaseNavActivity(), OnMapReadyCallback {
@@ -36,10 +34,20 @@ class StationMapActivity : BaseNavActivity(), OnMapReadyCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialise the Google Map fragment
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        // Initialise the Google Map fragment with safe finding
+        try {
+            val mapFragment = supportFragmentManager
+                .findFragmentById(R.id.map) as? SupportMapFragment
+            
+            if (mapFragment != null) {
+                mapFragment.getMapAsync(this)
+            } else {
+                android.util.Log.e("StationMap", "Map Fragment not found in layout")
+                Toast.makeText(this, "Map could not be loaded.", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("StationMap", "Error initializing map", e)
+        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {

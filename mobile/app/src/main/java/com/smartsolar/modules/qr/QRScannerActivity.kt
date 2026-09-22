@@ -11,14 +11,17 @@ package com.smartsolar.modules.qr
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.StrictMode
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
 import com.smartsolar.R
 import com.smartsolar.data.remote.ApiClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 class QRScannerActivity : AppCompatActivity() {
@@ -26,10 +29,6 @@ class QRScannerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_qr_scanner)
-
-        // Allow network on main thread for simplicity (assignment scope)
-        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
 
         // Launch ZXing QR scanner immediately when Activity opens
         val integrator = IntentIntegrator(this)
@@ -67,34 +66,42 @@ class QRScannerActivity : AppCompatActivity() {
             put("qrCodeId", qrCodeId)
         }
 
-        // Call the API to verify and finalise the transaction
-        val result = ApiClient.post(this, "operator/scan-qr", body)
+        // Disable UI or show progress if needed
+        Toast.makeText(this, "Verifying transfer...", Toast.LENGTH_SHORT).show()
 
-        if (result.isSuccess && result.body != null) {
-            // Parse success message from server
-            val json = JSONObject(result.body)
-            val message = json.optString("message", "Energy transfer finalised successfully!")
+        lifecycleScope.launch(Dispatchers.IO) {
+            // Call the API to verify and finalise the transaction
+            val result = ApiClient.post(this@QRScannerActivity, "operator/scan-qr", body)
 
-            // Show success dialog
-            AlertDialog.Builder(this)
-                .setTitle("✅ Transaction Complete")
-                .setMessage(message)
-                .setPositiveButton("OK") { _, _ -> finish() }
-                .show()
-        } else {
-            // Show failure dialog
-            AlertDialog.Builder(this)
-                .setTitle("❌ Verification Failed")
-                .setMessage(result.message ?: "Could not verify QR code. Please check the code and try again.")
-                .setPositiveButton("Retry") { _, _ ->
-                    // Re-launch scanner
-                    val integrator = IntentIntegrator(this)
-                    integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
-                    integrator.setPrompt("Scan Prosumer's Transaction QR Code")
-                    integrator.initiateScan()
+            withContext(Dispatchers.Main) {
+                if (result.isSuccess && result.body != null) {
+                    // Parse success message from server
+                    val json = JSONObject(result.body)
+                    val message = json.optString("message", "Energy transfer finalised successfully!")
+
+                    // Show success dialog
+                    AlertDialog.Builder(this@QRScannerActivity)
+                        .setTitle("✅ Transaction Complete")
+                        .setMessage(message)
+                        .setCancelable(false)
+                        .setPositiveButton("OK") { _, _ -> finish() }
+                        .show()
+                } else {
+                    // Show failure dialog
+                    AlertDialog.Builder(this@QRScannerActivity)
+                        .setTitle("❌ Verification Failed")
+                        .setMessage(result.message ?: "Could not verify QR code. Please check the code and try again.")
+                        .setPositiveButton("Retry") { _, _ ->
+                            // Re-launch scanner
+                            val integrator = IntentIntegrator(this@QRScannerActivity)
+                            integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
+                            integrator.setPrompt("Scan Prosumer's Transaction QR Code")
+                            integrator.initiateScan()
+                        }
+                        .setNegativeButton("Cancel") { _, _ -> finish() }
+                        .show()
                 }
-                .setNegativeButton("Cancel") { _, _ -> finish() }
-                .show()
+            }
         }
     }
 }

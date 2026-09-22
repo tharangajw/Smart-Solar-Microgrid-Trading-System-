@@ -31,9 +31,9 @@ class ProsumerDashboardActivity : BaseNavActivity() {
     private lateinit var layoutEmptyNextBooking: View
     private lateinit var progressBar: ProgressBar
 
-    private lateinit var textNextDate: TextView
-    private lateinit var textNextNode: TextView
-    private lateinit var textNextStatus: TextView
+    private var textNextDate: TextView? = null
+    private var textNextNode: TextView? = null
+    private var textNextStatus: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,8 +42,8 @@ class ProsumerDashboardActivity : BaseNavActivity() {
 
         // Setup Header
         val name = session.getName() ?: session.getNic() ?: "Prosumer"
-        findViewById<TextView>(R.id.textWelcomeName).text = "Hello, $name!"
-        findViewById<TextView>(R.id.textNic).text = "NIC: ${session.getNic()}"
+        findViewById<TextView>(R.id.textWelcomeName)?.text = "Hello, $name!"
+        findViewById<TextView>(R.id.textNic)?.text = "NIC: ${session.getNic()}"
 
         // Bind Views
         textPendingCount = findViewById(R.id.textPendingCount)
@@ -57,7 +57,7 @@ class ProsumerDashboardActivity : BaseNavActivity() {
         textNextStatus = findViewById(R.id.textNextStatus)
 
         // View All click handler
-        findViewById<View>(R.id.textViewAllBookings).setOnClickListener {
+        findViewById<View>(R.id.textViewAllBookings)?.setOnClickListener {
             startActivity(Intent(this, MyBookingsActivity::class.java))
             overridePendingTransition(0, 0)
         }
@@ -74,42 +74,41 @@ class ProsumerDashboardActivity : BaseNavActivity() {
         lifecycleScope.launch(Dispatchers.IO) {
             val response = ApiClient.get(this@ProsumerDashboardActivity, "Reservations/pending?nic=$nic")
 
-            withContext(Dispatchers.Main) {
-                progressBar.visibility = View.GONE
+            if (response != null) {
+                try {
+                    val array = if (response.trim().startsWith("[")) {
+                        JSONArray(response)
+                    } else {
+                        val obj = JSONObject(response)
+                        when {
+                            obj.has("data") -> obj.getJSONArray("data")
+                            obj.has("value") -> obj.getJSONArray("value")
+                            else -> JSONArray()
+                        }
+                    }
 
-                if (response != null) {
-                    try {
-                        val array = if (response.trim().startsWith("[")) {
-                            JSONArray(response)
-                        } else {
-                            val obj = JSONObject(response)
-                            when {
-                                obj.has("data") -> obj.getJSONArray("data")
-                                obj.has("value") -> obj.getJSONArray("value")
-                                else -> JSONArray()
-                            }
+                    var pendingCount = 0
+                    var approvedCount = 0
+                    var nextBooking: JSONObject? = null
+
+                    for (i in 0 until array.length()) {
+                        val item = array.getJSONObject(i)
+                        val status = item.optString("status", "Pending")
+
+                        if (status.equals("Pending", ignoreCase = true)) {
+                            pendingCount++
+                        } else if (status.equals("Approved", ignoreCase = true)) {
+                            approvedCount++
                         }
 
-                        var pendingCount = 0
-                        var approvedCount = 0
-                        var nextBooking: JSONObject? = null
-
-                        for (i in 0 until array.length()) {
-                            val item = array.getJSONObject(i)
-                            val status = item.optString("status", "Pending")
-
-                            if (status.equals("Pending", ignoreCase = true)) {
-                                pendingCount++
-                            } else if (status.equals("Approved", ignoreCase = true)) {
-                                approvedCount++
-                            }
-
-                            // Keep the first item as the "Next" booking (assuming API sorts by date)
-                            if (nextBooking == null) {
-                                nextBooking = item
-                            }
+                        // Keep the first item as the "Next" booking (assuming API sorts by date)
+                        if (nextBooking == null) {
+                            nextBooking = item
                         }
+                    }
 
+                    withContext(Dispatchers.Main) {
+                        progressBar.visibility = View.GONE
                         // Update Counts
                         textPendingCount.text = pendingCount.toString()
                         textUpcomingCount.text = approvedCount.toString()
@@ -120,9 +119,9 @@ class ProsumerDashboardActivity : BaseNavActivity() {
                             val nodeId = nextBooking.optString("nodeId", "Unknown Node")
                             val status = nextBooking.optString("status", "Pending")
 
-                            textNextDate.text = formatDate(isoDate)
-                            textNextNode.text = "Node: $nodeId"
-                            textNextStatus.text = status
+                            textNextDate?.text = formatDate(isoDate)
+                            textNextNode?.text = "Node: $nodeId"
+                            textNextStatus?.text = status
 
                             // Apply web colors to status badge
                             val (bgColor, textColor) = when (status.lowercase()) {
@@ -132,8 +131,15 @@ class ProsumerDashboardActivity : BaseNavActivity() {
                                 "cancelled" -> "#FEE2E2" to "#991B1B"
                                 else        -> "#F5F0E8" to "#5C5C5C"
                             }
-                            textNextStatus.background.mutate().setTint(Color.parseColor(bgColor))
-                            textNextStatus.setTextColor(Color.parseColor(textColor))
+                            textNextStatus?.background?.mutate()?.setTint(Color.parseColor(bgColor))
+                            textNextStatus?.setTextColor(Color.parseColor(textColor))
+
+                            val bookingId = nextBooking.optString("id", nextBooking.optString("_id"))
+                            cardNextBooking.setOnClickListener {
+                                val intent = Intent(this@ProsumerDashboardActivity, ReservationDetailActivity::class.java)
+                                intent.putExtra("BOOKING_ID", bookingId)
+                                startActivity(intent)
+                            }
 
                             cardNextBooking.visibility = View.VISIBLE
                             layoutEmptyNextBooking.visibility = View.GONE
@@ -141,14 +147,20 @@ class ProsumerDashboardActivity : BaseNavActivity() {
                             cardNextBooking.visibility = View.GONE
                             layoutEmptyNextBooking.visibility = View.VISIBLE
                         }
+                    }
 
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                } catch (e: Exception) {
+                    android.util.Log.e("ProsumerDashboard", "Parsing error", e)
+                    withContext(Dispatchers.Main) {
+                        progressBar.visibility = View.GONE
                         textPendingCount.text = "-"
                         textUpcomingCount.text = "-"
                         layoutEmptyNextBooking.visibility = View.VISIBLE
                     }
-                } else {
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    progressBar.visibility = View.GONE
                     textPendingCount.text = "-"
                     textUpcomingCount.text = "-"
                     layoutEmptyNextBooking.visibility = View.VISIBLE
