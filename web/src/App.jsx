@@ -21,7 +21,7 @@ import OperatorRoute from './Routes/OperatorRoute';
 import BackofficeLayout from './Modules/Backoffice/Layout/BackofficeLayout';
 import BackofficeDashboard from './Modules/Backoffice/pages/BackofficeDashboard';
 import GridOperatorsPage from './Modules/Backoffice/pages/GridOperatorsPage';
-import MicrogridNodesPage from './Modules/Backoffice/pages/MicrogridNodesPage';
+import BackofficeMicrogridNodesPage from './Modules/Backoffice/pages/MicrogridNodesPage';
 import PendingActivationsPage from './Modules/Backoffice/pages/PendingActivationsPage';
 import ProsumerManagementPage from './Modules/Backoffice/pages/ProsumerManagementPage';
 import ReservationManagementPage from './Modules/Backoffice/pages/ReservationManagementPage';
@@ -43,7 +43,7 @@ function App() {
             <Route index element={<Navigate to="pending" replace />} />
             <Route path="dashboard" element={<BackofficeDashboard />} />
             <Route path="operators" element={<GridOperatorsPage />} />
-            <Route path="nodes" element={<MicrogridNodesPage />} />
+            <Route path="nodes" element={<BackofficeMicrogridNodesPage />} />
             <Route path="pending" element={<PendingActivationsPage />} />
             <Route path="prosumers" element={<ProsumerManagementPage />} />
             <Route path="reservations" element={<ReservationManagementPage />} />
