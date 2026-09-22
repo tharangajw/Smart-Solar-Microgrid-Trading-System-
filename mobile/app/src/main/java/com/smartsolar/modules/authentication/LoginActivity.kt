@@ -13,9 +13,11 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.smartsolar.R
@@ -36,13 +38,19 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        // Removed StrictMode.permitAll() — network must NOT run on main thread.
-        // Using coroutines instead to avoid ANR.
+        val sessionManager = SessionManager(this)
 
         val editIdentifier = findViewById<EditText>(R.id.editTextNic)
         val editPassword = findViewById<EditText>(R.id.editTextPassword)
         val buttonLogin = findViewById<Button>(R.id.buttonLogin)
         val textViewRegister = findViewById<TextView>(R.id.textViewRegisterPrompt)
+        val headerImage = findViewById<ImageView>(R.id.headerImage)
+
+        // Secret Setup: Long-press the header image to change Server IP
+        headerImage.setOnLongClickListener {
+            showServerIpDialog(sessionManager)
+            true
+        }
 
         buttonLogin.setOnClickListener {
             val identifier = editIdentifier.text.toString().trim()
@@ -63,7 +71,7 @@ class LoginActivity : AppCompatActivity() {
                 put("password", password)
             }
 
-            Log.d("Login", "Attempting login for: $identifier")
+            Log.d("Login", "Attempting login at: ${sessionManager.getServerIp()}")
 
             // Launch network call on IO thread — keeps UI thread free (prevents ANR)
             lifecycleScope.launch(Dispatchers.IO) {
@@ -83,7 +91,7 @@ class LoginActivity : AppCompatActivity() {
                             val userId = json.optString("userId", "0")
 
                             // 1. Save to SharedPreferences
-                            SessionManager(this@LoginActivity).saveSession(token, role, nic)
+                            sessionManager.saveSession(token, role, nic)
 
                             // 2. Save to SQLite
                             val user = User(userId, nic, name, json.optString("email", ""), role, token)
@@ -117,5 +125,26 @@ class LoginActivity : AppCompatActivity() {
         textViewRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
+    }
+
+    private fun showServerIpDialog(sessionManager: SessionManager) {
+        val input = EditText(this)
+        input.hint = "e.g. 192.168.1.15"
+        input.setText(sessionManager.getServerIp())
+        input.setPadding(64, 32, 64, 32)
+
+        AlertDialog.Builder(this)
+            .setTitle("Server Configuration")
+            .setMessage("Enter your Computer's IP address (IPv4) to connect to the backend:")
+            .setView(input)
+            .setPositiveButton("Save") { _, _ ->
+                val newIp = input.text.toString().trim()
+                if (newIp.isNotEmpty()) {
+                    sessionManager.saveServerIp(newIp)
+                    Toast.makeText(this, "Server IP updated to: $newIp", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 }

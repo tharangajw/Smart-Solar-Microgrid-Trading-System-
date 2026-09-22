@@ -49,7 +49,7 @@ namespace SmartSolarMicrogrid.API.Modules.EnergySlots.Controllers
             }
 
             // 1. Verify Node exists and is ACTIVE
-            var node = await _context.SolarStations.Find(x => x.Id == slot.NodeId).FirstOrDefaultAsync();
+            var node = await _context.SolarStationInfos.Find(x => x.Id == slot.NodeId).FirstOrDefaultAsync();
             if (node == null)
             {
                 return NotFound(new { error = $"Node with ID '{slot.NodeId}' not found" });

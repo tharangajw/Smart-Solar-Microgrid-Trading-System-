@@ -23,7 +23,17 @@ class SessionManager(context: Context) {
         const val KEY_NAME = "user_name"
         const val KEY_NIC = "user_nic"
         const val KEY_EMAIL = "user_email"
+        const val KEY_SERVER_IP = "server_ip"
+        const val DEFAULT_IP = "172.28.15.169" // Updated to user's computer IP
     }
+
+    /** Save server IP address */
+    fun saveServerIp(ip: String) {
+        prefs.edit().putString(KEY_SERVER_IP, ip).apply()
+    }
+
+    /** Get stored server IP or default */
+    fun getServerIp(): String = prefs.getString(KEY_SERVER_IP, DEFAULT_IP) ?: DEFAULT_IP
 
     /** Save user session after successful login */
     fun saveSession(token: String, role: String, nic: String) {
