@@ -35,20 +35,30 @@ class ProfileActivity : BaseNavActivity() {
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
 
-        val editNic = findViewById<EditText>(R.id.editTextNic)
-        val editName = findViewById<EditText>(R.id.editTextName)
-        val editEmail = findViewById<EditText>(R.id.editTextEmail)
+        val textNic = findViewById<android.widget.TextView>(R.id.textNicDisplay)
+        val editName = findViewById<android.widget.EditText>(R.id.editTextName)
+        val editEmail = findViewById<android.widget.EditText>(R.id.editTextEmail)
         val buttonUpdateProfile = findViewById<Button>(R.id.buttonUpdateProfile)
         val buttonDeactivate = findViewById<Button>(R.id.buttonDeactivate)
+        
+        val textProfileName = findViewById<android.widget.TextView>(R.id.textProfileName)
+        val textProfileRole = findViewById<android.widget.TextView>(R.id.textProfileRole)
+        
+        findViewById<android.widget.ImageButton>(R.id.btnProfileBack)?.setOnClickListener {
+            onBackPressed()
+        }
 
         // Load current user data
         val userDao = UserDao(this)
         val user = userDao.getLoggedInUser()
 
         if (user != null) {
-            editNic.setText(user.nic)
+            textNic.text = user.nic
             editName.setText(user.name)
             editEmail.setText(user.email)
+            
+            textProfileName.text = user.name
+            textProfileRole.text = if (user.role.lowercase() == "operator") "Grid Operator" else "Solar Prosumer"
         }
 
         buttonUpdateProfile.setOnClickListener {

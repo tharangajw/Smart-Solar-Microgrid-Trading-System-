@@ -21,12 +21,17 @@
             app:cardBackgroundColor="@color/colorPrimary"
             app:cardCornerRadius="40dp"
             app:cardElevation="8dp"
+            app:strokeWidth="0dp"
+            app:cardPreventCornerOverlap="false"
             app:layout_constraintTop_toTopOf="parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="32dp">
+                android:paddingTop="64dp"
+                android:paddingBottom="32dp"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp">
 
                 <LinearLayout
                     android:id="@+id/layoutTitle"

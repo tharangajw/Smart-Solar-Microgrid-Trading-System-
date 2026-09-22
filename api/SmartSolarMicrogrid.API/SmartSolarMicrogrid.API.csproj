@@ -19,9 +19,10 @@
     <!-- BCrypt password hashing -->
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
 
-    <!-- JWT authentication – updated for net10.0 -->
+    <!-- JWT authentication -->
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.0.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
   </ItemGroup>
 
 </Project>
