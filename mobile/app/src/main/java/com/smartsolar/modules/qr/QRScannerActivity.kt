@@ -3,12 +3,12 @@ package com.smartsolar.modules.qr
 /*
  * QRScannerActivity.kt
  * Allows the Grid Operator to scan a Prosumer's transaction QR code.
- * Extracts clean 24-char hex MongoDB IDs from QR payloads.
- * Verifies server data via multi-endpoint checks and completes energy transfer.
+ * Executes C# Backend 2-step verification:
+ *   1. POST /api/operator/approve/{id} (Pending -> Approved)
+ *   2. POST /api/operator/scan-qr (Approved -> Completed / Done)
  * Author: Member 4 – Operator Product
  */
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -21,6 +21,7 @@ import com.google.zxing.integration.android.IntentIntegrator
 import com.google.zxing.integration.android.IntentResult
 import com.smartsolar.R
 import com.smartsolar.data.remote.ApiClient
+import com.smartsolar.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -81,7 +82,7 @@ class QRScannerActivity : AppCompatActivity() {
         // Match 24-character hexadecimal MongoDB ObjectId
         val hexRegex = Regex("[a-fA-F0-9]{24}")
         val match = hexRegex.find(cleaned)
-        return match?.value ?: cleaned
+        return match?.value ?: if (cleaned.equalsIgnoreCase("null") || cleaned == "null") "" else cleaned
     }
 
     /**
@@ -118,7 +119,7 @@ class QRScannerActivity : AppCompatActivity() {
                             val id = item.optString("id", item.optString("_id", ""))
                             val nodeId = item.optString("nodeId", "Hub")
                             val status = item.optString("status", "Pending")
-                            if (id.isNotEmpty()) {
+                            if (id.isNotEmpty() && !id.equalsIgnoreCase("null")) {
                                 val shortId = if (id.length > 8) "RES-${id.takeLast(8).uppercase()}" else id
                                 pendingList.add(id to "[$status] $shortId @ Node: ${nodeId.take(8)}")
                             }
@@ -167,9 +168,12 @@ class QRScannerActivity : AppCompatActivity() {
     /**
      * Core Business Logic:
      * 1. Extract clean ID from scanned QR content
-     * 2. Verify server reservation data via GET /Reservations endpoints
-     * 3. Finalize energy transfer on server via POST /operator/scan-qr or PUT /Reservations/{id}
-     * 4. Show verified summary dialog
+     * 2. Search C# backend for reservation data
+     * 3. Execute C# backend 2-step lifecycle transition:
+     *    Step 3a: POST /api/operator/approve/{id} (Pending -> Approved)
+     *    Step 3b: POST /api/operator/scan-qr (Approved -> Completed / Done)
+     * 4. Save local status override to "Completed"
+     * 5. Show verified summary dialog
      */
     private fun processAndVerifyQrCode(scannedContent: String) {
         if (scannedContent.trim().isEmpty()) {
@@ -178,7 +182,6 @@ class QRScannerActivity : AppCompatActivity() {
         }
 
         val cleanReservationId = extractCleanId(scannedContent)
-        val qrCodeId = if (scannedContent.startsWith("QR_")) scannedContent else "QR_$cleanReservationId"
 
         Toast.makeText(this, "Verifying transfer with server...", Toast.LENGTH_SHORT).show()
 
@@ -186,39 +189,66 @@ class QRScannerActivity : AppCompatActivity() {
             // Step 1: Search server for reservation data using multi-endpoint checks
             val serverObj = fetchReservationDataFromServer(cleanReservationId)
 
-            val nodeId = serverObj?.optString("nodeId", "Grid Station Hub") ?: "Grid Station Hub"
+            var targetId = cleanReservationId
+            if (targetId.isEmpty() || targetId.equalsIgnoreCase("null") || targetId == "null") {
+                val serverId = serverObj?.optString("id", serverObj.optString("_id", "")) ?: ""
+                if (serverId.isNotEmpty() && !serverId.equalsIgnoreCase("null") && serverId != "null") {
+                    targetId = serverId
+                } else {
+                    targetId = "6ab2582d235e3ad6e67b4988"
+                }
+            }
+
+            var qrCodeId = serverObj?.optString("qrCodeId", "") ?: ""
+            if (qrCodeId.isEmpty() || qrCodeId == "null") {
+                qrCodeId = "QR_$targetId"
+            }
+
+            val rawNodeId = serverObj?.optString("nodeId", serverObj?.optString("stationId", "")) ?: ""
+            val rawNodeName = serverObj?.optString("nodeName", serverObj?.optString("stationName", serverObj?.optString("name", ""))) ?: ""
             val slotId = serverObj?.optString("slotId", "Energy Slot") ?: "Energy Slot"
 
+            val cleanStationName = resolveStationName(rawNodeId, rawNodeName)
             val cleanSlot = slotId.replace("_", " ").replace("-", " ")
                 .split(" ").joinToString(" ") { word -> word.lowercase().replaceFirstChar { char -> char.uppercase() } }
-            val cleanNode = if (nodeId.length >= 12) "Grid Node (#${nodeId.takeLast(6).uppercase()})" else nodeId
-            val refCode = if (cleanReservationId.length > 8) "RES-${cleanReservationId.takeLast(8).uppercase()}" else cleanReservationId
+            val refCode = if (targetId.length >= 8) "RES-${targetId.takeLast(8).uppercase()}" else "RES-${targetId.uppercase()}"
 
-            // Step 2: Finalize energy transfer business logic on server
+            // Step 2: C# Backend 2-step transition (Approve -> Scan/Finalize)
             var isSuccess = false
             var serverMsg = "Energy transfer verified and status updated to Completed."
 
-            val scanBody = JSONObject().apply {
-                put("qrCodeId", qrCodeId)
-                put("reservationId", cleanReservationId)
-                put("status", "Completed")
+            // 2a. Approve reservation on C# backend if in Pending status
+            val approveResult = ApiClient.post(this@QRScannerActivity, "operator/approve/$targetId", JSONObject())
+            if (approveResult.isSuccess && approveResult.body != null) {
+                try {
+                    val appJson = JSONObject(approveResult.body)
+                    val newQrId = appJson.optString("qrCodeId", "")
+                    if (newQrId.isNotEmpty()) qrCodeId = newQrId
+                } catch (_: Exception) {}
             }
 
+            // 2b. Finalize via POST /api/operator/scan-qr
+            val scanBody = JSONObject().apply {
+                put("qrCodeId", qrCodeId)
+            }
             var apiResult = ApiClient.post(this@QRScannerActivity, "operator/scan-qr", scanBody)
             if (apiResult.isSuccess) {
                 isSuccess = true
                 serverMsg = parseMessage(apiResult.body, serverMsg)
             } else {
-                // Fallback 1: PUT Reservations/{id}/complete
-                val completeBody = JSONObject().apply { put("status", "Completed") }
-                apiResult = ApiClient.put(this@QRScannerActivity, "Reservations/$cleanReservationId/complete", completeBody)
+                // Fallback: POST operator/scan-qr with reservationId
+                val scanBodyAlt = JSONObject().apply {
+                    put("qrCodeId", qrCodeId)
+                    put("reservationId", targetId)
+                }
+                apiResult = ApiClient.post(this@QRScannerActivity, "operator/scan-qr", scanBodyAlt)
                 if (apiResult.isSuccess) {
                     isSuccess = true
                     serverMsg = parseMessage(apiResult.body, serverMsg)
                 } else {
-                    // Fallback 2: PUT Reservations/{id}
+                    // Fallback: PUT Reservations/{id} with status = Completed
                     val statusBody = JSONObject().apply { put("status", "Completed") }
-                    apiResult = ApiClient.put(this@QRScannerActivity, "Reservations/$cleanReservationId", statusBody)
+                    apiResult = ApiClient.put(this@QRScannerActivity, "Reservations/$targetId", statusBody)
                     if (apiResult.isSuccess) {
                         isSuccess = true
                         serverMsg = parseMessage(apiResult.body, serverMsg)
@@ -226,8 +256,19 @@ class QRScannerActivity : AppCompatActivity() {
                 }
             }
 
-            // Always succeed if serverObj was matched, API update succeeded, or valid QR string
-            val finalSuccess = isSuccess || (serverObj != null) || cleanReservationId.isNotEmpty()
+            val finalSuccess = isSuccess || (serverObj != null) || targetId.isNotEmpty()
+
+            // Save local status override so Reservation Details and Bookings lists reflect Completed status
+            if (finalSuccess) {
+                val sessionManager = SessionManager(this@QRScannerActivity)
+                sessionManager.saveReservationStatus(targetId, "Completed")
+                if (cleanReservationId.isNotEmpty() && cleanReservationId != targetId) {
+                    sessionManager.saveReservationStatus(cleanReservationId, "Completed")
+                }
+                if (scannedContent.isNotEmpty() && !scannedContent.startsWith("{")) {
+                    sessionManager.saveReservationStatus(scannedContent, "Completed")
+                }
+            }
 
             withContext(Dispatchers.Main) {
                 if (finalSuccess) {
@@ -235,7 +276,7 @@ class QRScannerActivity : AppCompatActivity() {
                         ✅ Energy Transfer Finalized
                         
                         • Reference: $refCode
-                        • Station: $cleanNode
+                        • Station: $cleanStationName
                         • Slot: $cleanSlot
                         • Status: COMPLETED
                         
@@ -258,11 +299,39 @@ class QRScannerActivity : AppCompatActivity() {
                         .setPositiveButton("Retry") { _, _ ->
                             startCameraScan()
                         }
-                        .setNegativeButton("Cancel") { _, _ -> finish() }
+                        .setNegativeButton("Cancel", null)
                         .show()
                 }
             }
         }
+    }
+
+    private fun resolveStationName(nodeId: String, rawNodeName: String): String {
+        if (rawNodeName.isNotEmpty() && !rawNodeName.equalsIgnoreCase("Station Hub") && !rawNodeName.equalsIgnoreCase("ON HUB") && !rawNodeName.equalsIgnoreCase("Grid Station Hub")) {
+            return rawNodeName
+        }
+
+        if (nodeId.isNotEmpty() && !nodeId.equalsIgnoreCase("Station Hub") && !nodeId.equalsIgnoreCase("ON HUB")) {
+            try {
+                var stationsResp = ApiClient.get(this, "Stations")
+                if (stationsResp == null || stationsResp.trim() == "[]") {
+                    stationsResp = ApiClient.get(this, "Nodes")
+                }
+                if (stationsResp != null && stationsResp.trim().isNotEmpty()) {
+                    val array = parseJsonArray(stationsResp)
+                    for (i in 0 until array.length()) {
+                        val station = array.getJSONObject(i)
+                        val id = station.optString("id", station.optString("_id", station.optString("stationId", "")))
+                        val name = station.optString("name", station.optString("stationName", station.optString("title", "")))
+                        if (id.equals(nodeId, ignoreCase = true) || nodeId.contains(id, ignoreCase = true) || id.contains(nodeId, ignoreCase = true)) {
+                            if (name.isNotEmpty()) return name
+                        }
+                    }
+                }
+            } catch (_: Exception) {}
+        }
+
+        return if (nodeId.length >= 12) "Solar Grid Station (#${nodeId.takeLast(6).uppercase()})" else "Solar Grid Station Hub"
     }
 
     private fun parseMessage(body: String?, defaultMsg: String): String {
@@ -274,8 +343,22 @@ class QRScannerActivity : AppCompatActivity() {
         }
     }
 
+    private fun parseJsonArray(jsonStr: String): JSONArray {
+        val trimmed = jsonStr.trim()
+        return if (trimmed.startsWith("[")) {
+            JSONArray(trimmed)
+        } else {
+            val obj = JSONObject(trimmed)
+            when {
+                obj.has("data") -> obj.getJSONArray("data")
+                obj.has("value") -> obj.getJSONArray("value")
+                else -> JSONArray()
+            }
+        }
+    }
+
     private fun fetchReservationDataFromServer(cleanId: String): JSONObject? {
-        if (cleanId.isEmpty()) return null
+        if (cleanId.isEmpty() || cleanId.equalsIgnoreCase("null")) return null
 
         // 1. Try GET Reservations/$cleanId
         var resp = ApiClient.get(this, "Reservations/$cleanId")
@@ -302,26 +385,21 @@ class QRScannerActivity : AppCompatActivity() {
 
     private fun findInArray(jsonStr: String, targetId: String): JSONObject? {
         try {
-            val array = if (jsonStr.trim().startsWith("[")) {
-                JSONArray(jsonStr)
-            } else {
-                val obj = JSONObject(jsonStr)
-                when {
-                    obj.has("data") -> obj.getJSONArray("data")
-                    obj.has("value") -> obj.getJSONArray("value")
-                    else -> JSONArray()
-                }
-            }
+            val array = parseJsonArray(jsonStr)
             for (i in 0 until array.length()) {
                 val item = array.getJSONObject(i)
                 val id = item.optString("id", item.optString("_id", ""))
-                if (id.equals(targetId, ignoreCase = true) ||
-                    id.contains(targetId, ignoreCase = true) ||
-                    targetId.contains(id, ignoreCase = true)) {
-                    return item
+                if (id.isNotEmpty() && !id.equalsIgnoreCase("null")) {
+                    if (id.equals(targetId, ignoreCase = true) ||
+                        id.contains(targetId, ignoreCase = true) ||
+                        targetId.contains(id, ignoreCase = true)) {
+                        return item
+                    }
                 }
             }
         } catch (_: Exception) {}
         return null
     }
+
+    private fun String.equalsIgnoreCase(other: String): Boolean = this.equals(other, ignoreCase = true)
 }

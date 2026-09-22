@@ -10,6 +10,8 @@ package com.smartsolar.modules.map
  */
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -27,6 +29,16 @@ import com.smartsolar.modules.common.BaseNavActivity
 class StationMapActivity : BaseNavActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
+    private val refreshHandler = Handler(Looper.getMainLooper())
+    private val refreshIntervalMs = 5_000L
+    private val refreshRunnable = object : Runnable {
+        override fun run() {
+            if (::mMap.isInitialized) {
+                loadStationsFromApi()
+                refreshHandler.postDelayed(this, refreshIntervalMs)
+            }
+        }
+    }
 
     override fun getLayoutResourceId() = R.layout.activity_map
     override fun getMenuItemId() = R.id.nav_map
@@ -61,6 +73,12 @@ class StationMapActivity : BaseNavActivity(), OnMapReadyCallback {
 
         // Fetch stations from the API and plot them
         loadStationsFromApi()
+        refreshHandler.postDelayed(refreshRunnable, refreshIntervalMs)
+    }
+
+    override fun onDestroy() {
+        refreshHandler.removeCallbacks(refreshRunnable)
+        super.onDestroy()
     }
 
     /**

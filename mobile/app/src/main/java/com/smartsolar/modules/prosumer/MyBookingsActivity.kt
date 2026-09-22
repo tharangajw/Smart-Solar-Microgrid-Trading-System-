@@ -2,10 +2,10 @@ package com.smartsolar.modules.prosumer
 
 /*
  * MyBookingsActivity.kt
- * Displays the prosumer's reservations in two tabs:
- *   - Upcoming: pending + approved future bookings (GET /reservations/pending?nic=)
- *   - History:  past / cancelled bookings (GET /reservations/history?nic=)
- * A "Cancel" button on each upcoming card calls PUT /reservations/{id}/cancel.
+ * Displays reservations in two tabs (Upcoming vs History).
+ * Supports both Prosumer (NIC-filtered) and Grid Operator (system-wide) monitoring.
+ * Syncs local status overrides from SessionManager to ensure completed transfers show immediately.
+ * Author: Member 4 – Operator Product
  */
 
 import android.os.Bundle
@@ -19,11 +19,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.tabs.TabLayout
 import com.smartsolar.R
 import com.smartsolar.data.remote.ApiClient
+import com.smartsolar.modules.common.BaseNavActivity
 import com.smartsolar.utils.SessionManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.smartsolar.modules.common.BaseNavActivity
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -72,19 +72,38 @@ class MyBookingsActivity : BaseNavActivity() {
             override fun onTabReselected(tab: TabLayout.Tab) {}
         })
 
-        // Load both lists
+        // Load lists
+        loadBookings()
+    }
+
+    override fun onResume() {
+        super.onResume()
         loadBookings()
     }
 
     private fun loadBookings() {
-        val nic = SessionManager(this).getNic() ?: ""
+        val session = SessionManager(this)
+        val nic = session.getNic() ?: ""
+        val role = session.getRole()?.lowercase() ?: ""
+        val isOperator = role.contains("operator") || role.contains("grid") || role.contains("admin")
+
         progressBar.visibility = View.VISIBLE
         recycler.visibility = View.GONE
         layoutEmpty.visibility = View.GONE
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val pendingResponse = ApiClient.get(this@MyBookingsActivity, "Reservations/pending?nic=$nic")
-            val historyResponse = ApiClient.get(this@MyBookingsActivity, "Reservations/history?nic=$nic")
+            val pendingUrl = if (isOperator) "operator/reservations?status=Pending" else "Reservations/pending?nic=$nic"
+            val historyUrl = if (isOperator) "operator/reservations" else "Reservations/history?nic=$nic"
+
+            var pendingResponse = ApiClient.get(this@MyBookingsActivity, pendingUrl)
+            if (isOperator && (pendingResponse == null || pendingResponse.trim() == "[]" || pendingResponse.trim() == "{}")) {
+                pendingResponse = ApiClient.get(this@MyBookingsActivity, "Reservations/pending")
+            }
+
+            var historyResponse = ApiClient.get(this@MyBookingsActivity, historyUrl)
+            if (isOperator && (historyResponse == null || historyResponse.trim() == "[]" || historyResponse.trim() == "{}")) {
+                historyResponse = ApiClient.get(this@MyBookingsActivity, "Reservations")
+            }
 
             withContext(Dispatchers.Main) {
                 progressBar.visibility = View.GONE
@@ -101,9 +120,40 @@ class MyBookingsActivity : BaseNavActivity() {
                     parseBookingList(historyResponse, historyList)
                 }
 
+                // For Operators, split all system reservations into Upcoming vs History tabs by status
+                if (isOperator) {
+                    val allItems = (upcomingList + historyList).distinctBy { it.id }
+                    upcomingList.clear()
+                    historyList.clear()
+
+                    for (item in allItems) {
+                        if (item.status.equals("Completed", ignoreCase = true) ||
+                            item.status.equals("Cancelled", ignoreCase = true) ||
+                            item.status.equals("Done", ignoreCase = true)) {
+                            historyList.add(item)
+                        } else {
+                            upcomingList.add(item)
+                        }
+                    }
+                } else {
+                    // For Prosumers, move any locally completed/cancelled items from upcoming into history
+                    val iterator = upcomingList.iterator()
+                    while (iterator.hasNext()) {
+                        val item = iterator.next()
+                        if (item.status.equals("Completed", ignoreCase = true) ||
+                            item.status.equals("Cancelled", ignoreCase = true) ||
+                            item.status.equals("Done", ignoreCase = true)) {
+                            iterator.remove()
+                            if (!historyList.any { it.id == item.id }) {
+                                historyList.add(0, item)
+                            }
+                        }
+                    }
+                }
+
                 renderList()
 
-                if (pendingResponse == null && historyResponse == null) {
+                if (pendingResponse == null && historyResponse == null && upcomingList.isEmpty() && historyList.isEmpty()) {
                     Toast.makeText(this@MyBookingsActivity,
                         "Cannot reach server. Check WiFi & backend.", Toast.LENGTH_LONG).show()
                 }
@@ -111,8 +161,9 @@ class MyBookingsActivity : BaseNavActivity() {
         }
     }
 
-    /** Populate a Booking list from a JSON array string */
+    /** Populate a Booking list from a JSON array string with local status overrides */
     private fun parseBookingList(json: String, target: MutableList<Booking>) {
+        val sessionManager = SessionManager(this)
         try {
             val array: JSONArray = if (json.trim().startsWith("[")) {
                 JSONArray(json)
@@ -126,12 +177,19 @@ class MyBookingsActivity : BaseNavActivity() {
             }
             for (i in 0 until array.length()) {
                 val item = array.getJSONObject(i)
+                val id = item.optString("id", item.optString("_id", "–"))
+                val rawStatus = item.optString("status", "Pending")
+
+                // Check local status override
+                val localStatus = sessionManager.getReservationStatus(id)
+                val status = if (!localStatus.isNullOrEmpty()) localStatus else rawStatus
+
                 target.add(
                     Booking(
-                        id              = item.optString("id", item.optString("_id", "–")),
+                        id              = id,
                         nodeId          = item.optString("nodeId", "–"),
                         slotId          = item.optString("slotId", "–"),
-                        status          = item.optString("status", "Pending"),
+                        status          = status,
                         reservationDate = item.optString("reservationDate", "–")
                     )
                 )

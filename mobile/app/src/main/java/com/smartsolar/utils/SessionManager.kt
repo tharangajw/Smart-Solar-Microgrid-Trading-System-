@@ -3,8 +3,8 @@ package com.smartsolar.utils
 /*
  * SessionManager.kt
  * Manages the user's login session using SharedPreferences.
- * Stores JWT token, user role, name, and NIC so the app can
- * persist login state between app restarts without hitting the API again.
+ * Stores JWT token, user role, name, NIC, and local reservation status overrides
+ * so the app can persist login state and status updates between app restarts.
  * Author: Member 4 – Operator Product
  */
 
@@ -46,6 +46,41 @@ class SessionManager(context: Context) {
             .apply()
     }
 
+    /** Save/Override local reservation status across ID key variations */
+    fun saveReservationStatus(reservationId: String, status: String) {
+        if (reservationId.isEmpty() || reservationId == "null") return
+        val editor = prefs.edit()
+        editor.putString("res_status_$reservationId", status)
+        val clean = reservationId.replace("RES-", "").replace("QR_", "").replace("qr_", "").trim()
+        if (clean.isNotEmpty()) {
+            editor.putString("res_status_$clean", status)
+            if (clean.length >= 8) {
+                editor.putString("res_status_${clean.takeLast(8)}", status)
+                editor.putString("res_status_RES-${clean.takeLast(8).uppercase()}", status)
+            }
+        }
+        editor.apply()
+    }
+
+    /** Get locally overridden reservation status if present (multi-key lookup) */
+    fun getReservationStatus(reservationId: String): String? {
+        if (reservationId.isEmpty() || reservationId == "null") return null
+        var status = prefs.getString("res_status_$reservationId", null)
+        if (status != null) return status
+        val clean = reservationId.replace("RES-", "").replace("QR_", "").replace("qr_", "").trim()
+        if (clean.isNotEmpty()) {
+            status = prefs.getString("res_status_$clean", null)
+            if (status != null) return status
+            if (clean.length >= 8) {
+                status = prefs.getString("res_status_${clean.takeLast(8)}", null)
+                if (status != null) return status
+                status = prefs.getString("res_status_RES-${clean.takeLast(8).uppercase()}", null)
+                if (status != null) return status
+            }
+        }
+        return null
+    }
+
     /** Get stored JWT token */
     fun getToken(): String? = prefs.getString(KEY_TOKEN, null)
 
@@ -66,6 +101,8 @@ class SessionManager(context: Context) {
 
     /** Clear session on logout */
     fun logout() {
+        val currentIp = getServerIp()
         prefs.edit().clear().apply()
+        saveServerIp(currentIp)
     }
 }

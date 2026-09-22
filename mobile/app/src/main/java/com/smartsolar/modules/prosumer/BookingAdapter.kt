@@ -5,6 +5,7 @@ package com.smartsolar.modules.prosumer
  * RecyclerView adapter for booking items (both Upcoming and History tabs).
  * Shows date, node id, status badge (color-coded), booking id,
  * and a Cancel button for pending/approved upcoming bookings.
+ * Author: Member 4 – Operator Product
  */
 
 import android.content.Context
@@ -16,6 +17,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.smartsolar.R
+import com.smartsolar.utils.SessionManager
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
@@ -53,20 +55,26 @@ class BookingAdapter(
 
         // Format date nicely: "2026-09-25T00:00:00Z" → "25 Sep 2026"
         holder.textDate.text = formatDate(booking.reservationDate)
-        holder.textNode.text = "Node: ${booking.nodeId.take(16)}…"
-        holder.textId.text = booking.id.take(16) + "…"
+        holder.textNode.text = if (booking.nodeId.length >= 12) "Grid Node (#${booking.nodeId.takeLast(6).uppercase()})" else booking.nodeId
+        holder.textId.text = if (booking.id.length >= 8) "RES-${booking.id.takeLast(8).uppercase()}" else booking.id
+
+        // Check local status override from SessionManager
+        val localStatus = SessionManager(context).getReservationStatus(booking.id)
+        val effectiveStatus = if (!localStatus.isNullOrEmpty()) localStatus else booking.status
 
         // Status badge — matches web StatusBadge.jsx exactly
-        val (bgColor, textColor) = when (booking.status.lowercase()) {
+        val (bgColor, textColor) = when (effectiveStatus.lowercase()) {
             "pending"   -> "#FEF3C7" to "#92400E"   // yellow-100 / yellow-800
             "approved"  -> "#DBEAFE" to "#1E40AF"   // blue-100   / blue-800
             "completed" -> "#DCFCE7" to "#166534"   // green-100  / green-800
             "cancelled" -> "#FEE2E2" to "#991B1B"   // red-100    / red-800
             else        -> "#F5F0E8" to "#5C5C5C"   // cream / charcoal-light
         }
-        holder.textStatus.text = booking.status
-        holder.textStatus.background.mutate().setTint(Color.parseColor(bgColor))
-        holder.textStatus.setTextColor(Color.parseColor(textColor))
+        holder.textStatus.text = effectiveStatus
+        try {
+            holder.textStatus.background.mutate().setTint(Color.parseColor(bgColor))
+            holder.textStatus.setTextColor(Color.parseColor(textColor))
+        } catch (_: Exception) {}
 
         holder.buttonCancel.visibility = View.GONE
         holder.itemView.setOnClickListener { onCancel(booking) }

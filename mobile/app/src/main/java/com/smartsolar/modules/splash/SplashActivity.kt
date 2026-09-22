@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.smartsolar.R
-import com.smartsolar.modules.authentication.LoginActivity
 import com.smartsolar.modules.onboarding.OnboardingActivity
 import com.smartsolar.modules.operator.OperatorDashboardActivity
 import com.smartsolar.modules.prosumer.ProsumerDashboardActivity
@@ -54,7 +53,7 @@ class SplashActivity : AppCompatActivity() {
         val sessionManager = SessionManager(this)
 
         if (sessionManager.isLoggedIn()) {
-            // Account is logged in -> Route directly to Dashboard (No Onboarding, No Login)
+            // Account is logged in -> Route directly to Dashboard (Auto-Login)
             val role = sessionManager.getRole() ?: ""
             val isOperator = role.contains("operator", ignoreCase = true) ||
                              role.contains("grid", ignoreCase = true) ||
@@ -73,17 +72,8 @@ class SplashActivity : AppCompatActivity() {
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
             finish()
         } else {
-            // Not logged in -> Check onboarding state
-            val prefs = getSharedPreferences("SmartSolarPrefs", MODE_PRIVATE)
-            val isOnboardingComplete = prefs.getBoolean("isOnboardingComplete", false)
-
-            val destination = if (isOnboardingComplete) {
-                LoginActivity::class.java
-            } else {
-                OnboardingActivity::class.java
-            }
-
-            val intent = Intent(this@SplashActivity, destination)
+            // Not logged in (Fresh install or Logged out) -> Show Onboarding slides (Splash -> Onboarding -> Login)
+            val intent = Intent(this@SplashActivity, OnboardingActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)

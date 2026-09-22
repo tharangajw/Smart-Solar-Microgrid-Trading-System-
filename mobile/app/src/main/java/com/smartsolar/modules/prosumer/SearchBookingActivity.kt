@@ -3,7 +3,7 @@ package com.smartsolar.modules.prosumer
 /*
  * SearchBookingActivity.kt
  * Allows users to search and filter slot reservations by Status and Date Range.
- * Includes local filtering fallback to ensure results display reliably.
+ * Supports both Prosumer (NIC-filtered) and Grid Operator (system-wide) searches.
  * Author: Member 4 – Operator Product
  */
 
@@ -101,11 +101,14 @@ class SearchBookingActivity : AppCompatActivity() {
     }
 
     private fun performSearch() {
-        val nic = SessionManager(this).getNic() ?: ""
+        val session = SessionManager(this)
+        val nic = session.getNic() ?: ""
+        val role = session.getRole()?.lowercase() ?: ""
+        val isOperator = role.contains("operator") || role.contains("grid") || role.contains("admin")
         val filterStatus = if (spinnerStatus.selectedItemPosition == 0) "" else spinnerStatus.selectedItem.toString()
 
-        var query = "Reservations/search?nic=$nic"
-        if (filterStatus.isNotEmpty()) query += "&status=$filterStatus"
+        var query = if (isOperator) "operator/reservations" else "Reservations/search?nic=$nic"
+        if (filterStatus.isNotEmpty()) query += if (isOperator) "?status=$filterStatus" else "&status=$filterStatus"
         if (fromDateIso != null) query += "&from=$fromDateIso"
         if (toDateIso != null) query += "&to=$toDateIso"
 
@@ -118,8 +121,8 @@ class SearchBookingActivity : AppCompatActivity() {
 
             // Fallback: If search endpoint returns empty, fetch pending + history and filter locally
             if (response == null || response.trim() == "[]" || response.trim() == "{}") {
-                val pendingResp = ApiClient.get(this@SearchBookingActivity, "Reservations/pending?nic=$nic")
-                val historyResp = ApiClient.get(this@SearchBookingActivity, "Reservations/history?nic=$nic")
+                val pendingResp = ApiClient.get(this@SearchBookingActivity, if (isOperator) "operator/reservations?status=Pending" else "Reservations/pending?nic=$nic")
+                val historyResp = ApiClient.get(this@SearchBookingActivity, if (isOperator) "operator/reservations" else "Reservations/history?nic=$nic")
                 val allResp = ApiClient.get(this@SearchBookingActivity, "Reservations")
                 response = combineJsonArrays(pendingResp, historyResp, allResp)
             }
@@ -136,15 +139,17 @@ class SearchBookingActivity : AppCompatActivity() {
                             val id = item.optString("id", item.optString("_id", ""))
                             val nodeId = item.optString("nodeId", "Hub")
                             val slotId = item.optString("slotId", "Slot")
-                            val status = item.optString("status", "Pending")
-                            val resDate = item.optString("reservationDate", "")
+                            
+                            val localStatus = session.getReservationStatus(id)
+                            val rawStatus = item.optString("status", "Pending")
+                            val status = if (!localStatus.isNullOrEmpty()) localStatus else rawStatus
 
                             // Apply local status filter if specified
                             if (filterStatus.isNotEmpty() && !status.equals(filterStatus, ignoreCase = true)) {
                                 continue
                             }
 
-                            resultsList.add(Booking(id, nodeId, slotId, status, resDate))
+                            resultsList.add(Booking(id, nodeId, slotId, status, item.optString("reservationDate", "")))
                         }
                     } catch (_: Exception) {}
                 }

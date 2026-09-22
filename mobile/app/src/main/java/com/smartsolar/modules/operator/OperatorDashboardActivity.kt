@@ -4,6 +4,7 @@ package com.smartsolar.modules.operator
  * OperatorDashboardActivity.kt
  * Operational dashboard for Grid Operators.
  * Sections: Grid Analytics, Operational Tools, and Booking Management.
+ * Parses C# OperatorDashboardStats & operator/reservations directly for live data.
  * Author: Member 4 – Operator Product
  */
 
@@ -85,19 +86,27 @@ class OperatorDashboardActivity : BaseNavActivity() {
             var pendingCount = 0
             var approvedCount = 0
             var historyCount = 0
+            var approvedFutureCount = 0
 
-            // 1. Fetch operator/dashboard
+            // 1. Fetch C# operator/dashboard (OperatorDashboardStats)
             val dashResponse = ApiClient.get(this@OperatorDashboardActivity, "operator/dashboard")
             if (dashResponse != null && dashResponse.trim().startsWith("{")) {
                 try {
                     val json = JSONObject(dashResponse)
+                    pendingCount = json.optInt("pendingCount", json.optInt("PendingCount", 0))
+                    approvedCount = json.optInt("approvedCount", json.optInt("ApprovedCount", 0))
+                    val completed = json.optInt("completedCount", json.optInt("CompletedCount", 0))
+                    val cancelled = json.optInt("cancelledCount", json.optInt("CancelledCount", 0))
+                    historyCount = completed + cancelled
+                    approvedFutureCount = json.optInt("approvedFutureCount", json.optInt("ApprovedFutureCount", approvedCount))
+
                     val slots = json.optString("availableSlots", json.optString("batteryStatus", ""))
                     if (slots.isNotEmpty() && slots != "0") batteryVal = slots
                 } catch (_: Exception) {}
             }
 
-            // 2. Fetch Reservations for analytics & booking management counts
-            var resResponse = ApiClient.get(this@OperatorDashboardActivity, "Reservations/pending")
+            // 2. Fallback / Detailed check from operator/reservations or Reservations
+            var resResponse = ApiClient.get(this@OperatorDashboardActivity, "operator/reservations")
             if (resResponse == null || resResponse.trim() == "[]" || resResponse.trim() == "{}") {
                 resResponse = ApiClient.get(this@OperatorDashboardActivity, "Reservations")
             }
@@ -105,19 +114,34 @@ class OperatorDashboardActivity : BaseNavActivity() {
             if (resResponse != null && resResponse.trim().isNotEmpty()) {
                 try {
                     val array = parseJsonArray(resResponse)
+                    var pCount = 0
+                    var aCount = 0
+                    var hCount = 0
+
                     for (i in 0 until array.length()) {
                         val item = array.getJSONObject(i)
-                        val status = item.optString("status", "Pending")
+                        val id = item.optString("id", item.optString("_id", ""))
+                        val localStatus = SessionManager(this@OperatorDashboardActivity).getReservationStatus(id)
+                        val status = if (!localStatus.isNullOrEmpty()) localStatus else item.optString("status", "Pending")
+
                         when {
-                            status.equals("Pending", ignoreCase = true) -> pendingCount++
-                            status.equals("Approved", ignoreCase = true) -> approvedCount++
-                            status.equals("Completed", ignoreCase = true) || status.equals("Cancelled", ignoreCase = true) -> historyCount++
+                            status.equalsIgnoreCase("Pending") -> pCount++
+                            status.equalsIgnoreCase("Approved") -> aCount++
+                            status.equalsIgnoreCase("Completed") || status.equalsIgnoreCase("Cancelled") || status.equalsIgnoreCase("Done") -> hCount++
+                            else -> pCount++
                         }
+                    }
+
+                    if (pCount > 0 || aCount > 0 || hCount > 0) {
+                        pendingCount = pCount
+                        approvedCount = aCount
+                        historyCount = hCount
+                        if (approvedFutureCount == 0) approvedFutureCount = aCount
                     }
                 } catch (_: Exception) {}
             }
 
-            // 3. Battery Capacity fallback from Nodes if needed
+            // 3. Battery Capacity from Nodes if needed
             if (batteryVal.isEmpty()) {
                 var nodeResp = ApiClient.get(this@OperatorDashboardActivity, "nodes?status=ACTIVE")
                 if (nodeResp == null || nodeResp.trim() == "[]") {
@@ -139,10 +163,11 @@ class OperatorDashboardActivity : BaseNavActivity() {
 
             if (batteryVal.isEmpty()) batteryVal = "100 kWh"
 
+            val currentCount = approvedCount + pendingCount
             val fmtPending = if (pendingCount < 10) "0$pendingCount" else pendingCount.toString()
-            val fmtApproved = if (approvedCount < 10) "0$approvedCount" else approvedCount.toString()
+            val fmtApproved = if (approvedFutureCount < 10) "0$approvedFutureCount" else approvedFutureCount.toString()
             val fmtHistory = if (historyCount < 10) "0$historyCount" else historyCount.toString()
-            val fmtCurrent = if ((approvedCount + pendingCount) < 10) "0${approvedCount + pendingCount}" else (approvedCount + pendingCount).toString()
+            val fmtCurrent = if (currentCount < 10) "0$currentCount" else currentCount.toString()
             val batteryDisplay = if (batteryVal.contains("kWh", ignoreCase = true)) batteryVal else "$batteryVal kWh"
 
             withContext(Dispatchers.Main) {
@@ -169,4 +194,6 @@ class OperatorDashboardActivity : BaseNavActivity() {
             }
         }
     }
+
+    private fun String.equalsIgnoreCase(other: String): Boolean = this.equals(other, ignoreCase = true)
 }
