@@ -13,7 +13,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -23,19 +22,32 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.smartsolar.R
 import com.smartsolar.data.remote.ApiClient
 import org.json.JSONArray
+import com.smartsolar.modules.common.BaseNavActivity
 
-class StationMapActivity : AppCompatActivity(), OnMapReadyCallback {
+class StationMapActivity : BaseNavActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
 
+    override fun getLayoutResourceId() = R.layout.activity_map
+    override fun getMenuItemId() = R.id.nav_map
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_map)
 
-        // Initialise the Google Map fragment
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        // Initialise the Google Map fragment with safe finding
+        try {
+            val mapFragment = supportFragmentManager
+                .findFragmentById(R.id.map) as? SupportMapFragment
+            
+            if (mapFragment != null) {
+                mapFragment.getMapAsync(this)
+            } else {
+                android.util.Log.e("StationMap", "Map Fragment not found in layout")
+                Toast.makeText(this, "Map could not be loaded.", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("StationMap", "Error initializing map", e)
+        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -122,13 +134,17 @@ class StationMapActivity : AppCompatActivity(), OnMapReadyCallback {
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(cameraTarget, 10f))
 
                         // Show station details card on marker click
-                        mMap.setOnMarkerClickListener { marker ->
-                            val cardView = findViewById<View>(R.id.cardStationDetails)
-                            val textName = findViewById<TextView>(R.id.textViewStationName)
-                            val textLocation = findViewById<TextView>(R.id.textViewStationLocation)
-                            val textCapacity = findViewById<TextView>(R.id.textViewStationCapacity)
-                            val textSlots = findViewById<TextView>(R.id.textViewAvailableSlots)
+                        val cardView = findViewById<View>(R.id.cardStationDetails)
+                        val textName = findViewById<TextView>(R.id.textViewStationName)
+                        val textLocation = findViewById<TextView>(R.id.textViewStationLocation)
+                        val textCapacity = findViewById<TextView>(R.id.textViewStationCapacity)
+                        val textSlots = findViewById<TextView>(R.id.textViewAvailableSlots)
+                        val buttonBookSlot = findViewById<android.widget.Button>(R.id.buttonBookSlot)
 
+                        var selectedStationTag: String? = null
+
+                        mMap.setOnMarkerClickListener { marker ->
+                            selectedStationTag = marker.tag as? String
                             textName.text = marker.title
                             val snippetParts = marker.snippet?.split("|") ?: listOf()
                             textLocation.text = snippetParts.getOrElse(0) { "Location: N/A" }.trim()
@@ -136,6 +152,16 @@ class StationMapActivity : AppCompatActivity(), OnMapReadyCallback {
                             textSlots.text = snippetParts.getOrElse(2) { "Slots: N/A" }.trim()
                             cardView.visibility = View.VISIBLE
                             false
+                        }
+
+                        buttonBookSlot.setOnClickListener {
+                            if (selectedStationTag != null) {
+                                val intent = android.content.Intent(this, com.smartsolar.modules.prosumer.ReserveSlotActivity::class.java)
+                                intent.putExtra("STATION_ID", selectedStationTag)
+                                startActivity(intent)
+                            } else {
+                                Toast.makeText(this, "Please select a station first", Toast.LENGTH_SHORT).show()
+                            }
                         }
 
                     } catch (e: Exception) {

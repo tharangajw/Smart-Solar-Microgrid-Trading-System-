@@ -11,9 +11,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/logo"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:roundIcon="@drawable/logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.SmartSolarMicrogrid"
         android:usesCleartextTraffic="true"
@@ -45,6 +45,12 @@
 
         <!-- Prosumer -->
         <activity android:name=".modules.prosumer.ProsumerDashboardActivity" android:exported="false" />
+        <activity android:name=".modules.prosumer.ReserveSlotActivity" android:exported="false" />
+        <activity android:name=".modules.prosumer.MyBookingsActivity" android:exported="false" />
+        <activity android:name=".modules.prosumer.SearchBookingActivity" android:exported="false" />
+        <activity android:name=".modules.prosumer.ReservationDetailActivity" android:exported="false" />
+        <activity android:name=".modules.prosumer.UpdateReservationActivity" android:exported="false" />
+        <activity android:name=".modules.prosumer.BookingSummaryActivity" android:exported="false" />
 
         <!-- Map & Reservations -->
         <activity android:name=".modules.map.StationMapActivity" android:exported="false" />
@@ -55,6 +61,7 @@
 
         <!-- Operator -->
         <activity android:name=".modules.operator.OperatorDashboardActivity" android:exported="false" />
+        <activity android:name=".modules.operator.AlertsActivity" android:exported="false" />
 
     </application>
 

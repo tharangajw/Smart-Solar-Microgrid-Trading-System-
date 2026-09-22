@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SmartSolarMicrogrid</string>
+    <string name="app_name">SolarLink</string>
     <string name="next">Next →</string>
     <string name="get_started">Get Started →</string>
 </resources>

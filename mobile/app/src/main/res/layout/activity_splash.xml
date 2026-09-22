@@ -4,9 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_splash_gradient">
-
-    <!-- Top Badge -->
+    android:background="@color/backgroundColor">
 
     <!-- Center Logo Container -->
     <LinearLayout
@@ -18,34 +16,11 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-
         <ImageView
             android:layout_width="436dp"
             android:layout_height="169dp"
             android:layout_gravity="center"
             android:src="@drawable/logo" />
-
-
-        <!-- Brand Text -->
-        <TextView
-            android:id="@+id/voltGridTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:fontFamily="sans-serif-black"
-            android:letterSpacing="0.02"
-            android:text="VOLTGRID"
-            android:textColor="@color/white"
-            android:textSize="36sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Smart Solar Microgrid Trading"
-            android:textColor="#8A9BC0"
-            android:textSize="15sp" />
 
         <!-- Progress Bar -->
         <com.google.android.material.progressindicator.LinearProgressIndicator
@@ -53,8 +28,8 @@
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            app:trackColor="#1E293B"
-            app:indicatorColor="#00C853"
+            app:trackColor="@color/dividerColor"
+            app:indicatorColor="@color/colorPrimary"
             app:trackThickness="4dp"
             app:trackCornerRadius="2dp"
             android:progress="0"
@@ -74,15 +49,16 @@
                 android:layout_width="14dp"
                 android:layout_height="14dp"
                 android:src="@android:drawable/stat_notify_sync"
-                app:tint="#00C853" />
+                app:tint="@color/colorPrimary" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
                 android:text="Grid Online"
-                android:textColor="@color/white"
-                android:textSize="12sp" />
+                android:textColor="@color/textColorPrimary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
     </LinearLayout>
@@ -109,14 +85,14 @@
                 android:layout_width="12dp"
                 android:layout_height="12dp"
                 android:src="@drawable/ic_voltgrid_bolt"
-                app:tint="#00C853" />
+                app:tint="@color/colorPrimary" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
-                android:text="Powered by VoltGrid Clean-Tech Energy"
-                android:textColor="#8A9BC0"
+                android:text="Powered by SolarLink Clean-Tech Energy"
+                android:textColor="@color/textColorSecondary"
                 android:textSize="11sp" />
         </LinearLayout>
     </LinearLayout>

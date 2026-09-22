@@ -9,7 +9,7 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.button.MaterialButton
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.smartsolar.R
 import com.smartsolar.modules.authentication.LoginActivity
 import java.util.ArrayList
@@ -18,7 +18,7 @@ class OnboardingActivity : AppCompatActivity() {
 
     private lateinit var onboardingAdapter: OnboardingAdapter
     private lateinit var layoutIndicators: LinearLayout
-    private lateinit var buttonNext: MaterialButton
+    private lateinit var fabNext: ExtendedFloatingActionButton
     private lateinit var textSkip: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,7 +26,7 @@ class OnboardingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_onboarding)
 
         layoutIndicators = findViewById(R.id.layoutIndicators)
-        buttonNext = findViewById(R.id.buttonNext)
+        fabNext = findViewById(R.id.fabNext)
         textSkip = findViewById(R.id.textSkip)
 
         setupOnboardingItems()
@@ -35,21 +35,24 @@ class OnboardingActivity : AppCompatActivity() {
         setupIndicators()
         setCurrentIndicator(0)
 
+        // Initial FAB state
+        fabNext.shrink()
+
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 setCurrentIndicator(position)
                 if (position == (onboardingAdapter.itemCount - 1)) {
-                    buttonNext.text = getString(R.string.get_started)
+                    fabNext.extend()
                     textSkip.visibility = View.INVISIBLE
                 } else {
-                    buttonNext.text = getString(R.string.next)
+                    fabNext.shrink()
                     textSkip.visibility = View.VISIBLE
                 }
             }
         })
 
-        buttonNext.setOnClickListener {
+        fabNext.setOnClickListener {
             if (viewPager.currentItem + 1 < onboardingAdapter.itemCount) {
                 viewPager.currentItem += 1
             } else {

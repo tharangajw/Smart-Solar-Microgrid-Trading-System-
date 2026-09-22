@@ -56,4 +56,8 @@ dependencies {
     // ZXing for QR Scanning
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+
+    // Kotlin Coroutines — required for lifecycleScope + Dispatchers.IO
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 }
