@@ -61,6 +61,7 @@
 
         <!-- Operator -->
         <activity android:name=".modules.operator.OperatorDashboardActivity" android:exported="false" />
+        <activity android:name=".modules.operator.AlertsActivity" android:exported="false" />
 
     </application>
 

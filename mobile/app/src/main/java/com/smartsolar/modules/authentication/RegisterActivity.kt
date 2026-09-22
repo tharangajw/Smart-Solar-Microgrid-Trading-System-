@@ -9,24 +9,23 @@ package com.smartsolar.modules.authentication
  */
 
 import android.os.Bundle
-import android.os.StrictMode
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.smartsolar.R
 import com.smartsolar.data.remote.ApiClient
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 class RegisterActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
-
-        // Allow network on main thread for simplicity (assignment scope)
-        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
 
         val editNic = findViewById<EditText>(R.id.editTextNic)
         val editName = findViewById<EditText>(R.id.editTextName)
@@ -50,22 +49,28 @@ class RegisterActivity : AppCompatActivity() {
             // Build JSON body
             val body = JSONObject().apply {
                 put("nic", nic)
-                put("fullName", name) // Backend expects fullName
+                put("fullName", name) 
                 put("email", email)
                 put("password", password)
-                put("phoneNumber", "0000000000") // Required fields for backend
+                put("phoneNumber", "0000000000")
                 put("address", "N/A")
                 put("solarCapacityKw", 0.0)
             }
 
-            // Call API
-            val result = ApiClient.post(this, "auth/register", body)
+            buttonRegister.isEnabled = false
+            lifecycleScope.launch(Dispatchers.IO) {
+                // Call API
+                val result = ApiClient.post(this@RegisterActivity, "auth/register", body)
 
-            if (result.isSuccess) {
-                Toast.makeText(this, "Registration Successful! Please login after activation.", Toast.LENGTH_LONG).show()
-                finish() // Go back to Login screen
-            } else {
-                Toast.makeText(this, result.message ?: "Registration failed", Toast.LENGTH_LONG).show()
+                withContext(Dispatchers.Main) {
+                    buttonRegister.isEnabled = true
+                    if (result.isSuccess) {
+                        Toast.makeText(this@RegisterActivity, "Registration Successful! Please login after activation.", Toast.LENGTH_LONG).show()
+                        finish() 
+                    } else {
+                        Toast.makeText(this@RegisterActivity, result.message ?: "Registration failed", Toast.LENGTH_LONG).show()
+                    }
+                }
             }
         }
         

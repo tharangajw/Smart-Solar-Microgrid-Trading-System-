@@ -27,15 +27,24 @@ abstract class BaseNavActivity : AppCompatActivity() {
 
         // Inflate the child activity's layout into the container
         val container = findViewById<FrameLayout>(R.id.contentContainer)
-        layoutInflater.inflate(getLayoutResourceId(), container, true)
+        if (container != null) {
+            layoutInflater.inflate(getLayoutResourceId(), container, true)
+        } else {
+            android.util.Log.e("BaseNav", "contentContainer not found in activity_base_nav")
+        }
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         val fab = findViewById<FloatingActionButton>(R.id.fabAction)
 
+        if (bottomNav == null || fab == null) {
+            android.util.Log.e("BaseNav", "Navigation components not found")
+            return
+        }
+
         val role = SessionManager(this).getRole()?.lowercase() ?: ""
 
-        // Setup menu and FAB based on role
-        if (role == "operator") {
+        // Setup menu and FAB based on role (handles "GridOperator" or "Operator")
+        if (role.contains("operator")) {
             bottomNav.inflateMenu(R.menu.menu_operator_nav)
             fab.setImageResource(android.R.drawable.ic_menu_camera)
             fab.setOnClickListener {
@@ -63,7 +72,7 @@ abstract class BaseNavActivity : AppCompatActivity() {
 
             when (item.itemId) {
                 R.id.nav_home -> {
-                    val intent = if (role == "operator") {
+                    val intent = if (role.contains("operator")) {
                         Intent(this, OperatorDashboardActivity::class.java)
                     } else {
                         Intent(this, ProsumerDashboardActivity::class.java)
@@ -72,6 +81,7 @@ abstract class BaseNavActivity : AppCompatActivity() {
                 }
                 R.id.nav_map -> startActivity(Intent(this, StationMapActivity::class.java))
                 R.id.nav_bookings -> startActivity(Intent(this, MyBookingsActivity::class.java))
+                R.id.nav_alerts -> startActivity(Intent(this, com.smartsolar.modules.operator.AlertsActivity::class.java))
                 R.id.nav_profile -> startActivity(Intent(this, ProfileActivity::class.java))
             }
             overridePendingTransition(0, 0)
@@ -105,6 +115,12 @@ abstract class BaseNavActivity : AppCompatActivity() {
                 customTopBar?.visibility = View.VISIBLE
                 titleText?.text = "My Bookings"
                 subtitleText?.text = "Manage your slots"
+                btnBack?.visibility = android.view.View.VISIBLE
+            }
+            R.id.nav_alerts -> {
+                customTopBar?.visibility = View.VISIBLE
+                titleText?.text = "System Alerts"
+                subtitleText?.text = "Grid notifications"
                 btnBack?.visibility = android.view.View.VISIBLE
             }
             R.id.nav_profile -> {

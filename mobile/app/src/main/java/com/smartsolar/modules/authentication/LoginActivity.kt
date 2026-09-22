@@ -89,25 +89,31 @@ class LoginActivity : AppCompatActivity() {
                             val name = json.optString("fullName", "User")
                             val nic = json.optString("nic", identifier)
                             val userId = json.optString("userId", "0")
+                            val email = json.optString("email", "")
 
                             // 1. Save to SharedPreferences
-                            sessionManager.saveSession(token, role, nic)
+                            sessionManager.saveSession(token, role, nic, name, email)
 
                             // 2. Save to SQLite
-                            val user = User(userId, nic, name, json.optString("email", ""), role, token)
+                            val user = User(userId, nic, name, email, role, token)
                             UserDao(this@LoginActivity).insertUser(user)
 
                             Log.d("Login", "Login successful, role: $role")
 
-                            // 3. Route based on role
-                            val destination = if (role.equals("GridOperator", ignoreCase = true)) {
-                                OperatorDashboardActivity::class.java
-                            } else {
-                                ProsumerDashboardActivity::class.java
-                            }
+                            try {
+                                // 3. Route based on role
+                                val destination = if (role.equals("GridOperator", ignoreCase = true)) {
+                                    OperatorDashboardActivity::class.java
+                                } else {
+                                    ProsumerDashboardActivity::class.java
+                                }
 
-                            startActivity(Intent(this@LoginActivity, destination))
-                            finish()
+                                startActivity(Intent(this@LoginActivity, destination))
+                                finish()
+                            } catch (e: Exception) {
+                                Log.e("Login", "Navigation error: ${e.message}")
+                                Toast.makeText(this@LoginActivity, "App error during navigation.", Toast.LENGTH_SHORT).show()
+                            }
 
                         } catch (e: Exception) {
                             Log.e("Login", "Parsing error: ${e.message}")

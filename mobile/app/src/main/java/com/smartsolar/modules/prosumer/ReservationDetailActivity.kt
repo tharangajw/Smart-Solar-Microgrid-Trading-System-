@@ -70,6 +70,20 @@ class ReservationDetailActivity : AppCompatActivity() {
 
                         content.visibility = View.VISIBLE
 
+                        val buttonViewQR = findViewById<Button>(R.id.buttonViewQR)
+                        val qrCodeId = obj.optString("qrCodeId").trim()
+                        
+                        if (status.equals("Approved", true) && qrCodeId.isNotEmpty()) {
+                            buttonViewQR.visibility = View.VISIBLE
+                            buttonViewQR.setOnClickListener {
+                                val intent = Intent(this@ReservationDetailActivity, com.smartsolar.modules.qr.QRDisplayActivity::class.java)
+                                intent.putExtra("RESERVATION_DATA", obj.toString())
+                                startActivity(intent)
+                            }
+                        } else {
+                            buttonViewQR.visibility = View.GONE
+                        }
+
                         val layoutActions = findViewById<View>(R.id.layoutActions)
                         if (status.equals("Pending", true) || status.equals("Approved", true)) {
                             layoutActions.visibility = View.VISIBLE

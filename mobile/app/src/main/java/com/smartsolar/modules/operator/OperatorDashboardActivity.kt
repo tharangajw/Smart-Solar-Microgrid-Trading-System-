@@ -12,11 +12,15 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.smartsolar.modules.common.BaseNavActivity
 import com.smartsolar.R
 import com.smartsolar.data.remote.ApiClient
 import com.smartsolar.modules.qr.QRScannerActivity
 import com.smartsolar.utils.SessionManager
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 class OperatorDashboardActivity : BaseNavActivity() {
@@ -27,11 +31,14 @@ class OperatorDashboardActivity : BaseNavActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val session = SessionManager(this)
+        val name = session.getName() ?: "Operator"
+        findViewById<TextView>(R.id.textViewGreeting).text = "Hello, $name!"
+
         val buttonScanQr = findViewById<View>(R.id.buttonScanQr)
         val buttonViewMap = findViewById<View>(R.id.buttonViewMap)
         val textBattery = findViewById<TextView>(R.id.textViewAvailableBattery)
         val textJobs = findViewById<TextView>(R.id.textViewPendingJobs)
-        val buttonLogout = findViewById<View>(R.id.buttonLogout)
 
         // Load statistics from Web Service
         loadOperatorStats(textBattery, textJobs)
@@ -43,42 +50,31 @@ class OperatorDashboardActivity : BaseNavActivity() {
         buttonViewMap.setOnClickListener {
             startActivity(Intent(this, com.smartsolar.modules.map.StationMapActivity::class.java))
         }
-
-        // Current Bookings and History removed per user request
-        
-        buttonLogout.setOnClickListener {
-            logout()
-        }
     }
 
     /** Fetches station status and pending counts from API */
     private fun loadOperatorStats(textBattery: TextView, textJobs: TextView) {
-        Thread {
-            val response = ApiClient.get(this, "operator/dashboard")
-            runOnUiThread {
-                if (response != null) {
-                    try {
-                        val json = JSONObject(response)
-                        // Backend might return availableSlots as a count, UI expects status
-                        val slots = json.optString("availableSlots", "0")
-                        val pending = json.optString("pendingCount", "0")
-                        
-                        textBattery.text = if (slots.toIntOrNull() != null) "$slots kWh" else slots
-                        textJobs.text = if (pending.toInt() < 10) "0$pending" else pending
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+        lifecycleScope.launch(Dispatchers.IO) {
+            val response = ApiClient.get(this@OperatorDashboardActivity, "operator/dashboard")
+            if (response != null) {
+                try {
+                    val json = JSONObject(response)
+                    val slots = json.optString("availableSlots", "0")
+                    val pending = json.optString("pendingCount", "0")
+                    
+                    // Parse counts safely to avoid crashes
+                    val pendingInt = pending.toIntOrNull() ?: 0
+                    val pendingDisplay = if (pendingInt < 10) "0$pendingInt" else pendingInt.toString()
+                    val batteryDisplay = if (slots.toDoubleOrNull() != null) "$slots kWh" else slots
+
+                    withContext(Dispatchers.Main) {
+                        textBattery.text = batteryDisplay
+                        textJobs.text = pendingDisplay
                     }
+                } catch (e: Exception) {
+                    android.util.Log.e("OperatorDashboard", "Parsing error", e)
                 }
             }
-        }.start()
-    }
-
-    /** Logout logic – clears local persistence */
-    private fun logout() {
-        SessionManager(this).logout()
-        val intent = Intent(this, com.smartsolar.modules.authentication.LoginActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finish()
+        }
     }
 }
