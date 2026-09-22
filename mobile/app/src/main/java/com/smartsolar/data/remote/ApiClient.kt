@@ -14,7 +14,7 @@ data class ApiResult(val isSuccess: Boolean, val body: String?, val message: Str
 object ApiClient {
 
     private fun getBaseUrl(context: Context): String {
-        val ip = SessionManager(context).getServerIp()
+        val ip = SessionManager(context).getServerIp().trim()
         // If the user just typed the IP (like 192.168.1.5), we add the protocol and port
         return if (ip.startsWith("http")) "$ip/api" else "http://$ip:5281/api"
     }
@@ -32,8 +32,8 @@ object ApiClient {
                 connection.setRequestProperty("Authorization", "Bearer $token")
             }
 
-            connection.connectTimeout = 10000
-            connection.readTimeout = 10000
+            connection.connectTimeout = 8000
+            connection.readTimeout = 8000
 
             val responseCode = connection.responseCode
             android.util.Log.d("ApiClient", "GET $endpoint - URL: $url - Response: $responseCode")
@@ -61,8 +61,9 @@ object ApiClient {
 
     private fun request(context: Context, method: String, endpoint: String, body: JSONObject?): ApiResult {
         val baseUrl = getBaseUrl(context)
+        val fullUrl = "$baseUrl/$endpoint"
         return try {
-            val url = URL("$baseUrl/$endpoint")
+            val url = URL(fullUrl)
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = method
             connection.setRequestProperty("Content-Type", "application/json")
@@ -72,8 +73,8 @@ object ApiClient {
                 connection.setRequestProperty("Authorization", "Bearer $token")
             }
 
-            connection.connectTimeout = 15000
-            connection.readTimeout = 15000
+            connection.connectTimeout = 10000
+            connection.readTimeout = 10000
 
             if (body != null) {
                 connection.doOutput = true
@@ -108,8 +109,8 @@ object ApiClient {
                 ApiResult(false, responseBody, errorMsg)
             }
         } catch (e: Exception) {
-            android.util.Log.e("ApiClient", "Network Error: ${e.message}")
-            ApiResult(false, null, "Network error. Please check WiFi/Backend.")
+            android.util.Log.e("ApiClient", "Network Error at $fullUrl: ${e.message}")
+            ApiResult(false, null, "Connection failed: ${e.message}\nCheck IP: $fullUrl")
         }
     }
 }
