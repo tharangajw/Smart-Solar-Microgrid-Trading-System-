@@ -31,7 +31,7 @@ const Navbar = () => {
   };
 
   const handleLoginClick = () => {
-    navigate('/backoffice/login');
+    navigate('/login');
   };
 
   return (

@@ -1,8 +1,16 @@
 import React from 'react';
+<<<<<<< HEAD
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import MicrogridNodesPage from './Modules/Microgrid/MicrogridNodesPage';
 import EnergySlotsPage from './Modules/EnergySlots/EnergySlotsPage';
 import MapPage from './Modules/Map/MapPage';
+=======
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import HomePage from './Modules/Home/HomePage';
+import DashboardPage from './Modules/Dashboard/DashboardPage';
+import Login from './Modules/Authentication/Login';
+import Register from './Modules/Authentication/Register';
+>>>>>>> 860e13e70d6836791b86a175b30a7eb2d83b60ec
 import './App.css';
 
 import HomePage from './Modules/Home/HomePage';
@@ -29,28 +37,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/dashboard" element={<Navigate to="/backoffice/dashboard" replace />} />
-
-        <Route path="/backoffice/login" element={<BackofficeLogin />} />
-        <Route element={<BackofficeRoute />}>
-          <Route path="/backoffice" element={<BackofficeLayout />}>
-            <Route index element={<Navigate to="pending" replace />} />
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="pending" element={<PendingActivationsPage />} />
-            <Route path="prosumers" element={<ProsumerManagementPage />} />
-          </Route>
-        </Route>
-
-        <Route path="/operator/login" element={<OperatorLogin />} />
-        <Route element={<OperatorRoute />}>
-          <Route path="/operator" element={<OperatorLayout />}>
-            <Route path="dashboard" element={<OperatorDashboard />} />
-            <Route path="bookings" element={<BookingMonitoring />} />
-            <Route path="bookings/:id" element={<BookingDetails />} />
-            <Route path="slots" element={<SlotAvailability />} />
-            <Route path="map" element={<StationsMap />} />
-          </Route>
-        </Route>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/reservations" element={<ReservationsPage />} />
         <Route path="/reservations/:id" element={<ReservationDetailPage />} />

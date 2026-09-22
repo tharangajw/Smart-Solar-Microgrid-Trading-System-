@@ -357,5 +357,11 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+
+        // Generate JWT token for OAuth user
+        public async Task<string> GenerateJwtTokenForUser(User user)
+        {
+            return await Task.FromResult(GenerateJwtToken(user));
+        }
     }
 }

@@ -1,0 +1,8 @@
+meta:
+  name: Facebook OAuth Challenge
+  type: http
+  seq: 4
+
+get:
+  url: http://localhost:5281/api/auth/facebook-login
+  auth: none

@@ -1,0 +1,19 @@
+meta:
+  name: User Registration
+  type: http
+  seq: 2
+
+post:
+  url: http://localhost:5281/api/auth/register
+  body: json
+  auth: none
+
+body:json: |
+  {
+    "email": "testuser@example.com",
+    "password": "Test@123",
+    "nic": "123456789V",
+    "firstName": "Test",
+    "lastName": "User",
+    "phoneNumber": "0771234567"
+  }

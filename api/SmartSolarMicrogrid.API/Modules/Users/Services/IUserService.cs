@@ -47,5 +47,8 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
 
     // Delete user (Backoffice only)
         Task<bool> DeleteUserAsync(string id);
+
+    // Generate JWT token for OAuth user
+        Task<string> GenerateJwtTokenForUser(User user);
     }
 }
