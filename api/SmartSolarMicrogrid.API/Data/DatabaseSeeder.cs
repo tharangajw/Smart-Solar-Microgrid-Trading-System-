@@ -2,6 +2,7 @@ using BCrypt.Net;
 using MongoDB.Driver;
 using SmartSolarMicrogrid.API.Modules.Users.Models;
 using SmartSolarMicrogrid.API.Modules.StationsMap.Models;
+using SmartSolarMicrogrid.API.Modules.Reservations.Models;
 
 namespace SmartSolarMicrogrid.API.Data
 {
@@ -20,6 +21,7 @@ namespace SmartSolarMicrogrid.API.Data
             await SeedBackofficeUser();
             await SeedGridOperatorUser();
             await SeedSolarStations();
+            await SeedReservations();
         }
 
 // Seed default Backoffice user if not exists
@@ -95,14 +97,53 @@ namespace SmartSolarMicrogrid.API.Data
 
             var stations = new[]
             {
-                new SolarStation { Name = "Colombo Solar Hub", Location = "Colombo 03", Latitude = 6.9271, Longitude = 79.8612, TotalSlots = 10, AvailableSlots = 7, CapacityKWh = 250, Status = "active" },
-                new SolarStation { Name = "Kandy Solar Hub", Location = "Kandy Central", Latitude = 7.2906, Longitude = 80.6337, TotalSlots = 8, AvailableSlots = 4, CapacityKWh = 180, Status = "active" },
-                new SolarStation { Name = "Galle Solar Hub", Location = "Galle Fort", Latitude = 6.0535, Longitude = 80.2210, TotalSlots = 6, AvailableSlots = 2, CapacityKWh = 120, Status = "active" },
-                new SolarStation { Name = "Jaffna Solar Hub", Location = "Jaffna Town", Latitude = 9.6615, Longitude = 80.0255, TotalSlots = 5, AvailableSlots = 0, CapacityKWh = 100, Status = "full" }
+                new SolarStation { Name = "Colombo North Hub", Location = "Colombo 13", Latitude = 6.9450, Longitude = 79.8650, TotalSlots = 50, AvailableSlots = 50, CapacityKw = 250 },
+                new SolarStation { Name = "Kandy Central Station", Location = "Kandy City Center", Latitude = 7.2906, Longitude = 80.6337, TotalSlots = 40, AvailableSlots = 40, CapacityKw = 200 },
+                new SolarStation { Name = "Galle Fort Microgrid", Location = "Galle Fort", Latitude = 6.0328, Longitude = 80.2170, TotalSlots = 30, AvailableSlots = 30, CapacityKw = 150 },
+                new SolarStation { Name = "Jaffna Solar Hub", Location = "Jaffna Town", Latitude = 9.6615, Longitude = 80.0255, TotalSlots = 60, AvailableSlots = 60, CapacityKw = 300, Status = "full" }
             };
 
             await _context.SolarStations.InsertManyAsync(stations);
             Console.WriteLine("Default solar stations created successfully.");
+        }
+
+        // Seed 2 dummy energy slot reservations for demo purposes
+        private async Task SeedReservations()
+        {
+            var reservations = _context.Database.GetCollection<Reservation>("Reservations");
+            if (await reservations.CountDocumentsAsync(_ => true) > 0)
+                return;
+
+            // Get a station to reference
+            var firstStation = await _context.SolarStations.Find(_ => true).FirstOrDefaultAsync();
+            var nodeId = firstStation?.Id ?? "unknown";
+
+            var dummyReservations = new[]
+            {
+                new Reservation
+                {
+                    ProsumerNic   = "891234567V",
+                    SlotId        = "SLOT-001",
+                    NodeId        = nodeId,
+                    ReservationDate = DateTime.UtcNow.AddDays(2),
+                    Status        = "Pending",
+                    CreatedAt     = DateTime.UtcNow,
+                    UpdatedAt     = DateTime.UtcNow
+                },
+                new Reservation
+                {
+                    ProsumerNic   = "901234568V",
+                    SlotId        = "SLOT-002",
+                    NodeId        = nodeId,
+                    ReservationDate = DateTime.UtcNow.AddDays(5),
+                    Status        = "Pending",
+                    CreatedAt     = DateTime.UtcNow,
+                    UpdatedAt     = DateTime.UtcNow
+                }
+            };
+
+            await reservations.InsertManyAsync(dummyReservations);
+            Console.WriteLine("Dummy energy slot reservations seeded successfully.");
         }
     }
 }

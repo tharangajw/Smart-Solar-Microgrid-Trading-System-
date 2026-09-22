@@ -32,7 +32,7 @@ const BackofficeLogin = () => {
 
       localStorage.setItem('backoffice_token', token);
       localStorage.setItem('backoffice_user', JSON.stringify(user));
-      navigate('/backoffice/pending');
+      navigate('/backoffice/prosumers');
     } catch (err) {
       const msg = err.response?.data?.message || 'Login failed. Check your credentials and try again.';
       setError(msg);

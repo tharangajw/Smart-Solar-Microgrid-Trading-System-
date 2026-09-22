@@ -5,6 +5,7 @@ import DashboardHeader from './components/DashboardHeader';
 import SummaryCard from './components/SummaryCard';
 import { Users, UserPlus, ShieldCheck, BatteryCharging, CalendarCheck, Zap } from 'lucide-react';
 import { getAllUsers, getPendingActivations } from '../../Services/backofficeApi';
+import backofficeApi from '../../Services/backofficeApi';
 
 const DashboardPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -13,6 +14,7 @@ const DashboardPage = () => {
   const [pendingCount, setPendingCount] = useState(0);
   const [prosumerCount, setProsumerCount] = useState(0);
   const [activeCount, setActiveCount] = useState(0);
+  const [stations, setStations] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,12 +37,17 @@ const DashboardPage = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [pendingRes, usersRes] = await Promise.all([getPendingActivations(), getAllUsers()]);
+        const [pendingRes, usersRes, stationsRes] = await Promise.all([
+          getPendingActivations(),
+          getAllUsers(),
+          backofficeApi.get('/stations'),
+        ]);
         const pending = pendingRes.data || [];
         const prosumers = (usersRes.data || []).filter((user) => user.role === 'Prosumer');
         setPendingCount(pending.length);
         setProsumerCount(prosumers.length);
         setActiveCount(prosumers.filter((user) => user.isActive).length);
+        setStations(stationsRes.data || []);
       } catch {
         setPendingCount(0);
       }
@@ -185,23 +192,34 @@ const DashboardPage = () => {
                 <h2 className="font-display text-lg font-semibold text-forest mb-6">Microgrid Status</h2>
                 
                 <div className="space-y-4">
-                  {[
-                    { name: 'North Campus Solar', capacity: '85%', status: 'optimal' },
-                    { name: 'Library Hub', capacity: '42%', status: 'warning' },
-                    { name: 'Engineering Bldg', capacity: '98%', status: 'optimal' },
-                  ].map((station, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-forest/5 transition-colors border border-transparent hover:border-forest/10">
-                      <div>
-                        <p className="font-medium text-sm text-charcoal">{station.name}</p>
-                        <p className="text-xs text-charcoal-light mt-0.5">Capacity: {station.capacity}</p>
-                      </div>
-                      <div className={`w-2 h-2 rounded-full ${station.status === 'optimal' ? 'bg-leaf' : 'bg-solar'}`}></div>
-                    </div>
-                  ))}
+                  {stations.length === 0 ? (
+                    <p className="text-sm text-charcoal-light text-center py-4">No stations available.</p>
+                  ) : (
+                    stations.slice(0, 5).map((station) => {
+                      const usedPct = station.totalSlots > 0
+                        ? Math.round(((station.totalSlots - station.availableSlots) / station.totalSlots) * 100)
+                        : 0;
+                      const isOptimal = station.isActive && station.status !== 'full';
+                      return (
+                        <div key={station.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-forest/5 transition-colors border border-transparent hover:border-forest/10">
+                          <div>
+                            <p className="font-medium text-sm text-charcoal">{station.name}</p>
+                            <p className="text-xs text-charcoal-light mt-0.5">
+                              {station.isActive ? `Slots used: ${usedPct}%` : 'Inactive'}
+                            </p>
+                          </div>
+                          <div className={`w-2 h-2 rounded-full ${
+                            !station.isActive ? 'bg-red-400' :
+                            station.status === 'full' ? 'bg-solar' : 'bg-leaf'
+                          }`} />
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
-                <button className="w-full mt-4 py-2 text-sm font-medium border border-forest/20 rounded-xl text-forest hover:bg-forest hover:text-ivory transition-colors">
+                <Link to="/backoffice/nodes" className="block w-full mt-4 py-2 text-sm font-medium text-center border border-forest/20 rounded-xl text-forest hover:bg-forest hover:text-ivory transition-colors">
                   View All Stations
-                </button>
+                </Link>
               </section>
 
               {/* Recent Transactions */}
@@ -235,7 +253,7 @@ const DashboardPage = () => {
       <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-forest/5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-lg font-semibold text-forest">Activation queue</h2>
-          <Link to="/backoffice/pending" className="text-sm font-medium text-sage hover:text-forest transition-colors">
+          <Link to="/backoffice/prosumers" className="text-sm font-medium text-sage hover:text-forest transition-colors">
             Open pending list
           </Link>
         </div>

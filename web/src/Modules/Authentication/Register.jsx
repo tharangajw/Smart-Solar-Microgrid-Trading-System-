@@ -57,18 +57,18 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8">
+    <div className="min-h-screen bg-ivory flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8 border border-forest/10">
         <div className="flex justify-center mb-8">
-          <div className="bg-gradient-to-r from-green-500 to-blue-500 p-3 rounded-full">
-            <Zap className="w-8 h-8 text-white" />
+          <div className="bg-forest p-3 rounded-full">
+            <Zap className="w-8 h-8 text-ivory" />
           </div>
         </div>
         
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-2">
+        <h1 className="text-2xl font-bold text-center text-forest mb-2">
           Smart Solar Microgrid
         </h1>
-        <p className="text-center text-gray-600 mb-8">
+        <p className="text-center text-charcoal-light mb-8">
           Register as a Prosumer
         </p>
 
@@ -79,7 +79,7 @@ export default function Register() {
         )}
 
         {success && (
-          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg mb-6">
             {success}
           </div>
         )}
@@ -87,17 +87,17 @@ export default function Register() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-charcoal mb-2">
                 NIC Number
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-forest/40 w-5 h-5" />
                 <input
                   type="text"
                   name="nic"
                   value={formData.nic}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                  className="w-full pl-10 pr-4 py-3 border border-forest/20 rounded-lg focus:ring-2 focus:ring-forest focus:border-transparent outline-none transition"
                   placeholder="901234567V"
                   required
                 />
@@ -105,17 +105,17 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-charcoal mb-2">
                 Full Name
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-forest/40 w-5 h-5" />
                 <input
                   type="text"
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                  className="w-full pl-10 pr-4 py-3 border border-forest/20 rounded-lg focus:ring-2 focus:ring-forest focus:border-transparent outline-none transition"
                   placeholder="John Doe"
                   required
                 />
@@ -123,17 +123,17 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-charcoal mb-2">
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-forest/40 w-5 h-5" />
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                  className="w-full pl-10 pr-4 py-3 border border-forest/20 rounded-lg focus:ring-2 focus:ring-forest focus:border-transparent outline-none transition"
                   placeholder="john@example.com"
                   required
                 />
@@ -141,17 +141,17 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-charcoal mb-2">
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-forest/40 w-5 h-5" />
                 <input
                   type="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                  className="w-full pl-10 pr-4 py-3 border border-forest/20 rounded-lg focus:ring-2 focus:ring-forest focus:border-transparent outline-none transition"
                   placeholder="Min 6 characters"
                   required
                   minLength="6"
@@ -160,34 +160,34 @@ export default function Register() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-charcoal mb-2">
                 Phone Number
               </label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-forest/40 w-5 h-5" />
                 <input
                   type="tel"
                   name="phoneNumber"
                   value={formData.phoneNumber}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                  className="w-full pl-10 pr-4 py-3 border border-forest/20 rounded-lg focus:ring-2 focus:ring-forest focus:border-transparent outline-none transition"
                   placeholder="0771234567"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-charcoal mb-2">
                 Solar Capacity (kW)
               </label>
               <div className="relative">
-                <Zap className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Zap className="absolute left-3 top-1/2 transform -translate-y-1/2 text-forest/40 w-5 h-5" />
                 <input
                   type="number"
                   name="solarCapacityKw"
                   value={formData.solarCapacityKw}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition"
+                  className="w-full pl-10 pr-4 py-3 border border-forest/20 rounded-lg focus:ring-2 focus:ring-forest focus:border-transparent outline-none transition"
                   placeholder="5.5"
                   step="0.1"
                   min="0"
@@ -197,16 +197,16 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-charcoal mb-2">
               Address
             </label>
             <div className="relative">
-              <MapPin className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+              <MapPin className="absolute left-3 top-3 text-forest/40 w-5 h-5" />
               <textarea
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition resize-none"
+                className="w-full pl-10 pr-4 py-3 border border-forest/20 rounded-lg focus:ring-2 focus:ring-forest focus:border-transparent outline-none transition resize-none"
                 placeholder="123 Main St, Colombo"
                 rows="3"
               />
@@ -216,17 +216,17 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-3 rounded-lg font-semibold hover:from-green-600 hover:to-blue-600 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-forest text-ivory py-3 rounded-lg font-semibold hover:bg-forest/90 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Registering...' : 'Register'}
           </button>
         </form>
 
-        <p className="text-center text-gray-600 mt-6">
+        <p className="text-center text-charcoal-light mt-6">
           Already have an account?{' '}
           <button
             onClick={() => navigate('/login')}
-            className="text-green-600 font-semibold hover:text-green-700"
+            className="text-forest font-semibold hover:text-leaf transition-colors"
           >
             Sign In
           </button>

@@ -10,6 +10,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace SmartSolarMicrogrid.API.Modules.StationsMap.Models
 {
+    [BsonIgnoreExtraElements]
     public class SolarStation
     {
         // MongoDB primary key
@@ -21,7 +22,7 @@ namespace SmartSolarMicrogrid.API.Modules.StationsMap.Models
         public string Name { get; set; } = null!;
 
         // Physical location description
-        public string Location { get; set; } = null!;
+        public string? Location { get; set; }
 
         // GPS latitude for Google Maps plotting
         public double Latitude { get; set; }
@@ -35,11 +36,16 @@ namespace SmartSolarMicrogrid.API.Modules.StationsMap.Models
         // Currently available battery slots
         public int AvailableSlots { get; set; }
 
-        // Maximum energy capacity in kWh
-        public double CapacityKWh { get; set; }
+        // Maximum energy capacity in kW
+        public double CapacityKw { get; set; }
+        
+        // Operational schedule (e.g., "06:00 - 18:00")
+        public string? Schedule { get; set; }
 
         // Operational status: "active", "inactive", "full"
-        public string Status { get; set; } = "active";
+        public string? Status { get; set; } = "active";
+
+        public bool IsActive { get; set; } = true;
 
         // Timestamp when the station was registered
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

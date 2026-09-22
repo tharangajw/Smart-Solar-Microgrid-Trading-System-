@@ -2,9 +2,10 @@
 
   <PropertyGroup>
     <!-- Target .NET 8 LTS – compatible with all referenced packages -->
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UseAppHost>false</UseAppHost>
   </PropertyGroup>
 
   <ItemGroup>

@@ -158,11 +158,10 @@ const OperatorLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const operator = JSON.parse(localStorage.getItem('operator_user') || '{}');
 
-  // Handle logout: clear session and redirect to login
   const handleLogout = () => {
     localStorage.removeItem('operator_token');
     localStorage.removeItem('operator_user');
-    navigate('/operator/login');
+    navigate('/');
   };
 
   return (

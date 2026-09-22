@@ -31,7 +31,20 @@ const Navbar = () => {
   };
 
   const handleLoginClick = () => {
-    navigate('/backoffice/login');
+    // Check if user is already logged in
+    const backofficeToken = localStorage.getItem('backoffice_token');
+    const operatorToken = localStorage.getItem('operator_token');
+    const token = localStorage.getItem('token');
+
+    if (backofficeToken) {
+      navigate('/backoffice/dashboard');
+    } else if (operatorToken) {
+      navigate('/operator/dashboard');
+    } else if (token) {
+      navigate('/dashboard');
+    } else {
+      navigate('/login');
+    }
   };
 
   return (
@@ -91,7 +104,7 @@ const Navbar = () => {
             onClick={handleLoginClick}
             className="border border-forest text-forest hover:bg-forest hover:text-ivory rounded-full px-6 py-2 text-sm font-medium transition-all duration-300"
           >
-            Backoffice Login
+            Login
           </button>
         </div>
 
@@ -156,7 +169,7 @@ const Navbar = () => {
             onClick={handleLoginClick}
             className="border border-forest text-forest hover:bg-forest hover:text-ivory rounded-full px-6 py-2 text-sm font-medium transition-all duration-300 w-fit mt-4"
           >
-            Backoffice Login
+            Login
           </button>
         </div>
       </div>

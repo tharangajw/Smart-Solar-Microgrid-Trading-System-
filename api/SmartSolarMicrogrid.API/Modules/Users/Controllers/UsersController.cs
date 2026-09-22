@@ -200,6 +200,21 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Controllers
             return Ok(new { message });
         }
 
+// Create Grid Operator (Backoffice only)
+        [HttpPost("grid-operator")]
+        [Authorize(Roles = UserRoles.Backoffice)]
+        public async Task<IActionResult> CreateGridOperator([FromBody] CreateGridOperatorRequest request)
+        {
+            var user = await _userService.CreateGridOperatorAsync(request);
+
+            if (user == null)
+            {
+                return BadRequest(new { message = "Failed to create Grid Operator" });
+            }
+
+            return Ok(user);
+        }
+
 // Delete user (Backoffice only)
         [HttpDelete("{id}")]
         [Authorize(Roles = UserRoles.Backoffice)]

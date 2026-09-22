@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SmartSolarMicrogrid.API.Modules.Reservations.DTOs;
 using SmartSolarMicrogrid.API.Modules.Reservations.Exceptions;
@@ -30,6 +30,10 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Controllers
                 return BadRequest(new { message = ex.Message });
             }
             catch (StationUnavailableException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
             }

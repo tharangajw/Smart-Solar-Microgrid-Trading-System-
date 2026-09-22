@@ -12,15 +12,18 @@ import OperatorDashboard from './Modules/Operator/pages/OperatorDashboard';
 import BookingMonitoring from './Modules/Operator/pages/BookingMonitoring';
 import BookingDetails from './Modules/Operator/pages/BookingDetails';
 import SlotAvailability from './Modules/Operator/pages/SlotAvailability';
-import OperatorLogin from './Modules/Operator/pages/OperatorLogin';
 import StationsMap from './Modules/Operator/pages/StationsMap';
 import OperatorRoute from './Routes/OperatorRoute';
 
 import BackofficeLayout from './Modules/Backoffice/Layout/BackofficeLayout';
-import BackofficeLogin from './Modules/Backoffice/pages/BackofficeLogin';
+import BackofficeDashboard from './Modules/Backoffice/pages/BackofficeDashboard';
+import GridOperatorsPage from './Modules/Backoffice/pages/GridOperatorsPage';
+import MicrogridNodesPage from './Modules/Backoffice/pages/MicrogridNodesPage';
 import PendingActivationsPage from './Modules/Backoffice/pages/PendingActivationsPage';
 import ProsumerManagementPage from './Modules/Backoffice/pages/ProsumerManagementPage';
+import ReservationManagementPage from './Modules/Backoffice/pages/ReservationManagementPage';
 import BackofficeRoute from './Routes/BackofficeRoute';
+import ProsumerRoute from './Routes/ProsumerRoute';
 import ReservationsPage from './Modules/Reservations/ReservationsPage';
 import ReservationDetailPage from './Modules/Reservations/ReservationDetailPage';
 
@@ -31,19 +34,19 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Navigate to="/backoffice/dashboard" replace />} />
 
-        <Route path="/backoffice/login" element={<BackofficeLogin />} />
         <Route element={<BackofficeRoute />}>
           <Route path="/backoffice" element={<BackofficeLayout />}>
             <Route index element={<Navigate to="pending" replace />} />
-            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="dashboard" element={<BackofficeDashboard />} />
+            <Route path="operators" element={<GridOperatorsPage />} />
+            <Route path="nodes" element={<MicrogridNodesPage />} />
             <Route path="pending" element={<PendingActivationsPage />} />
             <Route path="prosumers" element={<ProsumerManagementPage />} />
+            <Route path="reservations" element={<ReservationManagementPage />} />
           </Route>
         </Route>
 
-        <Route path="/operator/login" element={<OperatorLogin />} />
         <Route element={<OperatorRoute />}>
           <Route path="/operator" element={<OperatorLayout />}>
             <Route path="dashboard" element={<OperatorDashboard />} />
@@ -52,6 +55,10 @@ function App() {
             <Route path="slots" element={<SlotAvailability />} />
             <Route path="map" element={<StationsMap />} />
           </Route>
+        </Route>
+
+        <Route element={<ProsumerRoute />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
         </Route>
 
         <Route path="/reservations" element={<ReservationsPage />} />

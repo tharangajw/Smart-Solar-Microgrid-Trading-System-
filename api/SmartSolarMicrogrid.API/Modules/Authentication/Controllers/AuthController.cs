@@ -63,7 +63,7 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
 
             if (!authenticateResult.Succeeded)
             {
-                return Redirect("http://localhost:5173/login?error=google_auth_failed");
+                return Redirect("http://localhost:5174/login?error=google_auth_failed");
             }
 
             var email = authenticateResult.Principal.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
@@ -71,26 +71,26 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
 
             if (string.IsNullOrEmpty(email))
             {
-                return Redirect("http://localhost:5173/login?error=email_not_provided");
+                return Redirect("http://localhost:5174/login?error=email_not_provided");
             }
 
             var user = await _userService.GetUserByEmailAsync(email);
             
             if (user == null)
             {
-                return Redirect("http://localhost:5173/login?error=user_not_found");
+                return Redirect("http://localhost:5174/login?error=user_not_found");
             }
 
             if (!user.IsActive)
             {
-                return Redirect("http://localhost:5173/login?error=account_inactive");
+                return Redirect("http://localhost:5174/login?error=account_inactive");
             }
 
             var token = await _userService.GenerateJwtTokenForUser(user);
             
             await HttpContext.SignOutAsync("Google");
 
-            return Redirect($"http://localhost:5173/login?token={token}&userId={user.Id}");
+            return Redirect($"http://localhost:5174/login?token={token}&userId={user.Id}&role={user.Role}");
         }
 
 // Facebook OAuth callback endpoint
@@ -101,7 +101,7 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
 
             if (!authenticateResult.Succeeded)
             {
-                return Redirect("http://localhost:5173/login?error=facebook_auth_failed");
+                return Redirect("http://localhost:5174/login?error=facebook_auth_failed");
             }
 
             var email = authenticateResult.Principal.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
@@ -109,26 +109,26 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
 
             if (string.IsNullOrEmpty(email))
             {
-                return Redirect("http://localhost:5173/login?error=email_not_provided");
+                return Redirect("http://localhost:5174/login?error=email_not_provided");
             }
 
             var user = await _userService.GetUserByEmailAsync(email);
             
             if (user == null)
             {
-                return Redirect("http://localhost:5173/login?error=user_not_found");
+                return Redirect("http://localhost:5174/login?error=user_not_found");
             }
 
             if (!user.IsActive)
             {
-                return Redirect("http://localhost:5173/login?error=account_inactive");
+                return Redirect("http://localhost:5174/login?error=account_inactive");
             }
 
             var token = await _userService.GenerateJwtTokenForUser(user);
             
             await HttpContext.SignOutAsync("Facebook");
 
-            return Redirect($"http://localhost:5173/login?token={token}&userId={user.Id}");
+            return Redirect($"http://localhost:5174/login?token={token}&userId={user.Id}&role={user.Role}");
         }
 
 // Apple OAuth callback endpoint
@@ -139,7 +139,7 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
 
             if (!authenticateResult.Succeeded)
             {
-                return Redirect("http://localhost:5173/login?error=apple_auth_failed");
+                return Redirect("http://localhost:5174/login?error=apple_auth_failed");
             }
 
             var email = authenticateResult.Principal.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
@@ -147,26 +147,26 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
 
             if (string.IsNullOrEmpty(email))
             {
-                return Redirect("http://localhost:5173/login?error=email_not_provided");
+                return Redirect("http://localhost:5174/login?error=email_not_provided");
             }
 
             var user = await _userService.GetUserByEmailAsync(email);
             
             if (user == null)
             {
-                return Redirect("http://localhost:5173/login?error=user_not_found");
+                return Redirect("http://localhost:5174/login?error=user_not_found");
             }
 
             if (!user.IsActive)
             {
-                return Redirect("http://localhost:5173/login?error=account_inactive");
+                return Redirect("http://localhost:5174/login?error=account_inactive");
             }
 
             var token = await _userService.GenerateJwtTokenForUser(user);
             
             await HttpContext.SignOutAsync("Apple");
 
-            return Redirect($"http://localhost:5173/login?token={token}&userId={user.Id}");
+            return Redirect($"http://localhost:5174/login?token={token}&userId={user.Id}&role={user.Role}");
         }
 
 // Google OAuth challenge endpoint

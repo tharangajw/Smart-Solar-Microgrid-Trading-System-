@@ -9,12 +9,18 @@ import {
   Bell,
   X,
   Shield,
+  ShieldCheck,
+  Zap,
+  CalendarDays,
 } from 'lucide-react';
 
 const navItems = [
-  { name: 'Dashboard', path: '/backoffice/dashboard', icon: LayoutDashboard },
-  { name: 'Pending Activations', path: '/backoffice/pending', icon: UserPlus },
-  { name: 'Prosumers', path: '/backoffice/prosumers', icon: Users },
+  { name: 'Dashboard',          path: '/backoffice/dashboard',    icon: LayoutDashboard },
+  { name: 'Grid Operators',     path: '/backoffice/operators',    icon: ShieldCheck },
+  { name: 'Microgrid Nodes',    path: '/backoffice/nodes',        icon: Zap },
+  { name: 'Pending Activations',path: '/backoffice/pending',      icon: UserPlus },
+  { name: 'Prosumers',          path: '/backoffice/prosumers',    icon: Users },
+  { name: 'Reservations',       path: '/backoffice/reservations', icon: CalendarDays },
 ];
 
 const BackofficeSidebar = ({ isOpen, setIsOpen, officer, onLogout }) => {
@@ -105,7 +111,7 @@ const BackofficeHeader = ({ onMenuClick, officer }) => (
       </button>
       <div>
         <p className="font-display text-xl font-semibold text-forest leading-tight">Backoffice Portal</p>
-        <p className="text-xs text-charcoal-light hidden sm:block">Activate prosumers and manage accounts</p>
+        <p className="text-xs text-charcoal-light hidden sm:block">Backoffice handles microgrid registration and operational management.</p>
       </div>
     </div>
 
@@ -133,7 +139,7 @@ const BackofficeLayout = () => {
   const handleLogout = () => {
     localStorage.removeItem('backoffice_token');
     localStorage.removeItem('backoffice_user');
-    navigate('/backoffice/login');
+    navigate('/login');
   };
 
   return (

@@ -2,8 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SmartSolarMicrogrid.API.Modules.Users.Models
 {
-// Create user request for Backoffice users
-    public class CreateUserRequest
+// Create Grid Operator request for Backoffice users
+    public class CreateGridOperatorRequest
     {
         [Required]
         public string Nic { get; set; } = string.Empty;
@@ -20,12 +20,9 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Models
         public string Password { get; set; } = string.Empty;
 
         [Required]
-        public string Role { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
 
-        public string? PhoneNumber { get; set; }
-
-        public string? Address { get; set; }
-
-        public double? SolarCapacityKw { get; set; }
+        [Required]
+        public string Address { get; set; } = string.Empty;
     }
 }

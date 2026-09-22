@@ -50,5 +50,8 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
 
     // Generate JWT token for OAuth user
         Task<string> GenerateJwtTokenForUser(User user);
+
+    // Create Grid Operator (Backoffice only)
+        Task<User?> CreateGridOperatorAsync(CreateGridOperatorRequest request);
     }
 }

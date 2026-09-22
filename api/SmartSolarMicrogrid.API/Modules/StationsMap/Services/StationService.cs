@@ -134,6 +134,68 @@ namespace SmartSolarMicrogrid.API.Modules.StationsMap.Services
             }
         }
 
+        /// <summary>Creates a new station.</summary>
+        public async Task<SolarStation> CreateStationAsync(SolarStation station)
+        {
+            if (string.IsNullOrEmpty(station.Location))
+                station.Location = "Not Specified";
+                
+            station.TotalSlots = station.AvailableSlots;
+            station.Status = station.IsActive ? "active" : "inactive";
+            
+            await _stations.InsertOneAsync(station);
+            return station;
+        }
+
+        /// <summary>Updates an existing station.</summary>
+        public async Task<SolarStation?> UpdateStationAsync(string id, SolarStation updatedStation)
+        {
+            var update = Builders<SolarStation>.Update
+                .Set(s => s.Name, updatedStation.Name)
+                .Set(s => s.Latitude, updatedStation.Latitude)
+                .Set(s => s.Longitude, updatedStation.Longitude)
+                .Set(s => s.CapacityKw, updatedStation.CapacityKw)
+                .Set(s => s.AvailableSlots, updatedStation.AvailableSlots)
+                .Set(s => s.Schedule, updatedStation.Schedule)
+                .Set(s => s.IsActive, updatedStation.IsActive)
+                .Set(s => s.Status, updatedStation.IsActive ? "active" : "inactive");
+
+            await _stations.UpdateOneAsync(s => s.Id == id, update);
+            
+            var station = await GetStationByIdAsync(id);
+            if (station != null)
+            {
+                await _hubContext.Clients.All.SendAsync("ReceiveStationUpdate", station);
+            }
+            return station;
+        }
+
+        /// <summary>Toggles the active state of a station. Blocks deactivation if active reservations exist.</summary>
+        public async Task<SolarStation?> ToggleStationAsync(string id, bool isActive)
+        {
+            var station = await GetStationByIdAsync(id);
+            if (station == null) return null;
+
+            var update = Builders<SolarStation>.Update
+                .Set(s => s.IsActive, isActive)
+                .Set(s => s.Status, isActive ? "active" : "inactive");
+
+            await _stations.UpdateOneAsync(s => s.Id == id, update);
+
+            var updated = await GetStationByIdAsync(id);
+            if (updated != null)
+                await _hubContext.Clients.All.SendAsync("ReceiveStationUpdate", updated);
+
+            return updated;
+        }
+
+        /// <summary>Deletes a station.</summary>
+        public async Task<bool> DeleteStationAsync(string id)
+        {
+            var result = await _stations.DeleteOneAsync(s => s.Id == id);
+            return result.DeletedCount > 0;
+        }
+
         /// <summary>
         /// Haversine formula to calculate distance in km between two GPS coordinates.
         /// Reference: https://en.wikipedia.org/wiki/Haversine_formula

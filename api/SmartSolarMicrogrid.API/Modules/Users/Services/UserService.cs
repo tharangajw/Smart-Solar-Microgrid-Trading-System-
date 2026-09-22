@@ -121,8 +121,8 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
         // Create user (Backoffice only)
         public async Task<User?> CreateUserAsync(CreateUserRequest request)
         {
-            // Validate role
-            if (request.Role != UserRoles.Backoffice && request.Role != UserRoles.GridOperator)
+            // Validate role (Allow Backoffice, GridOperator, and Prosumer)
+            if (request.Role != UserRoles.Backoffice && request.Role != UserRoles.GridOperator && request.Role != UserRoles.Prosumer)
             {
                 return null;
             }
@@ -156,6 +156,7 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
                 Role = request.Role,
                 PhoneNumber = request.PhoneNumber,
                 Address = request.Address,
+                SolarCapacityKw = request.SolarCapacityKw,
                 IsActive = true,
                 Status = UserAccountStatus.Active,
                 CreatedAt = DateTime.UtcNow,
@@ -362,6 +363,41 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Services
         public async Task<string> GenerateJwtTokenForUser(User user)
         {
             return await Task.FromResult(GenerateJwtToken(user));
+        }
+
+        // Create Grid Operator (Backoffice only)
+        public async Task<User?> CreateGridOperatorAsync(CreateGridOperatorRequest request)
+        {
+            // Check if NIC or email already exists
+            var existingUser = await _context.Users
+                .Find(Builders<User>.Filter.Or(
+                    Builders<User>.Filter.Eq(u => u.Nic, request.Nic),
+                    Builders<User>.Filter.Eq(u => u.Email, request.Email)
+                ))
+                .FirstOrDefaultAsync();
+
+            if (existingUser != null)
+            {
+                return null;
+            }
+
+            var operatorUser = new User
+            {
+                Nic = request.Nic,
+                FullName = request.FullName,
+                Email = request.Email,
+                Password = BCrypt.Net.BCrypt.HashPassword(request.Password),
+                Role = UserRoles.GridOperator,
+                PhoneNumber = request.PhoneNumber,
+                Address = request.Address,
+                IsActive = true,
+                Status = UserAccountStatus.Active,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            await _context.Users.InsertOneAsync(operatorUser);
+            return operatorUser;
         }
     }
 }

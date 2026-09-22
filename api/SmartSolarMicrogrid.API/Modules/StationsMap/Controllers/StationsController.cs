@@ -9,6 +9,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using SmartSolarMicrogrid.API.Modules.StationsMap.Services;
+using SmartSolarMicrogrid.API.Modules.StationsMap.Models;
 
 namespace SmartSolarMicrogrid.API.Modules.StationsMap.Controllers
 {
@@ -71,19 +72,12 @@ namespace SmartSolarMicrogrid.API.Modules.StationsMap.Controllers
             return Ok(station);
         }
 
-        /// <summary>
-        /// PUT /api/stations/{id}/slots
-        /// Updates the available battery slot count for a station.
-        /// Called by Grid Operators from the web app Slot Availability page.
-        /// Body: { "availableSlots": 4 }
-        /// </summary>
         [HttpPut("{id}/slots")]
-        [Authorize(Roles = "GridOperator")]
+        [Authorize(Roles = "GridOperator,Backoffice")]
         public async Task<IActionResult> UpdateSlots(string id, [FromBody] UpdateSlotsRequest request)
         {
             try
             {
-                // Delegate slot update logic to service layer (FAT service pattern)
                 var updated = await _stationService.UpdateSlotAvailabilityAsync(id, request.AvailableSlots);
                 return Ok(updated);
             }
@@ -96,11 +90,68 @@ namespace SmartSolarMicrogrid.API.Modules.StationsMap.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        // --- Backoffice Management Endpoints ---
+
+        [HttpPost]
+        [Authorize(Roles = "Backoffice")]
+        public async Task<IActionResult> CreateStation([FromBody] SolarStation station)
+        {
+            var created = await _stationService.CreateStationAsync(station);
+            return Ok(created);
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Backoffice")]
+        public async Task<IActionResult> UpdateStation(string id, [FromBody] SolarStation station)
+        {
+            var updated = await _stationService.UpdateStationAsync(id, station);
+            if (updated == null)
+                return NotFound(new { message = "Station not found." });
+            return Ok(updated);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Backoffice")]
+        public async Task<IActionResult> DeleteStation(string id)
+        {
+            var success = await _stationService.DeleteStationAsync(id);
+            if (!success)
+                return NotFound(new { message = "Station not found." });
+            return Ok(new { message = "Station deleted successfully" });
+        }
+
+        /// <summary>
+        /// PATCH /api/stations/{id}/toggle
+        /// Toggles the IsActive status of a station (activate/deactivate).
+        /// Blocked by the service layer if active reservations exist.
+        /// </summary>
+        [HttpPatch("{id}/toggle")]
+        [Authorize(Roles = "Backoffice")]
+        public async Task<IActionResult> ToggleStation(string id, [FromBody] ToggleStationRequest request)
+        {
+            try
+            {
+                var updated = await _stationService.ToggleStationAsync(id, request.IsActive);
+                if (updated == null)
+                    return NotFound(new { message = "Station not found." });
+                return Ok(updated);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 
     // Request body model for slot update
     public class UpdateSlotsRequest
     {
         public int AvailableSlots { get; set; }
+    }
+
+    public class ToggleStationRequest
+    {
+        public bool IsActive { get; set; }
     }
 }
