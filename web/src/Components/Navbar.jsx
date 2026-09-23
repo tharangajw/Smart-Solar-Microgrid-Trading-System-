@@ -31,7 +31,20 @@ const Navbar = () => {
   };
 
   const handleLoginClick = () => {
-    navigate('/dashboard');
+    // Check if user is already logged in
+    const backofficeToken = localStorage.getItem('backoffice_token');
+    const operatorToken = localStorage.getItem('operator_token');
+    const token = localStorage.getItem('token');
+
+    if (backofficeToken) {
+      navigate('/backoffice/dashboard');
+    } else if (operatorToken) {
+      navigate('/operator/dashboard');
+    } else if (token) {
+      navigate('/dashboard');
+    } else {
+      navigate('/login');
+    }
   };
 
   return (
@@ -44,28 +57,8 @@ const Navbar = () => {
         
         {/* Left: Logo & Brand */}
         <div className="flex items-center gap-2">
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="32" height="32" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            className="text-forest"
-          >
-            <circle cx="12" cy="12" r="4"></circle>
-            <path d="M12 2v2"></path>
-            <path d="M12 20v2"></path>
-            <path d="m4.93 4.93 1.41 1.41"></path>
-            <path d="m17.66 17.66 1.41 1.41"></path>
-            <path d="M2 12h2"></path>
-            <path d="M20 12h2"></path>
-            <path d="m6.34 17.66-1.41 1.41"></path>
-            <path d="m19.07 4.93-1.41 1.41"></path>
-          </svg>
-          <span className="font-display font-semibold text-xl text-forest">SmartSolar</span>
+          <img src="/logo.png" alt="SolarLink Logo" className="h-10 w-auto" />
+          <span className="font-display font-semibold text-xl text-forest">SolarLink</span>
         </div>
 
         {/* Center/Right: Desktop Nav */}
@@ -140,6 +133,12 @@ const Navbar = () => {
               {link.name}
             </a>
           ))}
+          <button
+            onClick={() => navigate('/operator/login')}
+            className="text-charcoal hover:text-forest transition-colors text-sm font-medium tracking-wide uppercase py-2 text-left"
+          >
+            Operator
+          </button>
           <button 
             onClick={handleLoginClick}
             className="border border-forest text-forest hover:bg-forest hover:text-ivory rounded-full px-6 py-2 text-sm font-medium transition-all duration-300 w-fit mt-4"

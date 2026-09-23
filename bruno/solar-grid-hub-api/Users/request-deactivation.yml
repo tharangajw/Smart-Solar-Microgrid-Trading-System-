@@ -1,0 +1,11 @@
+meta:
+  name: Request Deactivation
+  type: http
+  seq: 13
+
+post:
+  url: http://localhost:5281/api/users/me/deactivate
+  auth: bearer
+
+headers: |
+  Authorization: Bearer {{token}}

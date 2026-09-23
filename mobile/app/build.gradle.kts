@@ -1,15 +1,16 @@
 plugins {
     alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
-    namespace = "sliit.ead.smartsolarmicrogrid"
-    compileSdk = 36
+    namespace = "com.smartsolar"
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "sliit.ead.smartsolarmicrogrid"
-        minSdk = 28
-        targetSdk = 36
+        minSdk = 24
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -26,18 +27,37 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+    kotlinOptions {
+        jvmTarget = "21"
     }
 }
 
 dependencies {
-
     implementation(libs.appcompat)
+    implementation(libs.core.ktx)
     implementation(libs.material)
     implementation(libs.activity)
+    implementation(libs.splashscreen)
     implementation(libs.constraintlayout)
+    implementation(libs.viewpager2)
+    implementation(libs.zxing.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    // Google Maps & Location
+    implementation("com.google.android.gms:play-services-maps:20.0.0")
+    implementation("com.google.android.gms:play-services-location:21.1.0")
+
+    // ZXing for QR Scanning
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+
+    // Kotlin Coroutines — required for lifecycleScope + Dispatchers.IO
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 }

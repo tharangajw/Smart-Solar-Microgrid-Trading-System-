@@ -26,7 +26,21 @@ const HeroSection = () => {
                 Explore the Network
               </a>
               <button 
-                onClick={() => navigate('/dashboard')}
+                onClick={() => {
+                  const backofficeToken = localStorage.getItem('backoffice_token');
+                  const operatorToken = localStorage.getItem('operator_token');
+                  const token = localStorage.getItem('token');
+
+                  if (backofficeToken) {
+                    navigate('/backoffice/dashboard');
+                  } else if (operatorToken) {
+                    navigate('/operator/dashboard');
+                  } else if (token) {
+                    navigate('/dashboard');
+                  } else {
+                    navigate('/login');
+                  }
+                }}
                 className="inline-flex items-center border-2 border-forest/20 text-forest px-8 py-3.5 rounded-full hover:border-forest hover:bg-forest hover:text-ivory transition-all duration-300 font-medium text-sm tracking-wide"
               >
                 Access Your Account

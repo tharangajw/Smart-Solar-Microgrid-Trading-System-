@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- DARK MODE DISABLED — Using light mode colors even in night mode -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="colorPrimary">#1565C0</color>
+    <color name="colorPrimaryDark">#0D47A1</color>
+    <color name="colorAccent">#00B248</color>
+
+    <!-- Backgrounds -->
+    <color name="backgroundColor">#EEF2FA</color>
+    <color name="backgroundCard">#FFFFFF</color>
+    <color name="backgroundCardBorder">#D8E2F5</color>
+
+    <!-- Text -->
+    <color name="textColorPrimary">#0D1B3E</color>
+    <color name="textColorSecondary">#5C6D8A</color>
+    <color name="textColorHint">#9AAAC5</color>
+
+    <!-- Indicators -->
+    <color name="indicatorActive">#00B248</color>
+    <color name="indicatorInactive">#C2D0EA</color>
+
+    <!-- Accents -->
+    <color name="accentGreen">#00B248</color>
+    <color name="accentBlue">#1565C0</color>
+    <color name="accentYellow">#F9A825</color>
+    <color name="dangerRed">#D32F2F</color>
+
+    <!-- Inputs -->
+    <color name="inputBackground">#FFFFFF</color>
+    <color name="inputBorder">#C2D0EA</color>
+    <color name="inputFocusBorder">#1565C0</color>
+</resources>
