@@ -18,7 +18,7 @@ export const useStationUpdates = () => {
   // Derive the SignalR hub URL from the same env var used by operatorApi.js
   // VITE_API_BASE_URL is e.g. "http://localhost:5001/api" → strip "/api" → hub base
   const hubUrl = useRef(() => {
-    const base = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001/api';
+    const base = import.meta.env.VITE_API_BASE_URL || '/api';
     // Remove trailing "/api" to get the server root, then append the hub path
     return base.replace(/\/api\/?$/, '') + '/hubs/stations';
   });

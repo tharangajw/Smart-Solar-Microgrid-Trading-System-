@@ -14,7 +14,7 @@ const DashboardHeader = ({ onMenuClick }) => {
         </button>
         <div>
           <h1 className="font-display text-xl font-semibold text-forest leading-tight">Dashboard</h1>
-          <p className="text-xs text-charcoal-light hidden sm:block">Welcome back to the SmartSolar network.</p>
+          <p className="text-xs text-charcoal-light hidden sm:block">Welcome back to the SolarLink network.</p>
         </div>
       </div>
 

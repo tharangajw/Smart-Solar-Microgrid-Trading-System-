@@ -15,7 +15,7 @@ const StationHighlight = () => {
               The Microgrid Network
             </h2>
             <p className="text-ivory/70 text-base leading-relaxed mb-10">
-              Each station in the SmartSolar network is a managed energy hub — equipped with solar panels, battery storage, and intelligent scheduling.
+              Each station in the SolarLink network is a managed energy hub â€” equipped with solar panels, battery storage, and intelligent scheduling.
             </p>
 
             <div className="space-y-6">

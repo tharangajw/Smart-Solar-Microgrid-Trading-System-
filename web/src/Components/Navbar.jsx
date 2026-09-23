@@ -57,28 +57,8 @@ const Navbar = () => {
         
         {/* Left: Logo & Brand */}
         <div className="flex items-center gap-2">
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            width="32" height="32" 
-            viewBox="0 0 24 24" 
-            fill="none" 
-            stroke="currentColor" 
-            strokeWidth="2" 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            className="text-forest"
-          >
-            <circle cx="12" cy="12" r="4"></circle>
-            <path d="M12 2v2"></path>
-            <path d="M12 20v2"></path>
-            <path d="m4.93 4.93 1.41 1.41"></path>
-            <path d="m17.66 17.66 1.41 1.41"></path>
-            <path d="M2 12h2"></path>
-            <path d="M20 12h2"></path>
-            <path d="m6.34 17.66-1.41 1.41"></path>
-            <path d="m19.07 4.93-1.41 1.41"></path>
-          </svg>
-          <span className="font-display font-semibold text-xl text-forest">SmartSolar</span>
+          <img src="/logo.png" alt="SolarLink Logo" className="h-10 w-auto" />
+          <span className="font-display font-semibold text-xl text-forest">SolarLink</span>
         </div>
 
         {/* Center/Right: Desktop Nav */}

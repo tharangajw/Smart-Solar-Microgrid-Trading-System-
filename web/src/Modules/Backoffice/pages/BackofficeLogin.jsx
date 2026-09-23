@@ -47,12 +47,10 @@ const BackofficeLogin = () => {
       <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-solar-soft/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
 
       <div className="relative w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-forest rounded-2xl shadow-lg mb-4">
-            <Shield size={32} className="text-ivory" />
-          </div>
+        <div className="text-center mb-8 flex flex-col items-center">
+          <img src="/logo.png" alt="SolarLink Logo" className="h-16 w-auto mb-4" />
           <h1 className="font-display text-3xl font-semibold text-forest tracking-tight">
-            SmartSolar Grid
+            SolarLink Grid
           </h1>
           <p className="text-sage font-medium mt-2">Backoffice Portal</p>
         </div>
@@ -80,7 +78,7 @@ const BackofficeLogin = () => {
                   value={form.email}
                   onChange={handleChange}
                   required
-                  placeholder="admin@smartsolar.com"
+                  placeholder="admin@SolarLink.com"
                   className="w-full pl-12 pr-4 py-3 bg-ivory border border-forest/10 rounded-xl text-charcoal placeholder-charcoal-light font-medium focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all"
                 />
               </div>
@@ -98,7 +96,7 @@ const BackofficeLogin = () => {
                   value={form.password}
                   onChange={handleChange}
                   required
-                  placeholder="••••••••"
+                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                   className="w-full pl-12 pr-4 py-3 bg-ivory border border-forest/10 rounded-xl text-charcoal placeholder-charcoal-light font-medium focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all"
                 />
               </div>

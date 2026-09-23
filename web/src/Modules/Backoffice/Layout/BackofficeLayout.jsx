@@ -43,7 +43,7 @@ const BackofficeSidebar = ({ isOpen, setIsOpen, officer, onLogout }) => {
       >
         <div className="h-16 flex items-center justify-between px-6 border-b border-forest/10 shrink-0">
           <div className="flex items-center gap-2">
-            <Shield size={22} className="text-forest" />
+            <img src="/logo.png" alt="SolarLink Logo" className="h-8 w-auto" />
             <span className="font-display font-semibold text-lg text-forest">Backoffice</span>
           </div>
           <button

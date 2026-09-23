@@ -3,7 +3,7 @@
  * Main dashboard for Grid Operators.
  * Uses the same SummaryCard / design tokens as the User Dashboard.
  * Fetches live data from the Web API via operatorApi service.
- * Author: Member 4 – Operator Product
+ * Author: Member 4 â€“ Operator Product
  */
 
 import React, { useState, useEffect } from 'react';
@@ -19,7 +19,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
-/* ── Status badge helper ─────────────────────────────────────────────────── */
+/* â”€â”€ Status badge helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const StatusBadge = ({ status }) => {
   const map = {
     Approved:  'bg-leaf/20 text-forest-light',
@@ -34,7 +34,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-/* ── Recent bookings table ───────────────────────────────────────────────── */
+/* â”€â”€ Recent bookings table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const RecentBookingsTable = ({ bookings, loading }) => {
   if (loading) {
     return (
@@ -66,10 +66,10 @@ const RecentBookingsTable = ({ bookings, loading }) => {
         <tbody>
           {bookings.map((b, i) => (
             <tr key={b.id || i} className="border-b border-forest/5 hover:bg-forest/[0.03] transition-colors">
-              <td className="px-4 py-3 font-medium text-charcoal">{b.prosumerName || b.userId || '—'}</td>
-              <td className="px-4 py-3 text-charcoal-light">{b.stationName || b.nodeId || '—'}</td>
+              <td className="px-4 py-3 font-medium text-charcoal">{b.prosumerName || b.userId || 'â€”'}</td>
+              <td className="px-4 py-3 text-charcoal-light">{b.stationName || b.nodeId || 'â€”'}</td>
               <td className="px-4 py-3 text-charcoal-light">
-                {b.startTime ? new Date(b.startTime).toLocaleString() : '—'}
+                {b.startTime ? new Date(b.startTime).toLocaleString() : 'â€”'}
               </td>
               <td className="px-4 py-3">
                 <StatusBadge status={b.status} />
@@ -82,7 +82,7 @@ const RecentBookingsTable = ({ bookings, loading }) => {
   );
 };
 
-/* ── Dashboard Page ──────────────────────────────────────────────────────── */
+/* â”€â”€ Dashboard Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const OperatorDashboard = () => {
   const [data, setData] = useState({
     totalReservations: 0,
@@ -123,10 +123,10 @@ const OperatorDashboard = () => {
       {/* Page heading */}
       <div>
         <h1 className="font-display text-2xl sm:text-3xl font-semibold text-forest">
-          Good {getGreeting()}, {(operator.fullName || 'Operator').split(' ')[0]} 👋
+          Good {getGreeting()}, {(operator.fullName || 'Operator').split(' ')[0]} ðŸ‘‹
         </h1>
         <p className="text-sm text-charcoal-light mt-1">
-          Here's what's happening on the SmartSolar grid today.
+          Here's what's happening on the SolarLink grid today.
         </p>
       </div>
 
@@ -137,11 +137,11 @@ const OperatorDashboard = () => {
         </div>
       )}
 
-      {/* Summary Cards — same component as User Dashboard */}
+      {/* Summary Cards â€” same component as User Dashboard */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <SummaryCard
           title="Total Bookings"
-          value={loading ? '…' : data.totalReservations}
+          value={loading ? 'â€¦' : data.totalReservations}
           subtitle="all time"
           icon={Calendar}
           trend="up"
@@ -149,7 +149,7 @@ const OperatorDashboard = () => {
         />
         <SummaryCard
           title="Pending Approval"
-          value={loading ? '…' : data.pendingCount}
+          value={loading ? 'â€¦' : data.pendingCount}
           subtitle="awaiting action"
           icon={Clock}
           trend="down"
@@ -157,7 +157,7 @@ const OperatorDashboard = () => {
         />
         <SummaryCard
           title="Approved Bookings"
-          value={loading ? '…' : data.approvedCount}
+          value={loading ? 'â€¦' : data.approvedCount}
           subtitle="confirmed"
           icon={CheckCircle}
           trend="up"
@@ -165,7 +165,7 @@ const OperatorDashboard = () => {
         />
         <SummaryCard
           title="Active Stations"
-          value={loading ? '…' : data.activeStations}
+          value={loading ? 'â€¦' : data.activeStations}
           subtitle="online right now"
           icon={BatteryCharging}
           trend="up"
@@ -176,7 +176,7 @@ const OperatorDashboard = () => {
       {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
 
-        {/* Recent Bookings — left 2 columns */}
+        {/* Recent Bookings â€” left 2 columns */}
         <div className="lg:col-span-2">
           <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-forest/5">
             <div className="flex items-center justify-between mb-6">

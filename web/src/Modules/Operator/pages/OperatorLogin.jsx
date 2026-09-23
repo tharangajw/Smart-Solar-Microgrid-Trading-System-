@@ -4,7 +4,7 @@
  * Calls POST /api/auth/login, validates the role is GridOperator,
  * stores the JWT token and user info in localStorage, then redirects
  * to the operator dashboard.
- * Author: Member 4 – Operator Product
+ * Author: Member 4 â€“ Operator Product
  */
 
 import React, { useState } from 'react';
@@ -69,7 +69,7 @@ const OperatorLogin = () => {
             <Zap size={32} className="text-ivory" />
           </div>
           <h1 className="font-display text-3xl font-semibold text-forest tracking-tight">
-            SmartSolar Grid
+            SolarLink Grid
           </h1>
           <p className="text-sage font-medium mt-2">Grid Operator Portal</p>
         </div>
@@ -103,7 +103,7 @@ const OperatorLogin = () => {
                   value={form.email}
                   onChange={handleChange}
                   required
-                  placeholder="operator@smartsolar.com"
+                  placeholder="operator@SolarLink.com"
                   className="w-full pl-12 pr-4 py-3 bg-ivory border border-forest/10 rounded-xl text-charcoal placeholder-charcoal-light font-medium focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all"
                 />
               </div>
@@ -125,7 +125,7 @@ const OperatorLogin = () => {
                   value={form.password}
                   onChange={handleChange}
                   required
-                  placeholder="••••••••"
+                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                   className="w-full pl-12 pr-4 py-3 bg-ivory border border-forest/10 rounded-xl text-charcoal placeholder-charcoal-light font-medium focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all"
                 />
               </div>

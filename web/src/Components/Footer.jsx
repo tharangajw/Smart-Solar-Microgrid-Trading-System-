@@ -11,28 +11,8 @@ const Footer = () => {
           {/* Column 1: Brand & Description */}
           <div className="flex flex-col">
             <div className="flex items-center gap-2 mb-4">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width="32" height="32" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                className="text-ivory"
-              >
-                <circle cx="12" cy="12" r="4"></circle>
-                <path d="M12 2v2"></path>
-                <path d="M12 20v2"></path>
-                <path d="m4.93 4.93 1.41 1.41"></path>
-                <path d="m17.66 17.66 1.41 1.41"></path>
-                <path d="M2 12h2"></path>
-                <path d="M20 12h2"></path>
-                <path d="m6.34 17.66-1.41 1.41"></path>
-                <path d="m19.07 4.93-1.41 1.41"></path>
-              </svg>
-              <span className="font-display font-semibold text-xl text-ivory">SmartSolar</span>
+              <img src="/logo.png" alt="SolarLink Logo" className="h-10 w-auto" />
+              <span className="font-display font-semibold text-xl text-ivory">SolarLink</span>
             </div>
             <p className="text-sage text-sm max-w-xs leading-relaxed">
               Connecting prosumers, microgrid stations, and clean energy through one intelligent platform.
@@ -69,8 +49,8 @@ const Footer = () => {
               <li className="text-sage text-sm">University Project</li>
               <li className="text-sage text-sm">Software Engineering Module</li>
               <li>
-                <a href="mailto:contact@smartsolar.lk" className="text-sage hover:text-solar transition-colors text-sm">
-                  contact@smartsolar.lk
+                <a href="mailto:contact@SolarLink.lk" className="text-sage hover:text-solar transition-colors text-sm">
+                  contact@SolarLink.lk
                 </a>
               </li>
             </ul>
@@ -81,7 +61,7 @@ const Footer = () => {
         {/* Bottom bar */}
         <div className="border-t border-white/10 mt-12 pt-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sage/60 text-xs">
-            © 2025 SmartSolar. University Project.
+            Â© 2025 SolarLink. University Project.
           </p>
           <p className="text-sage/60 text-xs">
             Built with purpose for a sustainable future.

@@ -4,7 +4,7 @@
  * Mirrors the User Dashboard design system (forest/ivory theme, Sidebar + Header).
  * Reads the authenticated operator from localStorage and renders a sticky header
  * with a collapsible sidebar for mobile.
- * Author: Member 4 – Operator Product
+ * Author: Member 4 â€“ Operator Product
  */
 
 import React, { useState } from 'react';
@@ -28,7 +28,7 @@ const navItems = [
   { name: 'Stations Map',    path: '/operator/map',       icon: Map },
 ];
 
-/* ── Sidebar ─────────────────────────────────────────────────────────────── */
+/* â”€â”€ Sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const OperatorSidebar = ({ isOpen, setIsOpen, operator, onLogout }) => {
   const location = useLocation();
 
@@ -51,8 +51,8 @@ const OperatorSidebar = ({ isOpen, setIsOpen, operator, onLogout }) => {
         {/* Brand */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-forest/10 shrink-0">
           <div className="flex items-center gap-2">
-            <Zap size={22} className="text-forest" />
-            <span className="font-display font-semibold text-lg text-forest">SmartSolar</span>
+            <img src="/logo.png" alt="SolarLink Logo" className="h-8 w-auto" />
+            <span className="font-display font-semibold text-lg text-forest">SolarLink</span>
           </div>
           <button
             className="lg:hidden text-charcoal-light hover:text-forest"
@@ -118,7 +118,7 @@ const OperatorSidebar = ({ isOpen, setIsOpen, operator, onLogout }) => {
   );
 };
 
-/* ── Header ──────────────────────────────────────────────────────────────── */
+/* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const OperatorHeader = ({ onMenuClick, operator }) => (
   <header className="h-16 bg-white/80 backdrop-blur-md border-b border-forest/10 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30 shrink-0">
     <div className="flex items-center gap-4">
@@ -131,7 +131,7 @@ const OperatorHeader = ({ onMenuClick, operator }) => (
       </button>
       <div>
         <p className="font-display text-xl font-semibold text-forest leading-tight">Operator Dashboard</p>
-        <p className="text-xs text-charcoal-light hidden sm:block">Grid Operator Portal — SmartSolar Network</p>
+        <p className="text-xs text-charcoal-light hidden sm:block">Grid Operator Portal â€” SolarLink Network</p>
       </div>
     </div>
 
@@ -152,7 +152,7 @@ const OperatorHeader = ({ onMenuClick, operator }) => (
   </header>
 );
 
-/* ── Layout ──────────────────────────────────────────────────────────────── */
+/* â”€â”€ Layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const OperatorLayout = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
