@@ -1,5 +1,13 @@
 package com.smartsolar.modules.prosumer
 
+/*
+ * ProsumerDashboardActivity.kt
+ * Main dashboard for Solar Prosumers.
+ * Automatically loads pending/upcoming counts and displays next booking card.
+ * Auto-refreshes on resume.
+ * Author: Member 4 – Operator Product
+ */
+
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -43,7 +51,7 @@ class ProsumerDashboardActivity : BaseNavActivity() {
         // Setup Header
         val name = session.getName() ?: session.getNic() ?: "Prosumer"
         findViewById<TextView>(R.id.textWelcomeName)?.text = "Hello, $name!"
-        findViewById<TextView>(R.id.textNic)?.text = "NIC: ${session.getNic()}"
+        findViewById<TextView>(R.id.textNic)?.text = "NIC: ${session.getNic() ?: "N/A"}"
 
         // Bind Views
         textPendingCount = findViewById(R.id.textPendingCount)
@@ -62,7 +70,12 @@ class ProsumerDashboardActivity : BaseNavActivity() {
             overridePendingTransition(0, 0)
         }
 
-        // Fetch data
+        loadDashboardData(session.getNic() ?: "")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val session = SessionManager(this)
         loadDashboardData(session.getNic() ?: "")
     }
 
@@ -72,20 +85,15 @@ class ProsumerDashboardActivity : BaseNavActivity() {
         layoutEmptyNextBooking.visibility = View.GONE
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val response = ApiClient.get(this@ProsumerDashboardActivity, "Reservations/pending?nic=$nic")
+            val sessionManager = SessionManager(this@ProsumerDashboardActivity)
+            var response = ApiClient.get(this@ProsumerDashboardActivity, "Reservations/pending?nic=$nic")
+            if (response == null || response.trim() == "[]" || response.trim() == "{}") {
+                response = ApiClient.get(this@ProsumerDashboardActivity, "Reservations?nic=$nic")
+            }
 
-            if (response != null) {
+            if (response != null && response.trim().isNotEmpty()) {
                 try {
-                    val array = if (response.trim().startsWith("[")) {
-                        JSONArray(response)
-                    } else {
-                        val obj = JSONObject(response)
-                        when {
-                            obj.has("data") -> obj.getJSONArray("data")
-                            obj.has("value") -> obj.getJSONArray("value")
-                            else -> JSONArray()
-                        }
-                    }
+                    val array = parseJsonArray(response)
 
                     var pendingCount = 0
                     var approvedCount = 0
@@ -93,17 +101,19 @@ class ProsumerDashboardActivity : BaseNavActivity() {
 
                     for (i in 0 until array.length()) {
                         val item = array.getJSONObject(i)
-                        val status = item.optString("status", "Pending")
+                        val id = item.optString("id", item.optString("_id", ""))
+                        val rawStatus = item.optString("status", "Pending")
+
+                        // Check local status override
+                        val localStatus = sessionManager.getReservationStatus(id)
+                        val status = if (!localStatus.isNullOrEmpty()) localStatus else rawStatus
 
                         if (status.equals("Pending", ignoreCase = true)) {
                             pendingCount++
+                            if (nextBooking == null) nextBooking = item
                         } else if (status.equals("Approved", ignoreCase = true)) {
                             approvedCount++
-                        }
-
-                        // Keep the first item as the "Next" booking (assuming API sorts by date)
-                        if (nextBooking == null) {
-                            nextBooking = item
+                            if (nextBooking == null) nextBooking = item
                         }
                     }
 
@@ -115,12 +125,16 @@ class ProsumerDashboardActivity : BaseNavActivity() {
 
                         // Update Next Booking Card
                         if (nextBooking != null) {
+                            val nextId = nextBooking.optString("id", nextBooking.optString("_id", ""))
+                            val localStatus = sessionManager.getReservationStatus(nextId)
+                            val status = if (!localStatus.isNullOrEmpty()) localStatus else nextBooking.optString("status", "Pending")
                             val isoDate = nextBooking.optString("reservationDate", "–")
                             val nodeId = nextBooking.optString("nodeId", "Unknown Node")
-                            val status = nextBooking.optString("status", "Pending")
+
+                            val cleanNode = if (nodeId.length >= 12) "Grid Station (#${nodeId.takeLast(6).uppercase()})" else nodeId
 
                             textNextDate?.text = formatDate(isoDate)
-                            textNextNode?.text = "Node: $nodeId"
+                            textNextNode?.text = cleanNode
                             textNextStatus?.text = status
 
                             // Apply web colors to status badge
@@ -131,8 +145,10 @@ class ProsumerDashboardActivity : BaseNavActivity() {
                                 "cancelled" -> "#FEE2E2" to "#991B1B"
                                 else        -> "#F5F0E8" to "#5C5C5C"
                             }
-                            textNextStatus?.background?.mutate()?.setTint(Color.parseColor(bgColor))
-                            textNextStatus?.setTextColor(Color.parseColor(textColor))
+                            try {
+                                textNextStatus?.background?.mutate()?.setTint(Color.parseColor(bgColor))
+                                textNextStatus?.setTextColor(Color.parseColor(textColor))
+                            } catch (_: Exception) {}
 
                             val bookingId = nextBooking.optString("id", nextBooking.optString("_id"))
                             cardNextBooking.setOnClickListener {
@@ -153,18 +169,32 @@ class ProsumerDashboardActivity : BaseNavActivity() {
                     android.util.Log.e("ProsumerDashboard", "Parsing error", e)
                     withContext(Dispatchers.Main) {
                         progressBar.visibility = View.GONE
-                        textPendingCount.text = "-"
-                        textUpcomingCount.text = "-"
+                        textPendingCount.text = "0"
+                        textUpcomingCount.text = "0"
                         layoutEmptyNextBooking.visibility = View.VISIBLE
                     }
                 }
             } else {
                 withContext(Dispatchers.Main) {
                     progressBar.visibility = View.GONE
-                    textPendingCount.text = "-"
-                    textUpcomingCount.text = "-"
+                    textPendingCount.text = "0"
+                    textUpcomingCount.text = "0"
                     layoutEmptyNextBooking.visibility = View.VISIBLE
                 }
+            }
+        }
+    }
+
+    private fun parseJsonArray(jsonStr: String): JSONArray {
+        val trimmed = jsonStr.trim()
+        return if (trimmed.startsWith("[")) {
+            JSONArray(trimmed)
+        } else {
+            val obj = JSONObject(trimmed)
+            when {
+                obj.has("data") -> obj.getJSONArray("data")
+                obj.has("value") -> obj.getJSONArray("value")
+                else -> JSONArray()
             }
         }
     }
@@ -173,7 +203,6 @@ class ProsumerDashboardActivity : BaseNavActivity() {
         return try {
             val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
             parser.timeZone = TimeZone.getTimeZone("UTC")
-            // Example format: Sep 24, 2026 - 10:00 AM
             val displayFmt = SimpleDateFormat("MMM dd, yyyy - hh:mm a", Locale.getDefault())
             val date = parser.parse(isoDate)
             if (date != null) displayFmt.format(date) else isoDate

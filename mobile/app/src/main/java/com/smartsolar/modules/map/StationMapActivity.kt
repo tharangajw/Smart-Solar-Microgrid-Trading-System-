@@ -125,9 +125,12 @@ class StationMapActivity : BaseNavActivity(), OnMapReadyCallback {
                             val lat = station.optDouble("latitude", station.optDouble("lat", 0.0))
                             val lng = station.optDouble("longitude", station.optDouble("lng", 0.0))
                             val location = station.optString("location", "N/A")
-                            val capacity = station.optDouble("capacityKWh", 
-                                station.optDouble("capacityKwh", 
-                                station.optDouble("capacitykwh", 0.0)))
+                            // The API exposes SolarStation.CapacityKw as JSON `capacityKw`.
+                            // Keep the older kWh names as fallbacks for legacy records.
+                            val capacity = station.optDouble("capacityKw",
+                                station.optDouble("capacityKWh",
+                                station.optDouble("capacityKwh",
+                                station.optDouble("capacitykwh", 0.0))))
                             val slots = station.optInt("availableSlots", 0)
                             val stationId = if (station.has("id")) station.getString("id") else station.optString("_id", "")
 
@@ -196,5 +199,5 @@ class StationMapActivity : BaseNavActivity(), OnMapReadyCallback {
 }
 
 private fun Double.formatKwh(): String {
-    return if (this % 1.0 == 0.0) "${this.toInt()} kWh" else "${this} kWh"
+    return if (this % 1.0 == 0.0) "${this.toInt()} kW" else "${this} kW"
 }
