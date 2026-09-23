@@ -80,37 +80,11 @@ const StationHighlight = () => {
 
           {/* Right Column - SVG Visualization */}
           <div className="p-8 flex justify-center items-center animate-fade-in-up-d1">
-            <svg viewBox="0 0 400 400" className="w-full max-w-md h-auto" xmlns="http://www.w3.org/2000/svg">
-              {/* Connections */}
-              <line x1="200" y1="200" x2="100" y2="120" className="stroke-ivory/20" strokeWidth="1" />
-              <line x1="200" y1="200" x2="300" y2="100" className="stroke-ivory/20" strokeWidth="1" />
-              <line x1="200" y1="200" x2="80" y2="280" className="stroke-ivory/20" strokeWidth="1" />
-              <line x1="200" y1="200" x2="320" y2="260" className="stroke-ivory/20" strokeWidth="1" />
-              <line x1="200" y1="200" x2="220" y2="340" className="stroke-ivory/20" strokeWidth="1" />
-              
-              <line x1="100" y1="120" x2="300" y2="100" className="stroke-ivory/10" strokeWidth="1" />
-              <line x1="80" y1="280" x2="100" y2="120" className="stroke-ivory/10" strokeWidth="1" />
-              <line x1="320" y1="260" x2="300" y2="100" className="stroke-ivory/10" strokeWidth="1" />
-              <line x1="320" y1="260" x2="220" y2="340" className="stroke-ivory/10" strokeWidth="1" />
-
-              {/* Nodes */}
-              {/* Central Hub */}
-              <circle cx="200" cy="200" r="14" fill="#D4A843" className="animate-pulse-node" />
-              
-              {/* Peripheral Nodes */}
-              <circle cx="100" cy="120" r="8" fill="#D4A843" className="animate-pulse-node-d1" />
-              <text x="70" y="105" fill="#FFFBF0" fillOpacity="0.4" fontSize="10" fontFamily="DM Sans, sans-serif">Station A</text>
-
-              <circle cx="300" cy="100" r="9" fill="#D4A843" className="animate-pulse-node-d2" />
-              <text x="315" y="105" fill="#FFFBF0" fillOpacity="0.4" fontSize="10" fontFamily="DM Sans, sans-serif">Station B</text>
-
-              <circle cx="80" cy="280" r="10" fill="#D4A843" className="animate-pulse-node-d3" />
-              
-              <circle cx="320" cy="260" r="8" fill="#D4A843" className="animate-pulse-node-d1" />
-              <text x="335" y="265" fill="#FFFBF0" fillOpacity="0.4" fontSize="10" fontFamily="DM Sans, sans-serif">Station C</text>
-
-              <circle cx="220" cy="340" r="9" fill="#D4A843" className="animate-pulse-node-d2" />
-            </svg>
+            <img 
+              src="/Infrastructure.png" 
+              alt="Microgrid Infrastructure" 
+              className="w-full max-w-md h-auto rounded-xl shadow-lg border border-forest-light/20" 
+            />
           </div>
         </div>
       </div>
