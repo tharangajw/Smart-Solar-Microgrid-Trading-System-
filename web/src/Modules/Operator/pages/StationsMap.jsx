@@ -15,6 +15,7 @@ const loadGoogleMaps = (key) => new Promise((resolve, reject) => {
 
 export default function StationsMap() {
   const mapElement = useRef(null); const map = useRef(null);
+  const [mapReady, setMapReady] = useState(false);
   // useStationUpdates manages its own state & SignalR patches.
   // We seed it via setStations after the initial REST load.
   const [stations, setStations] = useStationUpdates();
@@ -40,12 +41,17 @@ export default function StationsMap() {
   useEffect(() => {
     const key = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
     if (!key || key === 'your_google_maps_api_key_here') { setError('Set VITE_GOOGLE_MAPS_API_KEY in .env to display the map.'); return; }
-    loadGoogleMaps(key).then((maps) => { if (!map.current && mapElement.current) map.current = new maps.Map(mapElement.current, { center: { lat: 7.8731, lng: 80.7718 }, zoom: 7 }); }).catch(() => setError('Google Maps could not be loaded.'));
+    loadGoogleMaps(key).then((maps) => {
+      if (!map.current && mapElement.current) {
+        map.current = new maps.Map(mapElement.current, { center: { lat: 7.8731, lng: 80.7718 }, zoom: 7 });
+        setMapReady(true);
+      }
+    }).catch(() => setError('Google Maps could not be loaded.'));
   }, []);
 
   // Re-draw markers whenever visible stations change
   useEffect(() => {
-    if (!map.current || !window.google?.maps) return;
+    if (!mapReady || !map.current || !window.google?.maps) return;
     const bounds = new window.google.maps.LatLngBounds();
     const markers = visibleStations.map((station) => {
       const marker = new window.google.maps.Marker({ map: map.current, position: { lat: station.latitude, lng: station.longitude }, title: station.name });
@@ -53,7 +59,7 @@ export default function StationsMap() {
     });
     if (markers.length) map.current.fitBounds(bounds);
     return () => markers.forEach((marker) => marker.setMap(null));
-  }, [visibleStations]);
+  }, [visibleStations, mapReady]);
 
   return <div className="space-y-6 sm:space-y-8">
     <div className="flex items-end justify-between">
@@ -80,7 +86,7 @@ export default function StationsMap() {
             </div>
             <div className="flex justify-between border-b border-forest/5 pb-2">
               <dt className="text-charcoal-light font-medium">Capacity</dt>
-              <dd className="text-charcoal font-semibold">{selected.capacityKWh} kWh</dd>
+              <dd className="text-charcoal font-semibold">{selected.capacityKw ?? selected.capacityKWh ?? 0} kW</dd>
             </div>
             <div className="flex justify-between border-b border-forest/5 pb-2">
               <dt className="text-charcoal-light font-medium">Available slots</dt>
