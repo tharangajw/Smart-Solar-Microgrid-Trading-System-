@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <!-- Target .NET 10 – compatible with installed runtime 10.0.11 -->
-    <TargetFramework>net10.0</TargetFramework>
+    <!-- Target .NET 9 – compatible with installed runtime 9.0.304 -->
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseAppHost>false</UseAppHost>

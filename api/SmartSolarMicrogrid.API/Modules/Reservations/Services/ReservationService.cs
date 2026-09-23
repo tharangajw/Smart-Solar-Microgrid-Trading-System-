@@ -152,6 +152,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             if (!string.IsNullOrEmpty(nic))
             {
                 reservations = await _reservationRepository.GetReservationsByProsumerNicAsync(nic);
+                reservations = reservations.Where(r => r.Status == "Pending").ToList();
             }
             else
             {

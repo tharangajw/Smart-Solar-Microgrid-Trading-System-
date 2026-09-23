@@ -24,7 +24,7 @@ class SessionManager(context: Context) {
         const val KEY_NIC = "user_nic"
         const val KEY_EMAIL = "user_email"
         const val KEY_SERVER_IP = "server_ip"
-        const val DEFAULT_IP = "192.168.1.25" // Updated to user's new IP address
+        const val DEFAULT_IP = "192.168.8.191" // Updated to user's new IP address
     }
 
     /** Save server IP address */
