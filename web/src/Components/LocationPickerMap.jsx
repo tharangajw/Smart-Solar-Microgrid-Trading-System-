@@ -115,7 +115,8 @@ const LocationPickerMap = ({ lat, lng, onChange }) => {
   };
 
   const handleSearchLocation = async (e) => {
-    e.preventDefault();
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
     if (!searchQuery.trim()) return;
 
     setSearching(true);
@@ -168,25 +169,37 @@ const LocationPickerMap = ({ lat, lng, onChange }) => {
       </p>
 
       {/* Location Search Bar */}
-      <form onSubmit={handleSearchLocation} className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <input
             type="text"
             placeholder="Search town, city or address in Sri Lanka…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSearchLocation(e);
+              }
+            }}
             className="w-full pl-8 pr-3 py-1.5 border border-forest/20 rounded-xl text-xs bg-white focus:outline-none focus:border-forest"
           />
           <Search size={14} className="absolute left-2.5 top-2 text-forest/40" />
         </div>
         <button
-          type="submit"
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleSearchLocation(e);
+          }}
           disabled={searching}
           className="px-3 py-1.5 bg-forest hover:bg-forest-light text-white font-medium text-xs rounded-xl shadow-xs transition-colors flex items-center gap-1 shrink-0"
         >
           {searching ? <Loader2 size={13} className="animate-spin" /> : 'Search'}
         </button>
-      </form>
+      </div>
 
       {searchError && (
         <p className="text-[11px] text-red-500 font-medium">{searchError}</p>

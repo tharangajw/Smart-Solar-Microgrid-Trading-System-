@@ -19,6 +19,7 @@ import {
   Bell,
   X,
   Zap,
+  BarChart3,
 } from 'lucide-react';
 
 const navItems = [
@@ -26,6 +27,7 @@ const navItems = [
   { name: 'Bookings',        path: '/operator/bookings',  icon: CalendarDays },
   { name: 'Slot Availability', path: '/operator/slots',   icon: Battery },
   { name: 'Stations Map',    path: '/operator/map',       icon: Map },
+  { name: 'Reports',         path: '/operator/reports',   icon: BarChart3 },
 ];
 
 /* â”€â”€ Sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
