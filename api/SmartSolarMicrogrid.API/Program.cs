@@ -156,8 +156,7 @@ if (app.Environment.IsDevelopment())
 // Apply CORS before authentication
 app.UseCors("AllowAll");
 
-// Disable HTTPS redirection for local IIS / dev convenience
-// app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 // Authentication must come before Authorization
 app.UseAuthentication();
