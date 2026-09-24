@@ -12,12 +12,14 @@ using SmartSolarMicrogrid.API.Modules.StationsMap.Services;
 
 namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
 {
+    // Handles energy slot reservations, 7-day limits, and 12-hour cancellation rules
     public class ReservationService : IReservationService
     {
         private readonly IReservationRepository _reservationRepository;
         private readonly StationService _stationService;
         private readonly ReservationModelToDTO _mapper;
-// Initializes the ReservationService instance.
+
+        // Injects repository, station service, and DTO mapper
         public ReservationService(IReservationRepository reservationRepository, StationService stationService, ReservationModelToDTO mapper)
         {
             _reservationRepository = reservationRepository;
@@ -25,7 +27,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             _mapper = mapper;
         }
 
-// Handles the CreateReservationAsync operation.
+        // Creates a new reservation if date is valid (max 7 days) and station slots are available
         public async Task<ReservationResponseDto> CreateReservationAsync(CreateREservationDto createReservationDto)
         {
             if (createReservationDto.ReservationDate < DateTime.UtcNow)
@@ -64,7 +66,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             }
         }
 
-// Handles the UpdateReservationAsync operation.
+        // Updates reservation date/slot if requested at least 12 hours before appointment
         public async Task<ReservationResponseDto> UpdateReservationAsync(string id, UpdateReservationDto updateReservationDto)
         {
             var existingReservation = await _reservationRepository.GetReservationByIdAsync(id);
@@ -104,7 +106,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             return _mapper.MapToDto(existingReservation);
         }
 
-// Handles the CancelReservationAsync operation.
+        // Cancels reservation if at least 12 hours notice is given, and frees station slot
         public async Task<ReservationResponseDto> CancelReservationAsync(string id, CancelReservationDto cancelReservationDto)
         {
             var existingReservation = await _reservationRepository.GetReservationByIdAsync(id);
@@ -133,7 +135,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             return _mapper.MapToDto(updatedReservation);
         }
 
-// Handles the GetReservationByIdAsync operation.
+        // Gets reservation details by ID
         public async Task<ReservationResponseDto> GetReservationByIdAsync(string id)
         {
             var reservation = await _reservationRepository.GetReservationByIdAsync(id);
@@ -144,7 +146,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             return _mapper.MapToDto(reservation);
         }
 
-// Handles the GetPendingReservationsByProsumerNicAsync operation.
+        // Returns pending reservations optionally filtered by prosumer NIC
         public async Task<List<ReservationResponseDto>> GetPendingReservationsByProsumerNicAsync(string? nic)
         {
             List<Reservation> reservations;
@@ -162,7 +164,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             return reservations.Select(r => _mapper.MapToDto(r)).ToList();
         }
 
-// Handles the GetHistoryByProsumerNicAsync operation.
+        // Returns completed and cancelled reservation history records
         public async Task<List<ReservationResponseDto>> GetHistoryByProsumerNicAsync(string? nic)
         {
             List<Reservation> reservations;
@@ -179,7 +181,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             return history.Select(r => _mapper.MapToDto(r)).ToList();
         }
 
-// Handles the SearchReservationsAsync operation.
+        // Filters reservations by NIC, status, and date range
         public async Task<List<ReservationResponseDto>> SearchReservationsAsync(string? nic, string? status, DateTime? from, DateTime? to)
         {
             var reservations = await _reservationRepository.GetAllReservationsAsync();
@@ -203,7 +205,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
             return reservations.Select(r => _mapper.MapToDto(r)).ToList();
         }
 
-// Handles the GetApprovedFutureCountAsync operation.
+        // Counts upcoming approved reservations
         public async Task<int> GetApprovedFutureCountAsync(string? nic)
         {
             List<Reservation> reservations;

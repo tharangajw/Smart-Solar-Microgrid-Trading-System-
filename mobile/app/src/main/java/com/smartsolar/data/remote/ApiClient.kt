@@ -9,16 +9,19 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
+// Holds API response status, body payload, and error message
 data class ApiResult(val isSuccess: Boolean, val body: String?, val message: String?)
 
+// Handles HTTP requests, dynamic IP resolution, and JWT auth headers
 object ApiClient {
 
+    // Builds API base URL from user's configured server IP
     private fun getBaseUrl(context: Context): String {
         val ip = SessionManager(context).getServerIp().trim()
-        // If the user just typed the IP (like 192.168.1.5), we add the protocol and port
         return if (ip.startsWith("http")) "$ip/api" else "http://$ip:5281/api"
     }
 
+    // Sends GET request and returns raw response string or null on failure
     fun get(context: Context, endpoint: String): String? {
         val baseUrl = getBaseUrl(context)
         return try {
@@ -51,14 +54,17 @@ object ApiClient {
         }
     }
 
+    // Sends POST request with JSON payload
     fun post(context: Context, endpoint: String, body: JSONObject): ApiResult {
         return request(context, "POST", endpoint, body)
     }
 
+    // Sends PUT request with JSON payload
     fun put(context: Context, endpoint: String, body: JSONObject): ApiResult {
         return request(context, "PUT", endpoint, body)
     }
 
+    // Executes network request, sends JSON body, and parses response status
     private fun request(context: Context, method: String, endpoint: String, body: JSONObject?): ApiResult {
         val baseUrl = getBaseUrl(context)
         val fullUrl = "$baseUrl/$endpoint"

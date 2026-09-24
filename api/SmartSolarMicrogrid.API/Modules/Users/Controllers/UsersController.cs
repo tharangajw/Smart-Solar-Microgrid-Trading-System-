@@ -10,7 +10,7 @@ using SmartSolarMicrogrid.API.Modules.Users.Services;
 
 namespace SmartSolarMicrogrid.API.Modules.Users.Controllers
 {
-// Users management controller
+    // Handles user profile management, status updates, and admin user controls
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
@@ -18,15 +18,14 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Controllers
     {
         private readonly IUserService _userService;
 
-// Initializes the UsersController instance.
+        // Injects user management service
         public UsersController(IUserService userService)
         {
             _userService = userService;
         }
 
-// Get current user profile
+        // Returns profile data of the currently logged-in user
         [HttpGet("me")]
-// Handles the GetCurrentUser operation.
         public async Task<IActionResult> GetCurrentUser()
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -46,9 +45,8 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Controllers
             return Ok(user);
         }
 
-// Update current user profile
+        // Updates current user profile details
         [HttpPut("me")]
-// Handles the UpdateCurrentUser operation.
         public async Task<IActionResult> UpdateCurrentUser([FromBody] UpdateUserRequest request)
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -68,9 +66,8 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Controllers
             return Ok(user);
         }
 
-// Request account deactivation (Prosumer only)
+        // Submits an account deactivation request (Prosumers only)
         [HttpPost("me/deactivate")]
-// Handles the RequestDeactivation operation.
         public async Task<IActionResult> RequestDeactivation()
         {
             var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -96,30 +93,27 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Controllers
             return Ok(new { message = "Deactivation request submitted. Contact backoffice for reactivation." });
         }
 
-// Get all users (Backoffice only)
+        // Returns list of all system users (Backoffice only)
         [HttpGet]
         [Authorize(Roles = UserRoles.Backoffice)]
-// Handles the GetAllUsers operation.
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userService.GetAllUsersAsync();
             return Ok(users);
         }
 
-// Get pending activations (Backoffice only)
+        // Returns pending user activation requests (Backoffice only)
         [HttpGet("pending")]
         [Authorize(Roles = UserRoles.Backoffice)]
-// Handles the GetPendingActivations operation.
         public async Task<IActionResult> GetPendingActivations()
         {
             var users = await _userService.GetPendingActivationsAsync();
             return Ok(users);
         }
 
-// Get user by ID (Backoffice only)
+        // Gets user profile by database ID (Backoffice only)
         [HttpGet("{id}")]
         [Authorize(Roles = UserRoles.Backoffice)]
-// Handles the GetUserById operation.
         public async Task<IActionResult> GetUserById(string id)
         {
             var user = await _userService.GetUserByIdAsync(id);
@@ -132,10 +126,9 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Controllers
             return Ok(user);
         }
 
-// Get user by NIC (Backoffice only)
+        // Gets user profile by NIC number (Backoffice only)
         [HttpGet("nic/{nic}")]
         [Authorize(Roles = UserRoles.Backoffice)]
-// Handles the GetUserByNic operation.
         public async Task<IActionResult> GetUserByNic(string nic)
         {
             var user = await _userService.GetUserByNicAsync(nic);
@@ -148,10 +141,9 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Controllers
             return Ok(user);
         }
 
-// Create new user (Backoffice only)
+        // Creates a new user (Backoffice only)
         [HttpPost]
         [Authorize(Roles = UserRoles.Backoffice)]
-// Handles the CreateUser operation.
         public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
         {
             if (!ModelState.IsValid)
@@ -169,10 +161,9 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Controllers
             return Ok(user);
         }
 
-// Update user by ID (Backoffice only)
+        // Updates user details by ID (Backoffice only)
         [HttpPut("{id}")]
         [Authorize(Roles = UserRoles.Backoffice)]
-// Handles the UpdateUser operation.
         public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserRequest request)
         {
             var user = await _userService.UpdateUserByBackofficeAsync(id, request);
@@ -185,10 +176,9 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Controllers
             return Ok(user);
         }
 
-// Activate user account (Backoffice only)
+        // Approves and activates a user account (Backoffice only)
         [HttpPost("{id}/activate")]
         [Authorize(Roles = UserRoles.Backoffice)]
-// Handles the ActivateUser operation.
         public async Task<IActionResult> ActivateUser(string id)
         {
             var (success, message) = await _userService.ActivateUserAsync(id);
@@ -201,10 +191,9 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Controllers
             return Ok(new { message });
         }
 
-// Deactivate user account (Backoffice only)
+        // Deactivates/suspends a user account (Backoffice only)
         [HttpPost("{id}/deactivate")]
         [Authorize(Roles = UserRoles.Backoffice)]
-// Handles the DeactivateUser operation.
         public async Task<IActionResult> DeactivateUser(string id)
         {
             var (success, message) = await _userService.DeactivateUserAsync(id);
@@ -217,7 +206,7 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Controllers
             return Ok(new { message });
         }
 
-// Create Grid Operator (Backoffice only)
+        // Creates a new Grid Operator account (Backoffice only)
         [HttpPost("grid-operator")]
         [Authorize(Roles = UserRoles.Backoffice)]
         public async Task<IActionResult> CreateGridOperator([FromBody] CreateGridOperatorRequest request)
@@ -232,10 +221,9 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Controllers
             return Ok(user);
         }
 
-// Delete user (Backoffice only)
+        // Deletes a user account (Backoffice only)
         [HttpDelete("{id}")]
         [Authorize(Roles = UserRoles.Backoffice)]
-// Handles the DeleteUser operation.
         public async Task<IActionResult> DeleteUser(string id)
         {
             var result = await _userService.DeleteUserAsync(id);

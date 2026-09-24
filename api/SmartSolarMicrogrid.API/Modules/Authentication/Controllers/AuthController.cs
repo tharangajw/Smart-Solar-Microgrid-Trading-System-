@@ -10,22 +10,21 @@ using SmartSolarMicrogrid.API.Modules.Users.Services;
 
 namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
 {
-//  Authentication controller for login and registration
+    // Authentication controller for login, registration, JWT tokens, and OAuth logins
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
 
-// Initializes the AuthController instance.
+        // Injects user authentication service
         public AuthController(IUserService userService)
         {
             _userService = userService;
         }
 
-//  User login endpoint
+        // Authenticates user credentials and returns JWT token
         [HttpPost("login")]
-// Handles the Login operation.
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (!ModelState.IsValid)
@@ -43,9 +42,8 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
             return Ok(response);
         }
 
-// Prosumer registration endpoint
+        // Registers a new Prosumer account (starts as Pending)
         [HttpPost("register")]
-// Handles the Register operation.
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
             if (!ModelState.IsValid)
@@ -63,7 +61,7 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
             return Ok(new { message = "Registration successful. Please wait for backoffice activation.", user = result });
         }
 
-// Google OAuth callback endpoint
+        // Handles Google OAuth login callback and issues JWT token
         [HttpGet("google-callback")]
         public async Task<IActionResult> GoogleCallback()
         {
@@ -75,7 +73,6 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
             }
 
             var email = authenticateResult.Principal.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-            var name = authenticateResult.Principal.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
 
             if (string.IsNullOrEmpty(email))
             {
@@ -101,7 +98,7 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
             return Redirect($"http://localhost:5174/login?token={token}&userId={user.Id}&role={user.Role}");
         }
 
-// Facebook OAuth callback endpoint
+        // Handles Facebook OAuth login callback and issues JWT token
         [HttpGet("facebook-callback")]
         public async Task<IActionResult> FacebookCallback()
         {
@@ -113,7 +110,6 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
             }
 
             var email = authenticateResult.Principal.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-            var name = authenticateResult.Principal.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
 
             if (string.IsNullOrEmpty(email))
             {
@@ -139,7 +135,7 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
             return Redirect($"http://localhost:5174/login?token={token}&userId={user.Id}&role={user.Role}");
         }
 
-// Apple OAuth callback endpoint
+        // Handles Apple OAuth login callback and issues JWT token
         [HttpGet("apple-callback")]
         public async Task<IActionResult> AppleCallback()
         {
@@ -151,7 +147,6 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
             }
 
             var email = authenticateResult.Principal.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-            var name = authenticateResult.Principal.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
 
             if (string.IsNullOrEmpty(email))
             {
@@ -177,7 +172,7 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
             return Redirect($"http://localhost:5174/login?token={token}&userId={user.Id}&role={user.Role}");
         }
 
-// Google OAuth challenge endpoint
+        // Starts Google login flow
         [HttpGet("google-login")]
         public IActionResult GoogleLogin()
         {
@@ -185,7 +180,7 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
             return Challenge(properties, "Google");
         }
 
-// Facebook OAuth challenge endpoint
+        // Starts Facebook login flow
         [HttpGet("facebook-login")]
         public IActionResult FacebookLogin()
         {
@@ -193,7 +188,7 @@ namespace SmartSolarMicrogrid.API.Modules.Authentication.Controllers
             return Challenge(properties, "Facebook");
         }
 
-// Apple OAuth challenge endpoint
+        // Starts Apple login flow
         [HttpGet("apple-login")]
         public IActionResult AppleLogin()
         {

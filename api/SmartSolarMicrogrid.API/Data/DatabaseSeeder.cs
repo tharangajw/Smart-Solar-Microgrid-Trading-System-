@@ -11,17 +11,18 @@ using SmartSolarMicrogrid.API.Modules.Reservations.Models;
 
 namespace SmartSolarMicrogrid.API.Data
 {
-//  Database seeder for initial data
+    // Populates initial admin user, operator user, solar stations, and sample reservations on startup
     public class DatabaseSeeder
     {
         private readonly MongoDbContext _context;
 
-// Initializes the DatabaseSeeder instance.
+        // Initializes seeder with database context
         public DatabaseSeeder(MongoDbContext context)
         {
             _context = context;
         }
-// Seed initial data including default Backoffice user
+
+        // Runs all database seeding tasks
         public async Task SeedAsync()
         {
             await SeedBackofficeUser();
@@ -30,7 +31,7 @@ namespace SmartSolarMicrogrid.API.Data
             await SeedReservations();
         }
 
-// Seed default Backoffice user if not exists
+        // Seeds default Backoffice System Admin account if not existing
         private async Task SeedBackofficeUser()
         {
             var existingAdmin = await _context.Users
@@ -65,10 +66,11 @@ namespace SmartSolarMicrogrid.API.Data
             }
         }
 
-        // Seed a local-development Grid Operator account for the operator portal.
+        // Seeds default Grid Operator account for station management
         private async Task SeedGridOperatorUser()
         {
             const string email = "operator@smartsolar.com";
+            
             var existingOperator = await _context.Users
                 .Find(Builders<User>.Filter.Eq(u => u.Email, email))
                 .FirstOrDefaultAsync();
@@ -95,7 +97,7 @@ namespace SmartSolarMicrogrid.API.Data
             Console.WriteLine("Default Grid Operator user created successfully.");
         }
 
-        // Add stations only on a new local database so map and availability features work immediately.
+        // Seeds sample solar stations with GPS coordinates and slot capacities
         private async Task SeedSolarStations()
         {
             if (await _context.SolarStations.CountDocumentsAsync(_ => true) > 0)
@@ -113,14 +115,13 @@ namespace SmartSolarMicrogrid.API.Data
             Console.WriteLine("Default solar stations created successfully.");
         }
 
-        // Seed 2 dummy energy slot reservations for demo purposes
+        // Seeds sample slot reservations for testing reservation workflows
         private async Task SeedReservations()
         {
             var reservations = _context.Database.GetCollection<Reservation>("Reservations");
             if (await reservations.CountDocumentsAsync(_ => true) > 0)
                 return;
 
-            // Get a station to reference
             var firstStation = await _context.SolarStations.Find(_ => true).FirstOrDefaultAsync();
             var nodeId = firstStation?.Id ?? "unknown";
 
