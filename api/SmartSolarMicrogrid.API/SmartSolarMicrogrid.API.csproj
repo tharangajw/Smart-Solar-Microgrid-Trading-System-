@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!-- Target .NET 9 – compatible with installed runtime 9.0.304 -->
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0.401</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseAppHost>false</UseAppHost>
