@@ -12,12 +12,16 @@ import {
   ShieldCheck,
   Zap,
   CalendarDays,
+  MapPin,
+  BarChart3,
 } from 'lucide-react';
 
 const navItems = [
   { name: 'Dashboard',          path: '/backoffice/dashboard',    icon: LayoutDashboard },
   { name: 'Grid Operators',     path: '/backoffice/operators',    icon: ShieldCheck },
   { name: 'Microgrid Nodes',    path: '/backoffice/nodes',        icon: Zap },
+  { name: 'Station Map',        path: '/backoffice/map',          icon: MapPin },
+  { name: 'Reports & Analytics',path: '/backoffice/reports',      icon: BarChart3 },
   { name: 'Pending Activations',path: '/backoffice/pending',      icon: UserPlus },
   { name: 'Prosumers',          path: '/backoffice/prosumers',    icon: Users },
   { name: 'Reservations',       path: '/backoffice/reservations', icon: CalendarDays },

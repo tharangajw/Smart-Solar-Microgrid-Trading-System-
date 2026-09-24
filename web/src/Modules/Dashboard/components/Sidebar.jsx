@@ -27,7 +27,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { name: 'Energy Slots', icon: Clock, path: '/slots' },
     { name: 'Reservations', icon: CalendarCheck, path: '/reservations' },
     { name: 'Transactions', icon: ReceiptText, path: '#' },
-    { name: 'Reports', icon: BarChart3, path: '#' },
+    { name: 'Reports', icon: BarChart3, path: '/reports' },
     { name: 'Settings', icon: Settings, path: '#' },
   ];
 
