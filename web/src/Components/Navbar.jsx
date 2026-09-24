@@ -57,8 +57,7 @@ const Navbar = () => {
         
         {/* Left: Logo & Brand */}
         <div className="flex items-center gap-2">
-          <img src="/logo.png" alt="SolarLink Logo" className="h-10 w-auto" />
-          <span className="font-display font-semibold text-xl text-forest">SolarLink</span>
+          <img src={!isScrolled ? "/logo_footer.png" : "/logo.png"} alt="SolarLink Logo" className="h-14 w-auto drop-shadow-md" />
         </div>
 
         {/* Center/Right: Desktop Nav */}
@@ -68,7 +67,7 @@ const Navbar = () => {
               <a 
                 key={link.name} 
                 href={link.href} 
-                className="text-charcoal-light hover:text-forest transition-colors text-sm font-medium tracking-wide uppercase"
+                className={`transition-colors text-sm font-medium tracking-wide uppercase ${isScrolled ? 'text-charcoal-light hover:text-forest' : 'text-[#ffffff]/80 hover:text-[#ffffff]'}`}
               >
                 {link.name}
               </a>
@@ -76,7 +75,7 @@ const Navbar = () => {
           </div>
           <button 
             onClick={handleLoginClick}
-            className="border border-forest text-forest hover:bg-forest hover:text-ivory rounded-full px-6 py-2 text-sm font-medium transition-all duration-300"
+            className={`border rounded-full px-6 py-2 text-sm font-medium transition-all duration-300 ${isScrolled ? 'border-forest text-forest hover:bg-forest hover:text-ivory' : 'border-[#ffffff] text-[#ffffff] hover:bg-[#ffffff] hover:text-forest'}`}
           >
             Login
           </button>
@@ -86,7 +85,7 @@ const Navbar = () => {
         <div className="lg:hidden">
           <button 
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="text-forest focus:outline-none"
+            className={`${isScrolled ? 'text-forest' : 'text-ivory'} focus:outline-none transition-colors duration-300`}
             aria-label="Toggle menu"
           >
             <svg 

@@ -87,11 +87,8 @@ export default function Login() {
       <div className="bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl w-full max-w-md p-8 relative z-10">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="bg-forest p-4 rounded-2xl shadow-lg mb-4">
-            <div className="flex items-center gap-1">
-              <Sun className="w-7 h-7 text-solar" />
-              <Zap className="w-5 h-5 text-ivory" />
-            </div>
+          <div className="mb-4">
+            <img src="/logo.png" alt="Smart Solar Microgrid Logo" className="w-24 h-24 object-contain" />
           </div>
           <h1 className="text-2xl font-bold text-forest text-center">Smart Solar Microgrid</h1>
           <p className="text-charcoal-light text-sm mt-1">Sign in to your account</p>

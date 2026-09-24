@@ -60,9 +60,7 @@ export default function Register() {
     <div className="min-h-screen bg-ivory flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8 border border-forest/10">
         <div className="flex justify-center mb-8">
-          <div className="bg-forest p-3 rounded-full">
-            <Zap className="w-8 h-8 text-ivory" />
-          </div>
+          <img src="/logo.png" alt="Smart Solar Microgrid Logo" className="w-20 h-20 object-contain" />
         </div>
         
         <h1 className="text-2xl font-bold text-center text-forest mb-2">

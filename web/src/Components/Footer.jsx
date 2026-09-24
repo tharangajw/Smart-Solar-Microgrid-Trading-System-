@@ -11,8 +11,7 @@ const Footer = () => {
           {/* Column 1: Brand & Description */}
           <div className="flex flex-col">
             <div className="flex items-center gap-2 mb-4">
-              <img src="/logo.png" alt="SolarLink Logo" className="h-10 w-auto" />
-              <span className="font-display font-semibold text-xl text-ivory">SolarLink</span>
+              <img src="/logo_footer.png" alt="SolarLink Logo" className="h-20 w-auto" />
             </div>
             <p className="text-sage text-sm max-w-xs leading-relaxed">
               Connecting prosumers, microgrid stations, and clean energy through one intelligent platform.
