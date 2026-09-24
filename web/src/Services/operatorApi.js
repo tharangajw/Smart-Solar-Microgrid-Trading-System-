@@ -22,7 +22,7 @@
 import axios from "axios";
 
 // Read base URL from Vite environment variable (.env)
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Create a shared Axios instance for the entire operator product
 const operatorApi = axios.create({

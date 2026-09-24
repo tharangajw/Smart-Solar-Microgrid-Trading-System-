@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Use relative /api so Vite proxy forwards to http://localhost:5281
-const BASE_URL = '/api';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const backofficeApi = axios.create({
   baseURL: BASE_URL,

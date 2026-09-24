@@ -23,7 +23,12 @@ export default function StationsMap() {
   const [query, setQuery] = useState('');
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
-  const visibleStations = useMemo(() => stations.filter((s) => s.name.toLowerCase().includes(query.toLowerCase())), [stations, query]);
+  const visibleStations = useMemo(() => {
+    return stations.filter((s) => {
+      const stationName = s.name || s.stationName || s.code || 'Unknown Station';
+      return stationName.toLowerCase().includes(query.toLowerCase());
+    });
+  }, [stations, query]);
 
   // Initial REST load — runs once on mount
   useEffect(() => {
@@ -54,9 +59,15 @@ export default function StationsMap() {
     if (!mapReady || !map.current || !window.google?.maps) return;
     const bounds = new window.google.maps.LatLngBounds();
     const markers = visibleStations.map((station) => {
-      const marker = new window.google.maps.Marker({ map: map.current, position: { lat: station.latitude, lng: station.longitude }, title: station.name });
+      const lat = station.latitude ?? station.lat ?? station.gps?.lat;
+      const lng = station.longitude ?? station.lng ?? station.gps?.lng;
+      const stationName = station.name || station.stationName || station.code || 'Unknown Station';
+
+      if (lat === undefined || lng === undefined) return null;
+
+      const marker = new window.google.maps.Marker({ map: map.current, position: { lat, lng }, title: stationName });
       marker.addListener('click', () => setSelected(station)); bounds.extend(marker.getPosition()); return marker;
-    });
+    }).filter(Boolean);
     if (markers.length) map.current.fitBounds(bounds);
     return () => markers.forEach((marker) => marker.setMap(null));
   }, [visibleStations, mapReady]);
@@ -78,7 +89,9 @@ export default function StationsMap() {
       <div ref={mapElement} className="h-[560px] rounded-2xl border border-forest/10 shadow-sm" /> 
       <aside className="rounded-2xl bg-white border border-forest/5 p-6 shadow-sm">
         {selected ? <>
-          <h2 className="font-display text-xl font-semibold text-forest">{selected.name}</h2>
+          <h2 className="font-display text-xl font-semibold text-forest">
+            {selected.name || selected.stationName || selected.code || 'Unknown Station'}
+          </h2>
           <dl className="mt-6 space-y-4 text-sm">
             <div className="flex justify-between border-b border-forest/5 pb-2">
               <dt className="text-charcoal-light font-medium">Location</dt>

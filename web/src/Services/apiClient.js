@@ -1,4 +1,4 @@
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export async function request(path, options = {}) {
   const token = localStorage.getItem('token')
@@ -74,17 +74,5 @@ export const apiClient = {
       },
     });
     return response.json();
-  },
-
-  googleLogin() {
-    window.location.href = `${API_BASE_URL}/auth/google-login`;
-  },
-
-  facebookLogin() {
-    window.location.href = `${API_BASE_URL}/auth/facebook-login`;
-  },
-
-  appleLogin() {
-    window.location.href = `${API_BASE_URL}/auth/apple-login`;
   },
 };
