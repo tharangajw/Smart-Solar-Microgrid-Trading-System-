@@ -1,41 +1,6 @@
 @SmartSolarMicrogrid.API_HostAddress = http://localhost:5281
 
-### Create a new Energy Reservation
-POST {{SmartSolarMicrogrid.API_HostAddress}}/api/reservations
-Content-Type: application/json
-
-{
-  "prosumerId": "PROSUMER_12345",
-  "nodeId": "NODE_999",
-  "capacityKWh": 15.5,
-  "scheduledTime": "2026-09-20T10:00:00Z"
-}
-
-### Get all Pending Reservations
-GET {{SmartSolarMicrogrid.API_HostAddress}}/api/reservations/pending
+GET {{SmartSolarMicrogrid.API_HostAddress}}/weatherforecast/
 Accept: application/json
 
-### Get Reservations for a Specific Prosumer
-GET {{SmartSolarMicrogrid.API_HostAddress}}/api/reservations/prosumer/PROSUMER_12345
-Accept: application/json
-
-### Update a Reservation (Replace {id} with the ID returned from POST)
-PUT {{SmartSolarMicrogrid.API_HostAddress}}/api/reservations/{id}
-Content-Type: application/json
-
-{
-  "scheduledTime": "2026-09-21T10:00:00Z",
-  "capacityKWh": 20.0
-}
-
-### Cancel a Reservation (Replace {id} with the actual ID)
-DELETE {{SmartSolarMicrogrid.API_HostAddress}}/api/reservations/{id}
-Accept: application/json
-
-### Operator Scans QR Code (Replace {qrCodeId} with the actual qrCodeId from the GET/POST responses)
-POST {{SmartSolarMicrogrid.API_HostAddress}}/api/operator/scan-qr
-Content-Type: application/json
-
-{
-  "qrCodeId": "YOUR_QR_CODE_GUID_HERE"
-}
+###

@@ -2,67 +2,25 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/logo"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/logo"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SmartSolarMicrogrid"
-        android:usesCleartextTraffic="true"
         tools:targetApi="31">
-
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDur1-LM7qsjVebqYe67cfUHhg8lbp5Xzs" />
-
         <activity
-            android:name=".modules.splash.SplashActivity"
-            android:theme="@style/Theme.App.Starting"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".modules.onboarding.OnboardingActivity"
-            android:theme="@style/Theme.SmartSolarMicrogrid.Onboarding"
-            android:exported="false" />
-
-        <!-- Authentication -->
-        <activity android:name=".modules.authentication.LoginActivity" android:exported="false" />
-        <activity android:name=".modules.authentication.RegisterActivity" android:exported="false" />
-        <activity android:name=".modules.authentication.ProfileActivity" android:exported="false" />
-
-        <!-- Prosumer -->
-        <activity android:name=".modules.prosumer.ProsumerDashboardActivity" android:exported="false" />
-        <activity android:name=".modules.prosumer.ReserveSlotActivity" android:exported="false" />
-        <activity android:name=".modules.prosumer.MyBookingsActivity" android:exported="false" />
-        <activity android:name=".modules.prosumer.SearchBookingActivity" android:exported="false" />
-        <activity android:name=".modules.prosumer.ReservationDetailActivity" android:exported="false" />
-        <activity android:name=".modules.prosumer.UpdateReservationActivity" android:exported="false" />
-        <activity android:name=".modules.prosumer.BookingSummaryActivity" android:exported="false" />
-
-        <!-- Map & Reservations -->
-        <activity android:name=".modules.map.StationMapActivity" android:exported="false" />
-
-        <!-- QR -->
-        <activity android:name=".modules.qr.QRDisplayActivity" android:exported="false" />
-        <activity android:name=".modules.qr.QRScannerActivity" android:exported="false" />
-
-        <!-- Operator -->
-        <activity android:name=".modules.operator.OperatorDashboardActivity" android:exported="false" />
-        <activity android:name=".modules.operator.AlertsActivity" android:exported="false" />
-
     </application>
 
 </manifest>

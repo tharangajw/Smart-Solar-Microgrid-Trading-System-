@@ -1,69 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import DashboardHeader from './components/DashboardHeader';
 import SummaryCard from './components/SummaryCard';
-import EnergyAnalyticsChart from '../../Components/EnergyAnalyticsChart';
-import { Users, UserPlus, ShieldCheck, BatteryCharging, CalendarCheck, Zap } from 'lucide-react';
-import { getAllUsers, getPendingActivations } from '../../Services/backofficeApi';
-import backofficeApi from '../../Services/backofficeApi';
+import { Users, BatteryCharging, CalendarCheck, Zap } from 'lucide-react';
 
 const DashboardPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [recentReservations, setRecentReservations] = useState([]);
-  const [loadingReservations, setLoadingReservations] = useState(true);
-  const [pendingCount, setPendingCount] = useState(0);
-  const [prosumerCount, setProsumerCount] = useState(0);
-  const [activeCount, setActiveCount] = useState(0);
-  const [stations, setStations] = useState([]);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchRecent = async () => {
-      try {
-        const response = await fetch('/api/reservations/pending');
-        if (response.ok) {
-          const data = await response.json();
-          setRecentReservations(Array.isArray(data) ? data.slice(0, 3) : []);
-        }
-      } catch (err) {
-        console.error('Failed to fetch recent reservations:', err);
-      } finally {
-        setLoadingReservations(false);
-      }
-    };
-    fetchRecent();
-  }, []);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [pendingRes, usersRes, stationsRes] = await Promise.all([
-          getPendingActivations(),
-          getAllUsers(),
-          backofficeApi.get('/stations'),
-        ]);
-        const pending = pendingRes.data || [];
-        const prosumers = (usersRes.data || []).filter((user) => user.role === 'Prosumer');
-        setPendingCount(pending.length);
-        setProsumerCount(prosumers.length);
-        setActiveCount(prosumers.filter((user) => user.isActive).length);
-        setStations(stationsRes.data || []);
-      } catch {
-        setPendingCount(0);
-      }
-    };
-    load();
-  }, []);
-
-  const getStatusColor = (status) => {
-    switch(status?.toLowerCase()) {
-      case 'completed': return 'bg-leaf/20 text-forest-light';
-      case 'active': return 'bg-solar/20 text-solar-dark text-yellow-700';
-      case 'pending': return 'bg-gray-100 text-charcoal-light';
-      case 'cancelled': return 'bg-red-100 text-red-600';
-      default: return 'bg-gray-100 text-charcoal-light';
-    }
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   return (
@@ -71,7 +16,7 @@ const DashboardPage = () => {
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       
       <div className="flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden">
-        <DashboardHeader onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
+        <DashboardHeader onMenuClick={toggleSidebar} />
         
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
           {/* Summary Cards */}
@@ -120,50 +65,46 @@ const DashboardPage = () => {
               <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-forest/5">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="font-display text-lg font-semibold text-forest">Recent Reservations</h2>
-                  <Link to="/reservations" className="text-sm font-medium text-sage hover:text-forest transition-colors">
+                  <button className="text-sm font-medium text-sage hover:text-forest transition-colors">
                     View All
-                  </Link>
+                  </button>
                 </div>
                 
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm text-left">
                     <thead className="text-xs text-charcoal-light uppercase bg-forest/5 border-b border-forest/10 rounded-t-lg">
                       <tr>
-                        <th className="px-4 py-3 rounded-tl-lg font-medium">User NIC</th>
-                        <th className="px-4 py-3 font-medium">Station/Node</th>
-                        <th className="px-4 py-3 font-medium">Date</th>
+                        <th className="px-4 py-3 rounded-tl-lg font-medium">User</th>
+                        <th className="px-4 py-3 font-medium">Station</th>
+                        <th className="px-4 py-3 font-medium">Time Slot</th>
                         <th className="px-4 py-3 rounded-tr-lg font-medium">Status</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {loadingReservations ? (
-                        <tr>
-                          <td colSpan="4" className="px-4 py-6 text-center text-charcoal-light">Loading...</td>
-                        </tr>
-                      ) : recentReservations.length === 0 ? (
-                        <tr>
-                          <td colSpan="4" className="px-4 py-6 text-center text-charcoal-light">No recent reservations found.</td>
-                        </tr>
-                      ) : (
-                        recentReservations.map((res) => (
-                          <tr 
-                            key={res.id} 
-                            onClick={() => navigate(`/reservations/${res.id}`)}
-                            className="border-b border-forest/5 hover:bg-forest/5/50 transition-colors cursor-pointer"
-                          >
-                            <td className="px-4 py-3 font-medium text-charcoal">{res.prosumerNic}</td>
-                            <td className="px-4 py-3 text-charcoal-light">{res.nodeId}</td>
-                            <td className="px-4 py-3 text-charcoal-light">
-                              {new Date(res.reservationDate).toLocaleString()}
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className={`px-2 py-1 rounded-md text-xs font-medium ${getStatusColor(res.status)}`}>
-                                {res.status || 'Pending'}
-                              </span>
-                            </td>
-                          </tr>
-                        ))
-                      )}
+                      <tr className="border-b border-forest/5 hover:bg-forest/5/50 transition-colors">
+                        <td className="px-4 py-3 font-medium text-charcoal">Alex M.</td>
+                        <td className="px-4 py-3 text-charcoal-light">North Campus Solar</td>
+                        <td className="px-4 py-3 text-charcoal-light">09:00 - 10:00 AM</td>
+                        <td className="px-4 py-3">
+                          <span className="bg-leaf/20 text-forest-light px-2 py-1 rounded-md text-xs font-medium">Completed</span>
+                        </td>
+                      </tr>
+                      <tr className="border-b border-forest/5 hover:bg-forest/5/50 transition-colors">
+                        <td className="px-4 py-3 font-medium text-charcoal">Sarah J.</td>
+                        <td className="px-4 py-3 text-charcoal-light">Library Hub</td>
+                        <td className="px-4 py-3 text-charcoal-light">11:30 - 12:30 PM</td>
+                        <td className="px-4 py-3">
+                          <span className="bg-solar/20 text-solar-dark px-2 py-1 rounded-md text-xs font-medium text-yellow-700">Active</span>
+                        </td>
+                      </tr>
+                      <tr className="border-b border-forest/5 hover:bg-forest/5/50 transition-colors">
+                        <td className="px-4 py-3 font-medium text-charcoal">Michael T.</td>
+                        <td className="px-4 py-3 text-charcoal-light">Engineering Bldg</td>
+                        <td className="px-4 py-3 text-charcoal-light">02:00 - 04:00 PM</td>
+                        <td className="px-4 py-3">
+                          <span className="bg-gray-100 text-charcoal-light px-2 py-1 rounded-md text-xs font-medium">Pending</span>
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
                 </div>
@@ -173,12 +114,14 @@ const DashboardPage = () => {
               <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-forest/5">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="font-display text-lg font-semibold text-forest">Energy Slot Overview</h2>
-                  <Link to="/slots" className="text-sm font-medium text-sage hover:text-forest transition-colors">
+                  <button className="text-sm font-medium text-sage hover:text-forest transition-colors">
                     Manage
-                  </Link>
+                  </button>
                 </div>
                 
-                <EnergyAnalyticsChart />
+                <div className="h-48 flex items-center justify-center bg-ivory/50 rounded-xl border border-dashed border-forest/20 text-charcoal-light text-sm">
+                  [Energy Availability Chart Placeholder]
+                </div>
               </section>
 
             </div>
@@ -191,34 +134,23 @@ const DashboardPage = () => {
                 <h2 className="font-display text-lg font-semibold text-forest mb-6">Microgrid Status</h2>
                 
                 <div className="space-y-4">
-                  {stations.length === 0 ? (
-                    <p className="text-sm text-charcoal-light text-center py-4">No stations available.</p>
-                  ) : (
-                    stations.slice(0, 5).map((station) => {
-                      const usedPct = station.totalSlots > 0
-                        ? Math.round(((station.totalSlots - station.availableSlots) / station.totalSlots) * 100)
-                        : 0;
-                      const isOptimal = station.isActive && station.status !== 'full';
-                      return (
-                        <div key={station.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-forest/5 transition-colors border border-transparent hover:border-forest/10">
-                          <div>
-                            <p className="font-medium text-sm text-charcoal">{station.name}</p>
-                            <p className="text-xs text-charcoal-light mt-0.5">
-                              {station.isActive ? `Slots used: ${usedPct}%` : 'Inactive'}
-                            </p>
-                          </div>
-                          <div className={`w-2 h-2 rounded-full ${
-                            !station.isActive ? 'bg-red-400' :
-                            station.status === 'full' ? 'bg-solar' : 'bg-leaf'
-                          }`} />
-                        </div>
-                      );
-                    })
-                  )}
+                  {[
+                    { name: 'North Campus Solar', capacity: '85%', status: 'optimal' },
+                    { name: 'Library Hub', capacity: '42%', status: 'warning' },
+                    { name: 'Engineering Bldg', capacity: '98%', status: 'optimal' },
+                  ].map((station, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 rounded-xl hover:bg-forest/5 transition-colors border border-transparent hover:border-forest/10">
+                      <div>
+                        <p className="font-medium text-sm text-charcoal">{station.name}</p>
+                        <p className="text-xs text-charcoal-light mt-0.5">Capacity: {station.capacity}</p>
+                      </div>
+                      <div className={`w-2 h-2 rounded-full ${station.status === 'optimal' ? 'bg-leaf' : 'bg-solar'}`}></div>
+                    </div>
+                  ))}
                 </div>
-                <Link to="/backoffice/nodes" className="block w-full mt-4 py-2 text-sm font-medium text-center border border-forest/20 rounded-xl text-forest hover:bg-forest hover:text-ivory transition-colors">
+                <button className="w-full mt-4 py-2 text-sm font-medium border border-forest/20 rounded-xl text-forest hover:bg-forest hover:text-ivory transition-colors">
                   View All Stations
-                </Link>
+                </button>
               </section>
 
               {/* Recent Transactions */}
@@ -248,18 +180,6 @@ const DashboardPage = () => {
           </div>
         </main>
       </div>
-
-      <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-forest/5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-lg font-semibold text-forest">Activation queue</h2>
-          <Link to="/backoffice/prosumers" className="text-sm font-medium text-sage hover:text-forest transition-colors">
-            Open pending list
-          </Link>
-        </div>
-        <p className="text-sm text-charcoal-light">
-          Mobile registrations are stored as inactive. Use Pending Activations to approve a prosumer so they can log in and book energy slots.
-        </p>
-      </section>
     </div>
   );
 };

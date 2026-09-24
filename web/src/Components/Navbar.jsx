@@ -31,20 +31,7 @@ const Navbar = () => {
   };
 
   const handleLoginClick = () => {
-    // Check if user is already logged in
-    const backofficeToken = localStorage.getItem('backoffice_token');
-    const operatorToken = localStorage.getItem('operator_token');
-    const token = localStorage.getItem('token');
-
-    if (backofficeToken) {
-      navigate('/backoffice/dashboard');
-    } else if (operatorToken) {
-      navigate('/operator/dashboard');
-    } else if (token) {
-      navigate('/dashboard');
-    } else {
-      navigate('/login');
-    }
+    navigate('/dashboard');
   };
 
   return (
@@ -94,12 +81,6 @@ const Navbar = () => {
               </a>
             ))}
           </div>
-          <button
-            onClick={() => navigate('/operator/login')}
-            className="text-charcoal-light hover:text-forest transition-colors text-sm font-medium tracking-wide uppercase"
-          >
-            Operator
-          </button>
           <button 
             onClick={handleLoginClick}
             className="border border-forest text-forest hover:bg-forest hover:text-ivory rounded-full px-6 py-2 text-sm font-medium transition-all duration-300"
@@ -159,12 +140,6 @@ const Navbar = () => {
               {link.name}
             </a>
           ))}
-          <button
-            onClick={() => navigate('/operator/login')}
-            className="text-charcoal hover:text-forest transition-colors text-sm font-medium tracking-wide uppercase py-2 text-left"
-          >
-            Operator
-          </button>
           <button 
             onClick={handleLoginClick}
             className="border border-forest text-forest hover:bg-forest hover:text-ivory rounded-full px-6 py-2 text-sm font-medium transition-all duration-300 w-fit mt-4"

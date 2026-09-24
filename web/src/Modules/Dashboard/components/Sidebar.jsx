@@ -1,9 +1,9 @@
+import React from 'react';
 import { 
   LayoutDashboard, 
   Users, 
   Zap, 
   BatteryCharging, 
-  MapPin,
   Clock, 
   CalendarCheck, 
   ReceiptText, 
@@ -12,20 +12,18 @@ import {
   LogOut,
   X
 } from 'lucide-react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const navigate = useNavigate();
-  const location = useLocation();
   
   const navItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard', active: true },
     { name: 'Users', icon: Users, path: '#' },
     { name: 'Prosumers', icon: Zap, path: '#' },
-    { name: 'Microgrid Stations', icon: BatteryCharging, path: '/microgrid' },
-    { name: 'Station Map', icon: MapPin, path: '/map' },
-    { name: 'Energy Slots', icon: Clock, path: '/slots' },
-    { name: 'Reservations', icon: CalendarCheck, path: '/reservations' },
+    { name: 'Microgrid Stations', icon: BatteryCharging, path: '#' },
+    { name: 'Energy Slots', icon: Clock, path: '#' },
+    { name: 'Reservations', icon: CalendarCheck, path: '#' },
     { name: 'Transactions', icon: ReceiptText, path: '#' },
     { name: 'Reports', icon: BarChart3, path: '#' },
     { name: 'Settings', icon: Settings, path: '#' },
@@ -53,7 +51,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       >
         {/* Logo Area */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-forest/10 shrink-0">
-          <Link to="/" className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
               width="24" height="24" 
@@ -76,7 +74,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               <path d="m19.07 4.93-1.41 1.41"></path>
             </svg>
             <span className="font-display font-semibold text-lg text-forest">SmartSolar</span>
-          </Link>
+          </div>
           <button 
             className="lg:hidden text-charcoal-light hover:text-forest"
             onClick={() => setIsOpen(false)}
@@ -89,33 +87,19 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.path || (item.path !== '/' && item.path !== '#' && location.pathname.startsWith(item.path));
-            
-            if (item.path === '#') {
-              return (
-                <div
-                  key={item.name}
-                  className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-charcoal-light/60 cursor-not-allowed"
-                >
-                  <Icon size={18} />
-                  {item.name}
-                </div>
-              );
-            }
-
             return (
-              <Link
+              <a
                 key={item.name}
-                to={item.path}
+                href={item.path}
                 className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  isActive
-                    ? 'bg-forest text-ivory shadow-md shadow-forest/20 font-semibold' 
+                  item.active 
+                    ? 'bg-forest text-ivory shadow-md shadow-forest/20' 
                     : 'text-charcoal-light hover:bg-forest/5 hover:text-forest'
                 }`}
               >
                 <Icon size={18} />
                 {item.name}
-              </Link>
+              </a>
             );
           })}
         </div>
