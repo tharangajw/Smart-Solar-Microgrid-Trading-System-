@@ -21,13 +21,12 @@ const DashboardPage = () => {
   useEffect(() => {
     const fetchRecent = async () => {
       try {
-        const response = await fetch('/api/reservations/pending');
-        if (response.ok) {
-          const data = await response.json();
-          setRecentReservations(Array.isArray(data) ? data.slice(0, 3) : []);
-        }
+        const response = await backofficeApi.get('/reservations/pending');
+        const data = response.data;
+        setRecentReservations(Array.isArray(data) ? data.slice(0, 3) : []);
       } catch (err) {
         console.error('Failed to fetch recent reservations:', err);
+        setRecentReservations([]);
       } finally {
         setLoadingReservations(false);
       }

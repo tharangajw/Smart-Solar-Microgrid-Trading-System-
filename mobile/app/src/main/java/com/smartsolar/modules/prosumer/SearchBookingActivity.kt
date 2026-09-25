@@ -149,12 +149,26 @@ class SearchBookingActivity : AppCompatActivity() {
                                 continue
                             }
 
+                            // Apply local date filter if specified (matching backend logic which filters by created date)
+                            val dateField = item.optString("createdAt", item.optString("reservationDate", ""))
+                            if (fromDateIso != null || toDateIso != null) {
+                                try {
+                                    val dateStr = dateField.take(10) // yyyy-MM-dd
+                                    val fromStr = fromDateIso?.take(10) ?: "0000-00-00"
+                                    val toStr = toDateIso?.take(10) ?: "9999-99-99"
+                                    if (dateStr < fromStr || dateStr > toStr) {
+                                        continue
+                                    }
+                                } catch (_: Exception) {}
+                            }
+
                             resultsList.add(Booking(id, nodeId, slotId, status, item.optString("reservationDate", "")))
                         }
                     } catch (_: Exception) {}
                 }
 
                 if (resultsList.isEmpty()) {
+                    textEmpty.text = "No results found"
                     textEmpty.visibility = View.VISIBLE
                 } else {
                     recycler.visibility = View.VISIBLE
