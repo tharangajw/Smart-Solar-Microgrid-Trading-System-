@@ -1,103 +1,113 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import StatusBadge from './StatusBadge';
-import { Eye } from 'lucide-react';
+import { Eye, Clock, CalendarDays, Loader, XCircle } from 'lucide-react';
 
-const BookingTable = ({ bookings, loading, onApprove, approvingId }) => {
+const BookingTable = ({ bookings, loading, onApprove, approvingId, onCancel }) => {
   if (loading) {
     return (
-      <div className="py-12 flex flex-col items-center justify-center space-y-4">
-        <div className="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-slate-500 font-medium animate-pulse">Loading latest bookings...</p>
+      <div className="flex items-center justify-center py-20 gap-2 text-sage text-sm">
+        <Loader size={18} className="animate-spin" /> Loading bookings...
       </div>
     );
   }
 
   if (!bookings || bookings.length === 0) {
     return (
-      <div className="py-12 text-center">
-        <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Eye size={24} className="text-slate-400" />
-        </div>
-        <h3 className="text-lg font-semibold text-slate-800">No bookings yet</h3>
-        <p className="text-slate-500 mt-1">When new bookings arrive, they'll show up here.</p>
+      <div className="text-center py-20">
+        <CalendarDays className="mx-auto text-sage mb-3" size={32} />
+        <p className="text-charcoal font-medium">No bookings yet</p>
+        <p className="text-sm text-charcoal-light mt-1">When new bookings arrive, they'll show up here.</p>
       </div>
     );
   }
 
+  const fmt = (d) => d ? new Date(d).toLocaleString('en-LK', {
+    dateStyle: 'medium', timeStyle: 'short'
+  }) : '—';
+
   return (
-    <div className="overflow-hidden bg-white rounded-2xl shadow-sm border border-slate-100">
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-slate-100">
-          <thead className="bg-slate-50/80 backdrop-blur-sm">
-            <tr>
-              <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">
-                Booking ID
-              </th>
-              <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">
-                Date & Time
-              </th>
-              <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">
-                Node
-              </th>
-              <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">
-                Energy
-              </th>
-              <th scope="col" className="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-widest">
-                Status
-              </th>
-              <th scope="col" className="px-6 py-4 text-right text-xs font-bold text-slate-500 uppercase tracking-widest">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-slate-50">
-            {bookings.map((booking) => (
-              <tr key={booking.id} className="hover:bg-teal-50/50 transition-colors group cursor-default">
-                <td className="px-6 py-5 whitespace-nowrap">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-                    #{booking.id}
-                  </span>
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm text-left">
+        <thead className="text-xs text-charcoal-light uppercase bg-forest/5 border-b border-forest/10">
+          <tr>
+            <th className="px-4 py-3 font-medium">Prosumer NIC</th>
+            <th className="px-4 py-3 font-medium">Node / Station</th>
+            <th className="px-4 py-3 font-medium">Slot ID</th>
+            <th className="px-4 py-3 font-medium">Date</th>
+            <th className="px-4 py-3 font-medium">Time</th>
+            <th className="px-4 py-3 font-medium">Status</th>
+            <th className="px-4 py-3 font-medium">Created</th>
+            <th className="px-4 py-3 font-medium text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {bookings.map((booking) => {
+            const canModify = booking.status !== 'Cancelled' && booking.status !== 'Completed';
+            return (
+              <tr key={booking.id} className="border-b border-forest/5 hover:bg-forest/[0.03]">
+                <td className="px-4 py-3 font-mono text-xs">{booking.prosumerNic || '—'}</td>
+                <td className="px-4 py-3">
+                  <p className="font-medium text-charcoal text-xs">{booking.nodeName || booking.nodeId || '—'}</p>
+                  <p className="text-charcoal-light font-mono text-[10px] mt-0.5">{booking.nodeId || '—'}</p>
                 </td>
-                <td className="px-6 py-5 whitespace-nowrap text-sm text-slate-500 font-medium">
-                  {new Date(booking.reservationDate || booking.date).toLocaleString(undefined, {
-                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                  })}
+                <td className="px-4 py-3 text-charcoal-light font-mono text-xs">{booking.slotId || booking.energyAmount || '—'}</td>
+                <td className="px-4 py-3 text-charcoal-light">
+                  {booking.reservationDate || booking.date
+                    ? new Date(booking.reservationDate || booking.date).toLocaleDateString('en-LK', { dateStyle: 'medium' })
+                    : '—'}
                 </td>
-                <td className="px-6 py-5 whitespace-nowrap text-sm text-slate-700 font-medium">
-                  {booking.nodeName || booking.nodeId}
+                <td className="px-4 py-3 text-charcoal-light">
+                  <div className="flex items-center gap-1.5">
+                    <Clock size={13} className="text-charcoal-light shrink-0" />
+                    <span>
+                      {booking.reservationDate || booking.date
+                        ? new Date(booking.reservationDate || booking.date).toLocaleTimeString('en-LK', { timeStyle: 'short' })
+                        : '—'}
+                    </span>
+                  </div>
                 </td>
-                <td className="px-6 py-5 whitespace-nowrap text-sm text-slate-900 font-bold">
-                  {booking.energyAmount ?? booking.slotId ?? '—'}
-                  {booking.energyAmount != null && <span className="text-slate-400 font-medium"> kWh</span>}
-                </td>
-                <td className="px-6 py-5 whitespace-nowrap">
+                <td className="px-4 py-3">
                   <StatusBadge status={booking.status} />
                 </td>
-                <td className="px-6 py-5 whitespace-nowrap text-right text-sm font-medium">
-                  {booking.status?.toLowerCase() === 'pending' && onApprove && (
-                    <button
-                      type="button"
-                      onClick={() => onApprove(booking.id)}
-                      disabled={approvingId === booking.id}
-                      className="mr-2 inline-flex items-center rounded-lg bg-teal-600 px-3 py-1.5 text-white transition hover:bg-teal-700 disabled:opacity-60"
+                <td className="px-4 py-3 text-charcoal-light text-xs">
+                  {fmt(booking.createdAt)}
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-2 justify-end">
+                    {booking.status?.toLowerCase() === 'pending' && onApprove && (
+                      <button
+                        type="button"
+                        onClick={() => onApprove(booking.id)}
+                        disabled={approvingId === booking.id}
+                        className="mr-2 inline-flex items-center rounded-lg bg-forest text-ivory px-3 py-1.5 text-xs font-medium transition hover:bg-forest/90 disabled:opacity-60"
+                      >
+                        {approvingId === booking.id ? 'Approving…' : 'Approve'}
+                      </button>
+                    )}
+                    {canModify && onCancel && (
+                      <button
+                        onClick={() => onCancel(booking)}
+                        title="Cancel"
+                        className="p-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors"
+                      >
+                        <XCircle size={14} />
+                      </button>
+                    )}
+                    <Link 
+                      to={`/operator/bookings/${booking.id}`} 
+                      title="View Details"
+                      className="p-1.5 rounded-lg border border-forest/20 text-forest hover:bg-forest/5 transition-colors"
                     >
-                      {approvingId === booking.id ? 'Approving…' : 'Approve'}
-                    </button>
-                  )}
-                  <Link 
-                    to={`/operator/bookings/${booking.id}`} 
-                    className="inline-flex items-center justify-center space-x-2 bg-white text-teal-600 border border-teal-100 hover:border-teal-200 hover:bg-teal-50 px-3 py-1.5 rounded-lg transition-all shadow-sm group-hover:shadow"
-                  >
-                    <Eye size={16} />
-                    <span>View</span>
-                  </Link>
+                      <Eye size={14} />
+                    </Link>
+                  </div>
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 };

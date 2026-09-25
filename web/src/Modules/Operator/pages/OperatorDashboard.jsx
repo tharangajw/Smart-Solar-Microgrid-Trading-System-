@@ -3,7 +3,7 @@
  * Main dashboard for Grid Operators.
  * Uses the same SummaryCard / design tokens as the User Dashboard.
  * Fetches live data from the Web API via operatorApi service.
- * Author: Member 4 â€“ Operator Product
+ * Author: Member 4 – Operator Product
  */
 
 import React, { useState, useEffect } from 'react';
@@ -19,7 +19,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
-/* â”€â”€ Status badge helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Status badge helper ─────────────────────────────────────────────────── */
 const StatusBadge = ({ status }) => {
   const map = {
     Approved:  'bg-leaf/20 text-forest-light',
@@ -34,7 +34,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-/* â”€â”€ Recent bookings table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Recent bookings table ───────────────────────────────────────────────── */
 const RecentBookingsTable = ({ bookings, loading }) => {
   if (loading) {
     return (
@@ -66,10 +66,13 @@ const RecentBookingsTable = ({ bookings, loading }) => {
         <tbody>
           {bookings.map((b, i) => (
             <tr key={b.id || i} className="border-b border-forest/5 hover:bg-forest/[0.03] transition-colors">
-              <td className="px-4 py-3 font-medium text-charcoal">{b.prosumerName || b.userId || 'â€”'}</td>
-              <td className="px-4 py-3 text-charcoal-light">{b.stationName || b.nodeId || 'â€”'}</td>
+              <td className="px-4 py-3 font-medium text-charcoal">{b.prosumerName || b.prosumerNic || '—'}</td>
+              <td className="px-4 py-3">
+                <p className="font-medium text-charcoal">{b.stationName || b.nodeId || '—'}</p>
+                <p className="text-charcoal-light font-mono text-[10px] mt-0.5">{b.nodeId || '—'}</p>
+              </td>
               <td className="px-4 py-3 text-charcoal-light">
-                {b.startTime ? new Date(b.startTime).toLocaleString() : 'â€”'}
+                {b.reservationDate ? new Date(b.reservationDate).toLocaleString('en-LK', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}
               </td>
               <td className="px-4 py-3">
                 <StatusBadge status={b.status} />
@@ -82,7 +85,7 @@ const RecentBookingsTable = ({ bookings, loading }) => {
   );
 };
 
-/* â”€â”€ Dashboard Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Dashboard Page ──────────────────────────────────────────────────────── */
 const OperatorDashboard = () => {
   const [data, setData] = useState({
     totalReservations: 0,
@@ -98,13 +101,21 @@ const OperatorDashboard = () => {
   useEffect(() => {
     const loadDashboard = async () => {
       try {
-        const [dashRes, reservRes] = await Promise.all([
+        const [dashRes, reservRes, statRes] = await Promise.all([
           getOperatorDashboard(),
           getAllReservations(),
+          import('../../../Services/operatorApi').then(m => m.getAllStations())
         ]);
+        
+        const stations = statRes.data || [];
+        const getStationName = (id) => stations.find(s => s.id === id)?.name;
+
         setData({
           ...dashRes.data,
-          recentBookings: (reservRes.data || []).slice(0, 5),
+          recentBookings: (reservRes.data || []).slice(0, 5).map(b => ({
+            ...b,
+            stationName: getStationName(b.nodeId)
+          })),
         });
       } catch (err) {
         setError(err.response?.data?.message || 'Unable to load dashboard data.');
@@ -123,7 +134,7 @@ const OperatorDashboard = () => {
       {/* Page heading */}
       <div>
         <h1 className="font-display text-2xl sm:text-3xl font-semibold text-forest">
-          Good {getGreeting()}, {(operator.fullName || 'Operator').split(' ')[0]} ðŸ‘‹
+          Good {getGreeting()}, {(operator.fullName || 'Operator').split(' ')[0]} 👋
         </h1>
         <p className="text-sm text-charcoal-light mt-1">
           Here's what's happening on the SolarLink grid today.
@@ -137,7 +148,7 @@ const OperatorDashboard = () => {
         </div>
       )}
 
-      {/* Summary Cards â€” same component as User Dashboard */}
+      {/* Summary Cards — same component as User Dashboard */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <SummaryCard
           title="Total Bookings"
@@ -176,7 +187,7 @@ const OperatorDashboard = () => {
       {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
 
-        {/* Recent Bookings â€” left 2 columns */}
+        {/* Recent Bookings — left 2 columns */}
         <div className="lg:col-span-2">
           <section className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-forest/5">
             <div className="flex items-center justify-between mb-6">

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/backgroundColor"
     android:orientation="vertical"
-    android:paddingTop="80dp"
+    android:paddingTop="150dp"
     tools:context=".modules.prosumer.MyBookingsActivity">
 
     <!-- Tab Layout -->
@@ -23,7 +23,8 @@
         app:tabSelectedTextColor="@color/colorPrimary"
         app:tabTextColor="@color/textColorSecondary"
         app:tabIndicatorColor="@color/colorPrimary"
-        app:tabIndicatorHeight="3dp" />
+        app:tabIndicatorHeight="3dp"
+        app:tabTextAppearance="@style/TextAppearance.AppCompat.Medium" />
 
     <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
