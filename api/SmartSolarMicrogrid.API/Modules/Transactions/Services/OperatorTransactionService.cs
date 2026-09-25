@@ -137,18 +137,44 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Services
         /// <summary>
         /// Verifies a scanned QR code and finalises the energy transfer transaction.
         /// Business rules:
-        ///   – QrTransaction with the given QrCodeId must exist
+        ///   – QrTransaction with the given QrCodeId or SourceReservationId must exist
         ///   – Status must be Approved (not already Done or Cancelled)
         ///   – Sets QrTransaction status to Done
         ///   – Sets corresponding Reservation status to Completed
         /// </summary>
-        /// <param name="qrCodeId">The UUID QR code scanned by the operator</param>
+        /// <param name="qrCodeId">The UUID QR code or Reservation ID scanned by the operator</param>
         public async Task<bool> VerifyAndFinalizeTransactionAsync(string qrCodeId)
         {
-            // Find the QrTransaction matching the scanned QR code
+            var cleanId = qrCodeId?.Trim().Replace("QR_", "").Replace("qr_", "") ?? "";
+
+            // Find the QrTransaction matching the scanned QR code or source reservation ID
             var qrTransaction = await _qrTransactions
-                .Find(r => r.QrCodeId == qrCodeId)
+                .Find(r => r.QrCodeId == cleanId || r.SourceReservationId == cleanId || r.QrCodeId == qrCodeId)
                 .FirstOrDefaultAsync();
+
+            // If not found in QrTransactions, check if Reservation exists and is Approved
+            if (qrTransaction == null)
+            {
+                var reservation = await _reservations
+                    .Find(r => r.Id == cleanId || r.QrCodeId == cleanId)
+                    .FirstOrDefaultAsync();
+
+                if (reservation != null && reservation.Status == "Approved")
+                {
+                    qrTransaction = new QrTransaction
+                    {
+                        ProsumerId = reservation.ProsumerNic,
+                        NodeId = reservation.NodeId,
+                        CapacityKWh = 0,
+                        ScheduledTime = reservation.ReservationDate,
+                        Status = "Approved",
+                        QrCodeId = string.IsNullOrEmpty(reservation.QrCodeId) ? cleanId : reservation.QrCodeId,
+                        SourceReservationId = reservation.Id,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    await _qrTransactions.InsertOneAsync(qrTransaction);
+                }
+            }
 
             if (qrTransaction == null)
                 throw new KeyNotFoundException("Invalid QR Code. No matching reservation found.");
@@ -157,11 +183,15 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Services
                 throw new InvalidOperationException(
                     $"Cannot finalise reservation. Status must be Approved, current: {qrTransaction.Status}");
 
-            // Mark QrTransaction as Done
+            // Update only an Approved transaction. The status predicate makes the
+            // completion idempotent-safe when two operators scan the same QR.
             var energyUpdate = Builders<QrTransaction>.Update
                 .Set(r => r.Status, "Done");
             var result = await _qrTransactions
-                .UpdateOneAsync(r => r.Id == qrTransaction.Id, energyUpdate);
+                .UpdateOneAsync(r => r.Id == qrTransaction.Id && r.Status == "Approved", energyUpdate);
+
+            if (result.ModifiedCount == 0)
+                throw new InvalidOperationException("This transaction was already completed or is no longer approved.");
 
             // Also update the parent Reservation to Completed for consistency
             var reservationUpdate = Builders<Reservation>.Update
@@ -171,7 +201,59 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Services
                 r => r.Id == qrTransaction.SourceReservationId,
                 reservationUpdate);
 
-            return result.ModifiedCount > 0;
+            return true;
+        }
+
+        /// <summary>
+        /// Reads the server-side transaction and its source reservation without
+        /// changing state. Operators use this as the verification step before
+        /// confirming the physical energy transfer.
+        /// </summary>
+        public async Task<VerifiedTransaction?> GetVerifiedTransactionAsync(string qrCodeId)
+        {
+            var cleanId = qrCodeId?.Trim().Replace("QR_", "").Replace("qr_", "") ?? "";
+
+            var transaction = await _qrTransactions
+                .Find(t => t.QrCodeId == cleanId || t.SourceReservationId == cleanId || t.QrCodeId == qrCodeId)
+                .FirstOrDefaultAsync();
+
+            if (transaction == null)
+            {
+                var res = await _reservations
+                    .Find(r => r.Id == cleanId || r.QrCodeId == cleanId)
+                    .FirstOrDefaultAsync();
+
+                if (res != null)
+                {
+                    transaction = new QrTransaction
+                    {
+                        ProsumerId = res.ProsumerNic,
+                        NodeId = res.NodeId,
+                        CapacityKWh = 0,
+                        ScheduledTime = res.ReservationDate,
+                        Status = res.Status,
+                        QrCodeId = string.IsNullOrEmpty(res.QrCodeId) ? cleanId : res.QrCodeId,
+                        SourceReservationId = res.Id,
+                        CreatedAt = res.CreatedAt
+                    };
+                    return new VerifiedTransaction
+                    {
+                        Transaction = transaction,
+                        Reservation = res
+                    };
+                }
+                return null;
+            }
+
+            var reservation = await _reservations
+                .Find(r => r.Id == transaction.SourceReservationId)
+                .FirstOrDefaultAsync();
+
+            return new VerifiedTransaction
+            {
+                Transaction = transaction,
+                Reservation = reservation
+            };
         }
     }
 
@@ -187,5 +269,11 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Services
         public int CancelledCount { get; set; }
         public int ActiveStations { get; set; }
         public int ApprovedFutureCount { get; set; }
+    }
+
+    public class VerifiedTransaction
+    {
+        public QrTransaction Transaction { get; set; } = null!;
+        public Reservation? Reservation { get; set; }
     }
 }

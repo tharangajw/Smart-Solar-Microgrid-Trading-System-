@@ -68,6 +68,15 @@ class StationMapActivity : BaseNavActivity(), OnMapReadyCallback {
         // Basic map settings
         mMap.uiSettings.isZoomControlsEnabled = true
         mMap.uiSettings.isMapToolbarEnabled = true
+        mMap.uiSettings.isMyLocationButtonEnabled = true
+        
+        // Enable location layer if permission is granted
+        enableMyLocationIfPermitted()
+
+        // Handle user tap on map to pick/select location
+        mMap.setOnMapClickListener { latLng ->
+            loadStationsFromApi(latLng.latitude, latLng.longitude)
+        }
         
         android.util.Log.d("StationMap", "Map Engine Ready. If screen is blank, check API Key in Cloud Console.")
 
@@ -76,23 +85,59 @@ class StationMapActivity : BaseNavActivity(), OnMapReadyCallback {
         refreshHandler.postDelayed(refreshRunnable, refreshIntervalMs)
     }
 
+    private fun enableMyLocationIfPermitted() {
+        if (androidx.core.content.ContextCompat.checkSelfPermission(
+                this, android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            try {
+                mMap.isMyLocationEnabled = true
+            } catch (e: SecurityException) {
+                android.util.Log.e("StationMap", "SecurityException enabling location", e)
+            }
+        } else {
+            androidx.core.app.ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION),
+                1001
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1001 && grantResults.isNotEmpty() && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            if (::mMap.isInitialized) {
+                enableMyLocationIfPermitted()
+            }
+        }
+    }
+
     override fun onDestroy() {
         refreshHandler.removeCallbacks(refreshRunnable)
         super.onDestroy()
     }
 
     /**
-     * Fetches all solar stations from GET /stations API endpoint,
+     * Fetches all solar stations from GET /stations or GET /stations/nearby API endpoint,
      * then plots each as a marker on the Google Map.
      */
-    private fun loadStationsFromApi() {
-        // Show a "loading" toast or indicator could be better, for now just log
+    private fun loadStationsFromApi(selectedLat: Double? = null, selectedLng: Double? = null) {
         android.util.Log.d("StationMap", "Starting to fetch stations...")
         
         // Run network call in a background thread to avoid blocking UI
         Thread {
-            // Using "Stations" to match ReservationRepository and backend Controller name
-            val response = ApiClient.get(this, "Stations")
+            val endpoint = if (selectedLat != null && selectedLng != null) {
+                "Stations/nearby?lat=$selectedLat&lng=$selectedLng&radius=100"
+            } else {
+                "Stations"
+            }
+            var response = ApiClient.get(this, endpoint)
+            if (response == null || response.trim() == "[]") {
+                response = ApiClient.get(this, "Stations")
+            }
 
             runOnUiThread {
                 if (response != null) {

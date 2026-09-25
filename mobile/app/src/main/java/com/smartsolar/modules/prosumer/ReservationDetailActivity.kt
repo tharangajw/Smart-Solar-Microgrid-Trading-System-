@@ -88,10 +88,10 @@ class ReservationDetailActivity : AppCompatActivity() {
         } else {
             buttonViewQR.text = "View Transaction QR Code"
             buttonViewQR.setOnClickListener {
-                val validId = if (!bookingId.isNullOrEmpty() && bookingId != "null") bookingId!! else "6ab2582d235e3ad6e67b4986"
+                val validId = bookingId
                 val qrJson = JSONObject().apply {
                     put("id", validId)
-                    put("qrCodeId", "QR_$validId")
+                    put("qrCodeId", "")
                     put("status", "Approved")
                 }.toString()
                 val intent = Intent(this@ReservationDetailActivity, com.smartsolar.modules.qr.QRDisplayActivity::class.java)
@@ -151,7 +151,7 @@ class ReservationDetailActivity : AppCompatActivity() {
                                 val activeId = if (!fullId.isNullOrEmpty() && fullId != "null") fullId else if (!bookingId.isNullOrEmpty() && bookingId != "null") bookingId!! else "6ab2582d235e3ad6e67b4986"
                                 val qrJson = JSONObject().apply {
                                     put("id", activeId)
-                                    put("qrCodeId", "QR_$activeId")
+                                    put("qrCodeId", obj.optString("qrCodeId", ""))
                                     put("status", status)
                                 }.toString()
                                 val intent = Intent(this@ReservationDetailActivity, com.smartsolar.modules.qr.QRDisplayActivity::class.java)
