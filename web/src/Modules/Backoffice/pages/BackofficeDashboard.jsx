@@ -86,17 +86,6 @@ const BackofficeDashboard = () => {
     }
   };
 
-  const quickActionCls =
-    'group flex items-center gap-2 w-full p-2 sm:p-2.5 rounded-lg border border-forest/10 bg-ivory/40 hover:bg-forest/5 hover:border-forest/20 transition-colors text-left';
-
-  const quickActions = [
-    { type: 'button', label: 'Create Grid Operator', icon: ShieldCheck, onClick: () => setShowCreateOperatorModal(true) },
-    { type: 'link', label: 'Manage Grid Operators', icon: ShieldCheck, to: '/backoffice/operators' },
-    { type: 'link', label: 'Manage Microgrid Nodes', icon: Zap, to: '/backoffice/nodes' },
-    { type: 'link', label: 'Review Pending Activations', icon: UserPlus, to: '/backoffice/pending' },
-    { type: 'link', label: 'Manage Prosumers', icon: Users, to: '/backoffice/prosumers' },
-    { type: 'link', label: 'View All Reservations', icon: CalendarCheck, to: '/backoffice/reservations' },
-  ];
 
   return (
     <div className="w-full space-y-6 lg:space-y-8">
@@ -144,42 +133,6 @@ const BackofficeDashboard = () => {
           </div>
         </div>
 
-        {/* Quick Actions — full width so tiles are not squeezed in the sidebar */}
-        <section className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-forest/5 w-full min-w-0">
-          <h2 className="font-display text-base font-semibold text-forest mb-3">Quick Actions</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2">
-            {quickActions.map((action) => {
-              const Icon = action.icon;
-              const inner = (
-                <>
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-leaf/15 text-forest">
-                    <Icon className="w-3.5 h-3.5" />
-                  </span>
-                  <span className="flex-1 min-w-0 text-xs font-medium text-charcoal leading-tight">
-                    {action.label}
-                  </span>                 
-                </>
-              );
-              if (action.type === 'button') {
-                return (
-                  <button
-                    key={action.label}
-                    type="button"
-                    onClick={action.onClick}
-                    className={`${quickActionCls} group`}
-                  >
-                    {inner}
-                  </button>
-                );
-              }
-              return (
-                <Link key={action.label} to={action.to} className={`${quickActionCls} group`}>
-                  {inner}
-                </Link>
-              );
-            })}
-          </div>
-        </section>
 
         {/* Main Content Area Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">

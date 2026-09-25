@@ -4,7 +4,7 @@
  * Calls POST /api/auth/login, validates the role is GridOperator,
  * stores the JWT token and user info in localStorage, then redirects
  * to the operator dashboard.
- * Author: Member 4 â€“ Operator Product
+ * Author: Member 4 – Operator Product
  */
 
 import React, { useState } from 'react';

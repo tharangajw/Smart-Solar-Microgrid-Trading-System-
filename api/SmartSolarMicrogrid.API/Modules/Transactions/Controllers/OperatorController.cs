@@ -47,10 +47,10 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Controllers
         /// </summary>
         [HttpGet("reservations")]
 // Handles the GetReservations operation.
-        public async Task<IActionResult> GetReservations([FromQuery] string? status)
+        public async Task<IActionResult> GetReservations([FromQuery] string? status, [FromQuery] string? nic, [FromQuery] DateTime? from, [FromQuery] DateTime? to)
         {
             // Fetch live reservations from the service layer
-            var reservations = await _operatorService.GetAllReservationsAsync(status);
+            var reservations = await _operatorService.GetAllReservationsAsync(status, nic, from, to);
             return Ok(reservations);
         }
 

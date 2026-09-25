@@ -65,19 +65,28 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Services
         /// Used by the operator Booking Monitoring page to display live reservation data.
         /// </summary>
         /// <param name="status">Optional status filter: Pending | Approved | Completed | Cancelled</param>
-        public async Task<List<Reservation>> GetAllReservationsAsync(string? status = null)
+        public async Task<List<Reservation>> GetAllReservationsAsync(string? status = null, string? nic = null, DateTime? from = null, DateTime? to = null)
         {
-            // Apply status filter if provided, otherwise return all
+            var builder = Builders<Reservation>.Filter;
+            var filter = builder.Empty;
+
             if (!string.IsNullOrWhiteSpace(status))
+                filter &= builder.Eq(r => r.Status, status);
+
+            if (!string.IsNullOrWhiteSpace(nic))
+                filter &= builder.Regex(r => r.ProsumerNic, new MongoDB.Bson.BsonRegularExpression(nic, "i"));
+
+            if (from.HasValue)
+                filter &= builder.Gte(r => r.CreatedAt, from.Value.ToUniversalTime());
+
+            if (to.HasValue)
             {
-                return await _reservations
-                    .Find(r => r.Status == status)
-                    .SortByDescending(r => r.CreatedAt)
-                    .ToListAsync();
+                var toDate = to.Value.ToUniversalTime().Date.AddDays(1).AddTicks(-1);
+                filter &= builder.Lte(r => r.CreatedAt, toDate);
             }
 
             return await _reservations
-                .Find(_ => true)
+                .Find(filter)
                 .SortByDescending(r => r.CreatedAt)
                 .ToListAsync();
         }
