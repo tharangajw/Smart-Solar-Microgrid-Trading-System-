@@ -16,7 +16,7 @@ object ApiClient {
     private fun getBaseUrl(context: Context): String {
         val ip = SessionManager(context).getServerIp().trim()
         // If the user just typed the IP (like 192.168.1.5), we add the protocol and port
-        return if (ip.startsWith("http")) "$ip/api" else "http://$ip:5281/api"
+        return if (ip.startsWith("http")) "$ip/api" else "http://$ip:8080/api"
     }
 
     fun get(context: Context, endpoint: String): String? {
@@ -102,7 +102,13 @@ object ApiClient {
                 ApiResult(true, responseBody, null)
             } else {
                 val errorMsg = try {
-                    JSONObject(responseBody).getString("message")
+                    val obj = JSONObject(responseBody)
+                    when {
+                        obj.has("message") -> obj.getString("message")
+                        obj.has("error") -> obj.getString("error")
+                        obj.has("title") -> obj.getString("title") // .NET Core ProblemDetails
+                        else -> "Server error: $responseCode"
+                    }
                 } catch (ex: Exception) {
                     "Server error: $responseCode"
                 }
@@ -110,7 +116,8 @@ object ApiClient {
             }
         } catch (e: Exception) {
             android.util.Log.e("ApiClient", "Network Error at $fullUrl: ${e.message}")
-            ApiResult(false, null, "Connection failed: ${e.message}\nCheck IP: $fullUrl")
+            // Friendly error message for connection drops/timeouts
+            ApiResult(false, null, "Network Error. Please check your connection.")
         }
     }
 }

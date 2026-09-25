@@ -60,8 +60,12 @@ class MyBookingsActivity : BaseNavActivity() {
         findViewById<View>(R.id.btnNavBack)?.setOnClickListener { finish() }
 
         // Tabs
-        tabLayout.addTab(tabLayout.newTab().setText("📅  Upcoming"))
-        tabLayout.addTab(tabLayout.newTab().setText("📁  History"))
+        tabLayout.setTabTextColors(
+            androidx.core.content.ContextCompat.getColor(this, R.color.textColorSecondary),
+            androidx.core.content.ContextCompat.getColor(this, R.color.colorPrimary)
+        )
+        tabLayout.addTab(tabLayout.newTab().setText("Upcoming"))
+        tabLayout.addTab(tabLayout.newTab().setText("History"))
 
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab) {
@@ -120,6 +124,43 @@ class MyBookingsActivity : BaseNavActivity() {
                     parseBookingList(historyResponse, historyList)
                 }
 
+                // SQLite Caching Logic
+                val dao = com.smartsolar.data.local.ReservationDao(this@MyBookingsActivity)
+                val isNetworkFailure = (pendingResponse == null && historyResponse == null)
+
+                if (!isNetworkFailure) {
+                    // We got data from API, so cache it locally
+                    val allFetched = (upcomingList + historyList).distinctBy { it.id }
+                    if (allFetched.isNotEmpty()) {
+                        dao.clearAllReservations()
+                        val cacheList = allFetched.map { b ->
+                            com.smartsolar.models.Reservation(b.id, b.slotId, b.nodeId, b.status, b.reservationDate)
+                        }
+                        dao.insertReservations(cacheList)
+                    }
+                } else {
+                    // Network failed, load from SQLite local cache
+                    val localData = dao.getAllReservations()
+                    if (localData.isNotEmpty()) {
+                        upcomingList.clear()
+                        historyList.clear()
+                        localData.forEach { r ->
+                            val b = Booking(
+                                id = r.id, 
+                                nodeId = r.nodeId ?: "–", 
+                                slotId = r.slotId ?: "–", 
+                                status = r.status ?: "Pending", 
+                                reservationDate = r.scheduledDate ?: "–"
+                            )
+                            if (b.status.equals("Completed", ignoreCase = true) || b.status.equals("Cancelled", ignoreCase = true) || b.status.equals("Done", ignoreCase = true)) {
+                                historyList.add(b)
+                            } else {
+                                upcomingList.add(b)
+                            }
+                        }
+                    }
+                }
+
                 // For Operators, split all system reservations into Upcoming vs History tabs by status
                 if (isOperator) {
                     val allItems = (upcomingList + historyList).distinctBy { it.id }
@@ -153,9 +194,12 @@ class MyBookingsActivity : BaseNavActivity() {
 
                 renderList()
 
-                if (pendingResponse == null && historyResponse == null && upcomingList.isEmpty() && historyList.isEmpty()) {
+                if (isNetworkFailure && upcomingList.isEmpty() && historyList.isEmpty()) {
                     Toast.makeText(this@MyBookingsActivity,
-                        "Cannot reach server. Check WiFi & backend.", Toast.LENGTH_LONG).show()
+                        "Cannot reach server and no local offline data.", Toast.LENGTH_LONG).show()
+                } else if (isNetworkFailure) {
+                    Toast.makeText(this@MyBookingsActivity,
+                        "Offline Mode: Showing cached reservations.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -207,6 +251,21 @@ class MyBookingsActivity : BaseNavActivity() {
         if (list.isEmpty()) {
             recycler.visibility = View.GONE
             layoutEmpty.visibility = View.VISIBLE
+            
+            try {
+                if (layoutEmpty is android.view.ViewGroup) {
+                    val group = layoutEmpty as android.view.ViewGroup
+                    for (i in 0 until group.childCount) {
+                        val child = group.getChildAt(i)
+                        if (child is android.widget.TextView) {
+                            child.text = if (currentTab == 0) "No pending bookings" else "No booking history"
+                            break
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                // Ignore if we can't update the text dynamically
+            }
         } else {
             layoutEmpty.visibility = View.GONE
             recycler.visibility = View.VISIBLE

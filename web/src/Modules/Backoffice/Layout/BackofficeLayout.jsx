@@ -6,18 +6,21 @@ import {
   Users,
   LogOut,
   Menu,
-  Bell,
   X,
   Shield,
   ShieldCheck,
   Zap,
   CalendarDays,
+  MapPin,
+  BarChart3,
 } from 'lucide-react';
 
 const navItems = [
   { name: 'Dashboard',          path: '/backoffice/dashboard',    icon: LayoutDashboard },
   { name: 'Grid Operators',     path: '/backoffice/operators',    icon: ShieldCheck },
   { name: 'Microgrid Nodes',    path: '/backoffice/nodes',        icon: Zap },
+  { name: 'Station Map',        path: '/backoffice/map',          icon: MapPin },
+  { name: 'Reports & Analytics',path: '/backoffice/reports',      icon: BarChart3 },
   { name: 'Pending Activations',path: '/backoffice/pending',      icon: UserPlus },
   { name: 'Prosumers',          path: '/backoffice/prosumers',    icon: Users },
   { name: 'Reservations',       path: '/backoffice/reservations', icon: CalendarDays },
@@ -78,8 +81,8 @@ const BackofficeSidebar = ({ isOpen, setIsOpen, officer, onLogout }) => {
 
         <div className="p-4 border-t border-forest/10 shrink-0">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-full bg-solar-soft flex items-center justify-center text-forest font-bold text-sm shadow-sm shrink-0">
-              {(officer.fullName || 'BO').split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()}
+            <div className="w-9 h-9 rounded-full bg-solar-soft flex items-center justify-center text-forest font-bold text-sm shadow-sm shrink-0 overflow-hidden border-2 border-white">
+              <img src="/backoffice.jpg" alt="Backoffice Profile" className="w-full h-full object-cover" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-charcoal truncate">{officer.fullName || 'Backoffice'}</p>
@@ -116,12 +119,9 @@ const BackofficeHeader = ({ onMenuClick, officer }) => (
     </div>
 
     <div className="flex items-center gap-3 sm:gap-5">
-      <button className="relative p-2 text-charcoal hover:text-forest transition-colors rounded-full hover:bg-forest/5">
-        <Bell size={20} />
-      </button>
       <div className="flex items-center gap-2 pl-3 sm:pl-5 border-l border-forest/10">
-        <div className="w-8 h-8 rounded-full bg-forest text-ivory flex items-center justify-center text-sm font-semibold shadow-sm">
-          {(officer.fullName || 'BO').split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase()}
+        <div className="w-8 h-8 rounded-full bg-forest text-ivory flex items-center justify-center text-sm font-semibold shadow-sm overflow-hidden border-2 border-white">
+          <img src="/backoffice.jpg" alt="Backoffice Profile" className="w-full h-full object-cover" />
         </div>
         <div className="hidden sm:block">
           <p className="text-sm font-medium text-charcoal leading-none">{officer.fullName || 'Backoffice'}</p>

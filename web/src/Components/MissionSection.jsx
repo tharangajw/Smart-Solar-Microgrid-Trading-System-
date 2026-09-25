@@ -19,7 +19,7 @@ const MissionSection = () => {
               SolarLink brings together solar energy producers, local energy infrastructure, and organized energy access into a single, thoughtfully designed platform. We believe clean energy should be accessible, community-driven, and simple to manage.
             </p>
             <p className="text-charcoal-light text-base leading-relaxed mb-8">
-              Built as a university software engineering project, SolarLink demonstrates how technology can facilitate real connections between prosumers and microgrid stations â€” making shared solar energy practical and transparent.
+              Built as a university software engineering project, SolarLink demonstrates how technology can facilitate real connections between prosumers and microgrid stations — making shared solar energy practical and transparent.
             </p>
             <div className="w-16 h-0.5 bg-solar"></div>
           </div>

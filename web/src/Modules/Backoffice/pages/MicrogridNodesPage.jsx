@@ -4,6 +4,7 @@ import {
   Loader, RefreshCw, X, CheckCircle, AlertCircle, XCircle, Battery
 } from 'lucide-react';
 import backofficeApi from '../../../Services/backofficeApi';
+import LocationPickerMap from '../../../Components/LocationPickerMap';
 
 // ── Schedule options ──────────────────────────────────────────────────────────
 const START_TIMES = ['05:00','06:00','06:30','07:00','07:30','08:00'];
@@ -296,7 +297,16 @@ const MicrogridNodesPage = () => {
                 />
               </div>
 
-              {/* GPS */}
+              {/* Location Picker Map (OpenStreetMap) */}
+              <div className="p-3 bg-cream/40 rounded-xl border border-forest/10">
+                <LocationPickerMap
+                  lat={form.latitude}
+                  lng={form.longitude}
+                  onChange={(newLat, newLng) => setForm({ ...form, latitude: newLat, longitude: newLng })}
+                />
+              </div>
+
+              {/* GPS Coordinates */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-charcoal mb-1">

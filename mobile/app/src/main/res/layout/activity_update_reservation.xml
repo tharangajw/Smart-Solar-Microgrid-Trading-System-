@@ -42,6 +42,23 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Select New Date"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+            
+        <TextView
+            android:id="@+id/textDatePicker"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_input_outlined"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:text="Tap to pick a date"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="Select New Slot"
             android:textStyle="bold"
             android:layout_marginBottom="4dp"/>

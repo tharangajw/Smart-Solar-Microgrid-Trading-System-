@@ -75,10 +75,8 @@ export const getOperatorDashboard = () =>
  * Fetch all reservations, optionally filtered by status.
  * @param {string|null} status - e.g. "Pending" | "Approved" | "Completed" | "Cancelled"
  */
-export const getOperatorReservations = (status = null) =>
-  operatorApi.get("/operator/reservations", {
-    params: status ? { status } : {},
-  });
+export const getOperatorReservations = (params = {}) =>
+  operatorApi.get("/operator/reservations", { params });
 
 // Kept as the page-level name used throughout the operator product.
 export const getAllReservations = getOperatorReservations;
@@ -103,6 +101,9 @@ export const scanQrCode = (qrCodeId) =>
 /** Fetch a single reservation by its MongoDB ObjectId. */
 export const getReservationById = (id) =>
   operatorApi.get(`/reservations/${id}`);
+
+export const cancelReservation = (id, data) => 
+  operatorApi.put(`/reservations/${id}/cancel`, data);
 
 // ── Solar Stations ────────────────────────────────────────────────────────────
 

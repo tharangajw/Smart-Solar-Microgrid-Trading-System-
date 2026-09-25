@@ -38,7 +38,7 @@ class ReserveSlotActivity : AppCompatActivity() {
         val nic = session.getNic() ?: ""
         findViewById<TextView>(R.id.textNicValue).text = nic
         
-        findViewById<View>(R.id.btnNavBack).setOnClickListener { finish() }
+        // Nav back listener moved to bottom with confirmation dialog
         findViewById<TextView>(R.id.textNavTitle).text = "Reserve a Slot"
         findViewById<TextView>(R.id.textNavSubtitle).text = "Book your solar energy slot"
 
@@ -190,10 +190,35 @@ class ReserveSlotActivity : AppCompatActivity() {
                         startActivity(intent)
                         finish()
                     } else {
-                        Toast.makeText(this@ReserveSlotActivity, "Failed: ${result.message}", Toast.LENGTH_LONG).show()
+                        androidx.appcompat.app.AlertDialog.Builder(this@ReserveSlotActivity)
+                            .setTitle("Reservation Failed")
+                            .setMessage(result.message ?: "An unknown error occurred while booking.")
+                            .setPositiveButton("OK", null)
+                            .show()
                     }
                 }
             }
+        }
+
+        // 5. Back press data loss confirmation
+        val backCallback = object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (selectedStationId != null || selectedDateStr != null) {
+                    androidx.appcompat.app.AlertDialog.Builder(this@ReserveSlotActivity)
+                        .setTitle("Discard Reservation?")
+                        .setMessage("You have unsaved changes. Are you sure you want to go back?")
+                        .setPositiveButton("Yes, Discard") { _, _ -> finish() }
+                        .setNegativeButton("Cancel", null)
+                        .show()
+                } else {
+                    finish()
+                }
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, backCallback)
+        
+        findViewById<View>(R.id.btnNavBack).setOnClickListener { 
+            backCallback.handleOnBackPressed()
         }
     }
 

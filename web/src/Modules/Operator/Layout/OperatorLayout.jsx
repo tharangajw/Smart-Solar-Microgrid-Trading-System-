@@ -4,7 +4,7 @@
  * Mirrors the User Dashboard design system (forest/ivory theme, Sidebar + Header).
  * Reads the authenticated operator from localStorage and renders a sticky header
  * with a collapsible sidebar for mobile.
- * Author: Member 4 â€“ Operator Product
+ * Author: Member 4 – Operator Product
  */
 
 import React, { useState } from 'react';
@@ -16,9 +16,9 @@ import {
   Map,
   LogOut,
   Menu,
-  Bell,
   X,
   Zap,
+  BarChart3,
 } from 'lucide-react';
 
 const navItems = [
@@ -26,9 +26,10 @@ const navItems = [
   { name: 'Bookings',        path: '/operator/bookings',  icon: CalendarDays },
   { name: 'Slot Availability', path: '/operator/slots',   icon: Battery },
   { name: 'Stations Map',    path: '/operator/map',       icon: Map },
+  { name: 'Reports',         path: '/operator/reports',   icon: BarChart3 },
 ];
 
-/* â”€â”€ Sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Sidebar ─────────────────────────────────────────────────────────────── */
 const OperatorSidebar = ({ isOpen, setIsOpen, operator, onLogout }) => {
   const location = useLocation();
 
@@ -97,8 +98,8 @@ const OperatorSidebar = ({ isOpen, setIsOpen, operator, onLogout }) => {
         {/* User profile + logout */}
         <div className="p-4 border-t border-forest/10 shrink-0">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 rounded-full bg-solar-soft flex items-center justify-center text-forest font-bold text-sm shadow-sm shrink-0">
-              {(operator.fullName || 'GO').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+            <div className="w-9 h-9 rounded-full bg-solar-soft flex items-center justify-center text-forest font-bold text-sm shadow-sm shrink-0 overflow-hidden border-2 border-white">
+              <img src="/gridoperator.jpg" alt="Grid Operator Profile" className="w-full h-full object-cover" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-charcoal truncate">{operator.fullName || 'Grid Operator'}</p>
@@ -118,7 +119,7 @@ const OperatorSidebar = ({ isOpen, setIsOpen, operator, onLogout }) => {
   );
 };
 
-/* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Header ──────────────────────────────────────────────────────────────── */
 const OperatorHeader = ({ onMenuClick, operator }) => (
   <header className="h-16 bg-white/80 backdrop-blur-md border-b border-forest/10 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30 shrink-0">
     <div className="flex items-center gap-4">
@@ -131,18 +132,14 @@ const OperatorHeader = ({ onMenuClick, operator }) => (
       </button>
       <div>
         <p className="font-display text-xl font-semibold text-forest leading-tight">Operator Dashboard</p>
-        <p className="text-xs text-charcoal-light hidden sm:block">Grid Operator Portal â€” SolarLink Network</p>
+        <p className="text-xs text-charcoal-light hidden sm:block">Grid Operator Portal — SolarLink Network</p>
       </div>
     </div>
 
     <div className="flex items-center gap-3 sm:gap-5">
-      <button className="relative p-2 text-charcoal hover:text-forest transition-colors rounded-full hover:bg-forest/5">
-        <Bell size={20} />
-        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-solar rounded-full border-2 border-white" />
-      </button>
       <div className="flex items-center gap-2 pl-3 sm:pl-5 border-l border-forest/10">
-        <div className="w-8 h-8 rounded-full bg-forest text-ivory flex items-center justify-center text-sm font-semibold shadow-sm">
-          {(operator.fullName || 'GO').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+        <div className="w-8 h-8 rounded-full bg-forest text-ivory flex items-center justify-center text-sm font-semibold shadow-sm overflow-hidden border-2 border-white">
+          <img src="/gridoperator.jpg" alt="Grid Operator Profile" className="w-full h-full object-cover" />
         </div>
         <div className="hidden sm:block">
           <p className="text-sm font-medium text-charcoal leading-none">{operator.fullName || 'Grid Operator'}</p>
@@ -152,7 +149,7 @@ const OperatorHeader = ({ onMenuClick, operator }) => (
   </header>
 );
 
-/* â”€â”€ Layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Layout ──────────────────────────────────────────────────────────────── */
 const OperatorLayout = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

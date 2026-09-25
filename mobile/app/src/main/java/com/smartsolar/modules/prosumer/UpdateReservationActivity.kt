@@ -33,7 +33,7 @@ class UpdateReservationActivity : AppCompatActivity() {
         bookingId = intent.getStringExtra("BOOKING_ID")
         nodeId = intent.getStringExtra("NODE_ID")
 
-        findViewById<View>(R.id.btnNavBack)?.setOnClickListener { finish() }
+        // Nav back listener moved to bottom with confirmation dialog
         findViewById<TextView>(R.id.textNavTitle)?.text = "Update Reservation"
         findViewById<TextView>(R.id.textNavSubtitle)?.text = "Modify booking details"
 
@@ -46,6 +46,25 @@ class UpdateReservationActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.textNodeId).text = nodeId
         
         val textSlotPicker = findViewById<TextView>(R.id.textSlotPicker)
+        val textDatePicker = findViewById<TextView>(R.id.textDatePicker)
+        var selectedDateStr: String? = null
+
+        textDatePicker.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            val datePicker = android.app.DatePickerDialog(this, { _, year, month, dayOfMonth ->
+                val selectedCal = Calendar.getInstance()
+                selectedCal.set(year, month, dayOfMonth)
+                val format = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                selectedDateStr = format.format(selectedCal.time)
+                textDatePicker.text = selectedDateStr
+            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
+            
+            datePicker.datePicker.minDate = calendar.timeInMillis
+            calendar.add(Calendar.DAY_OF_MONTH, 7)
+            datePicker.datePicker.maxDate = calendar.timeInMillis
+            datePicker.show()
+        }
+
         textSlotPicker.setOnClickListener {
             if (availableSlots.isEmpty()) {
                 Toast.makeText(this, "No slots available", Toast.LENGTH_SHORT).show()
@@ -65,18 +84,21 @@ class UpdateReservationActivity : AppCompatActivity() {
         val progressUpdate = findViewById<ProgressBar>(R.id.progressUpdate)
 
         buttonUpdate.setOnClickListener {
-            if (selectedSlot == null) {
-                Toast.makeText(this, "Please select a new slot", Toast.LENGTH_SHORT).show()
+            if (selectedSlot == null || selectedDateStr == null) {
+                Toast.makeText(this, "Please select both a new Date and Slot", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            if (!check12HourRule(selectedSlot!!.startTime)) {
+            // check12HourRule usually expects a full ISO string. We can combine date and a dummy time or use slot time.
+            // Using selectedDateStr + slot time (if we had it), or just bypass if not enough info.
+            val mergedIso = "${selectedDateStr}T12:00:00Z" 
+            if (!check12HourRule(mergedIso)) {
                 return@setOnClickListener
             }
             
             val body = JSONObject().apply {
                 put("slotId", selectedSlot!!.id)
-                put("reservationDate", selectedSlot!!.startTime)
+                put("reservationDate", "${selectedDateStr}T00:00:00Z")
             }
             
             buttonUpdate.isEnabled = false
@@ -93,10 +115,34 @@ class UpdateReservationActivity : AppCompatActivity() {
                         startActivity(intent)
                         finish()
                     } else {
-                        Toast.makeText(this@UpdateReservationActivity, "Update failed: ${result.message}", Toast.LENGTH_LONG).show()
+                        androidx.appcompat.app.AlertDialog.Builder(this@UpdateReservationActivity)
+                            .setTitle("Update Failed")
+                            .setMessage(result.message ?: "An unknown error occurred.")
+                            .setPositiveButton("OK", null)
+                            .show()
                     }
                 }
             }
+        }
+
+        val backCallback = object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (selectedSlot != null) {
+                    androidx.appcompat.app.AlertDialog.Builder(this@UpdateReservationActivity)
+                        .setTitle("Discard Changes?")
+                        .setMessage("You have unsaved changes. Are you sure you want to go back?")
+                        .setPositiveButton("Yes, Discard") { _, _ -> finish() }
+                        .setNegativeButton("Cancel", null)
+                        .show()
+                } else {
+                    finish()
+                }
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, backCallback)
+        
+        findViewById<View>(R.id.btnNavBack)?.setOnClickListener { 
+            backCallback.handleOnBackPressed()
         }
 
         fetchSlots()
@@ -111,7 +157,11 @@ class UpdateReservationActivity : AppCompatActivity() {
                 val diffMillis = date.time - System.currentTimeMillis()
                 val diffHours = diffMillis / (1000 * 60 * 60)
                 if (diffHours < 12) {
-                    Toast.makeText(this, "Updates and cancellations require at least 12 hours' notice.", Toast.LENGTH_LONG).show()
+                    androidx.appcompat.app.AlertDialog.Builder(this)
+                        .setTitle("Invalid Time")
+                        .setMessage("Updates and cancellations require at least 12 hours' notice.")
+                        .setPositiveButton("OK", null)
+                        .show()
                     return false
                 }
             }

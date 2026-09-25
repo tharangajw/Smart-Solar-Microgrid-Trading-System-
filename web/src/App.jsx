@@ -30,6 +30,8 @@ import ProsumerRoute from './Routes/ProsumerRoute';
 import ReservationsPage from './Modules/Reservations/ReservationsPage';
 import ReservationDetailPage from './Modules/Reservations/ReservationDetailPage';
 
+import ReportsPage from './Modules/Reports/ReportsPage';
+
 function App() {
   return (
     <BrowserRouter>
@@ -44,6 +46,8 @@ function App() {
             <Route path="dashboard" element={<BackofficeDashboard />} />
             <Route path="operators" element={<GridOperatorsPage />} />
             <Route path="nodes" element={<BackofficeMicrogridNodesPage />} />
+            <Route path="map" element={<MapPage />} />
+            <Route path="reports" element={<ReportsPage />} />
             <Route path="pending" element={<PendingActivationsPage />} />
             <Route path="prosumers" element={<ProsumerManagementPage />} />
             <Route path="reservations" element={<ReservationManagementPage />} />
@@ -57,6 +61,7 @@ function App() {
             <Route path="bookings/:id" element={<BookingDetails />} />
             <Route path="slots" element={<SlotAvailability />} />
             <Route path="map" element={<StationsMap />} />
+            <Route path="reports" element={<ReportsPage />} />
           </Route>
         </Route>
 
@@ -69,6 +74,7 @@ function App() {
         <Route path="/microgrid" element={<MicrogridNodesPage />} />
         <Route path="/map" element={<MapPage />} />
         <Route path="/slots" element={<EnergySlotsPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
       </Routes>
     </BrowserRouter>
   );

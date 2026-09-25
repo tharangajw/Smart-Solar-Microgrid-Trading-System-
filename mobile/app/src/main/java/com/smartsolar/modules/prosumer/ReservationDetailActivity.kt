@@ -103,11 +103,17 @@ class ReservationDetailActivity : AppCompatActivity() {
         val layoutActions = findViewById<View>(R.id.layoutActions)
         layoutActions.visibility = View.VISIBLE
 
-        findViewById<View>(R.id.buttonEdit).setOnClickListener {
-            val intent = Intent(this@ReservationDetailActivity, UpdateReservationActivity::class.java)
-            intent.putExtra("BOOKING_ID", bookingId)
-            intent.putExtra("NODE_ID", nodeId ?: "Station Hub")
-            startActivity(intent)
+        val buttonEdit = findViewById<View>(R.id.buttonEdit)
+        if (isOperator) {
+            buttonEdit.visibility = View.GONE
+        } else {
+            buttonEdit.visibility = View.VISIBLE
+            buttonEdit.setOnClickListener {
+                val intent = Intent(this@ReservationDetailActivity, UpdateReservationActivity::class.java)
+                intent.putExtra("BOOKING_ID", bookingId)
+                intent.putExtra("NODE_ID", nodeId ?: "Station Hub")
+                startActivity(intent)
+            }
         }
 
         findViewById<View>(R.id.buttonCancel).setOnClickListener {
@@ -256,6 +262,14 @@ class ReservationDetailActivity : AppCompatActivity() {
 
         textStatus.text = statusText
         applyStatusBadgeStyle(textStatus, statusText)
+
+        // UI Enforcement of Business Rules
+        val layoutActions = findViewById<View>(R.id.layoutActions)
+        if (statusText.equals("Cancelled", ignoreCase = true) || statusText.equals("Completed", ignoreCase = true)) {
+            layoutActions.visibility = View.GONE
+        } else {
+            layoutActions.visibility = View.VISIBLE
+        }
     }
 
     private fun formatSlotDisplay(slot: String?): String {
@@ -366,7 +380,12 @@ class ReservationDetailActivity : AppCompatActivity() {
                     startActivity(intent)
                     finish()
                 } else {
-                    Toast.makeText(this@ReservationDetailActivity, "Cancel failed: ${result.message}", Toast.LENGTH_LONG).show()
+                    val msg = result.message ?: "An unknown error occurred while cancelling."
+                    androidx.appcompat.app.AlertDialog.Builder(this@ReservationDetailActivity)
+                        .setTitle("Cannot Cancel Reservation")
+                        .setMessage(msg)
+                        .setPositiveButton("OK", null)
+                        .show()
                 }
             }
         }
