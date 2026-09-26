@@ -4,7 +4,7 @@ package com.smartsolar.modules.prosumer
  * ReservationDetailActivity.kt
  * Displays detailed information about a specific energy reservation,
  * formatted nicely for end users with readable dates, clean IDs, and status badges.
- * Supports direct Operator Energy Transfer Finalization.
+ * Supports direct Operator Energy Transfer Finalization with optimistic instant UI response.
  * Author: Member 4 – Operator Product
  */
 
@@ -175,13 +175,27 @@ class ReservationDetailActivity : AppCompatActivity() {
         val validId = if (targetId.isNotEmpty() && targetId != "null") targetId else bookingId ?: ""
         if (validId.isEmpty() || validId == "null") return
 
-        Toast.makeText(this, "Completing transfer...", Toast.LENGTH_SHORT).show()
+        // 1. Optimistic Instant Local Update
+        val sessionManager = SessionManager(this)
+        sessionManager.saveReservationStatus(validId, "Completed")
+        sessionManager.saveReservationStatus(bookingId ?: "", "Completed")
 
+        val textStatus = findViewById<TextView>(R.id.textStatus)
+        textStatus.text = "Completed"
+        applyStatusBadgeStyle(textStatus, "Completed")
+
+        val layoutActions = findViewById<View>(R.id.layoutActions)
+        layoutActions.visibility = View.GONE
+
+        // 2. Show Dialog INSTANTLY
+        AlertDialog.Builder(this)
+            .setTitle("✅ Transfer Complete")
+            .setMessage("Energy transfer has been finalized and status updated to COMPLETED.")
+            .setPositiveButton("OK", null)
+            .show()
+
+        // 3. Sync to API in background
         lifecycleScope.launch(Dispatchers.IO) {
-            val sessionManager = SessionManager(this@ReservationDetailActivity)
-            sessionManager.saveReservationStatus(validId, "Completed")
-            sessionManager.saveReservationStatus(bookingId ?: "", "Completed")
-
             val scanBody = JSONObject().apply {
                 put("qrCodeId", "QR_$validId")
                 put("reservationId", validId)
@@ -189,20 +203,7 @@ class ReservationDetailActivity : AppCompatActivity() {
             }
 
             ApiClient.post(this@ReservationDetailActivity, "operator/scan-qr", scanBody)
-            ApiClient.put(this@ReservationDetailActivity, "Reservations/$validId/complete", JSONObject().apply { put("status", "Completed") })
             ApiClient.put(this@ReservationDetailActivity, "Reservations/$validId", JSONObject().apply { put("status", "Completed") })
-
-            withContext(Dispatchers.Main) {
-                val textStatus = findViewById<TextView>(R.id.textStatus)
-                textStatus.text = "Completed"
-                applyStatusBadgeStyle(textStatus, "Completed")
-
-                AlertDialog.Builder(this@ReservationDetailActivity)
-                    .setTitle("✅ Transfer Complete")
-                    .setMessage("Energy transfer has been finalized and status updated to COMPLETED.")
-                    .setPositiveButton("OK", null)
-                    .show()
-            }
         }
     }
 
