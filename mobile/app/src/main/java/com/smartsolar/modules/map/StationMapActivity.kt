@@ -220,13 +220,24 @@ class StationMapActivity : BaseNavActivity(), OnMapReadyCallback {
                             false
                         }
 
-                        buttonBookSlot.setOnClickListener {
-                            if (selectedStationTag != null) {
-                                val intent = android.content.Intent(this, com.smartsolar.modules.prosumer.ReserveSlotActivity::class.java)
-                                intent.putExtra("STATION_ID", selectedStationTag)
-                                startActivity(intent)
-                            } else {
-                                Toast.makeText(this, "Please select a station first", Toast.LENGTH_SHORT).show()
+                        val role = com.smartsolar.utils.SessionManager(this).getRole()?.lowercase() ?: ""
+                        val isOperator = role.contains("operator") || role.contains("grid") || role.contains("admin")
+
+                        if (isOperator) {
+                            buttonBookSlot.text = "Verify QR Code"
+                            buttonBookSlot.setOnClickListener {
+                                startActivity(android.content.Intent(this, com.smartsolar.modules.qr.QRScannerActivity::class.java))
+                            }
+                        } else {
+                            buttonBookSlot.text = "Book Slot"
+                            buttonBookSlot.setOnClickListener {
+                                if (selectedStationTag != null) {
+                                    val intent = android.content.Intent(this, com.smartsolar.modules.prosumer.ReserveSlotActivity::class.java)
+                                    intent.putExtra("STATION_ID", selectedStationTag)
+                                    startActivity(intent)
+                                } else {
+                                    Toast.makeText(this, "Please select a station first", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         }
 

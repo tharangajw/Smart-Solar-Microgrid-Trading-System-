@@ -88,8 +88,12 @@ class OperatorDashboardActivity : BaseNavActivity() {
             var historyCount = 0
             var approvedFutureCount = 0
 
-            // 1. Fetch C# operator/dashboard (OperatorDashboardStats)
-            val dashResponse = ApiClient.get(this@OperatorDashboardActivity, "operator/dashboard")
+            // 1. Fetch C# operator/dashboard or operator-dashboard/dashboard
+            var dashResponse = ApiClient.get(this@OperatorDashboardActivity, "operator/dashboard")
+            if (dashResponse == null || !dashResponse.trim().startsWith("{")) {
+                dashResponse = ApiClient.get(this@OperatorDashboardActivity, "operator-dashboard/dashboard")
+            }
+
             if (dashResponse != null && dashResponse.trim().startsWith("{")) {
                 try {
                     val json = JSONObject(dashResponse)
@@ -105,10 +109,16 @@ class OperatorDashboardActivity : BaseNavActivity() {
                 } catch (_: Exception) {}
             }
 
-            // 2. Fallback / Detailed check from operator/reservations or Reservations
+            // 2. Fetch live system reservations via multi-endpoint fallback chain
             var resResponse = ApiClient.get(this@OperatorDashboardActivity, "operator/reservations")
             if (resResponse == null || resResponse.trim() == "[]" || resResponse.trim() == "{}") {
-                resResponse = ApiClient.get(this@OperatorDashboardActivity, "Reservations")
+                resResponse = ApiClient.get(this@OperatorDashboardActivity, "operator-dashboard/bookings")
+            }
+            if (resResponse == null || resResponse.trim() == "[]" || resResponse.trim() == "{}") {
+                resResponse = ApiClient.get(this@OperatorDashboardActivity, "Reservations/search")
+            }
+            if (resResponse == null || resResponse.trim() == "[]" || resResponse.trim() == "{}") {
+                resResponse = ApiClient.get(this@OperatorDashboardActivity, "Reservations/pending")
             }
 
             if (resResponse != null && resResponse.trim().isNotEmpty()) {
@@ -132,12 +142,10 @@ class OperatorDashboardActivity : BaseNavActivity() {
                         }
                     }
 
-                    if (pCount > 0 || aCount > 0 || hCount > 0) {
-                        pendingCount = pCount
-                        approvedCount = aCount
-                        historyCount = hCount
-                        if (approvedFutureCount == 0) approvedFutureCount = aCount
-                    }
+                    pendingCount = pCount
+                    approvedCount = aCount
+                    historyCount = hCount
+                    if (approvedFutureCount == 0) approvedFutureCount = aCount
                 } catch (_: Exception) {}
             }
 

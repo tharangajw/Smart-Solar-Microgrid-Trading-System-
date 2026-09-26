@@ -87,7 +87,7 @@ class MyBookingsActivity : BaseNavActivity() {
 
     private fun loadBookings() {
         val session = SessionManager(this)
-        val nic = session.getNic() ?: ""
+        val nic = session.getNic()?.trim() ?: ""
         val role = session.getRole()?.lowercase() ?: ""
         val isOperator = role.contains("operator") || role.contains("grid") || role.contains("admin")
 
@@ -96,7 +96,7 @@ class MyBookingsActivity : BaseNavActivity() {
         layoutEmpty.visibility = View.GONE
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val pendingUrl = if (isOperator) "operator/reservations?status=Pending" else "Reservations/pending?nic=$nic"
+            val pendingUrl = if (isOperator) "operator/reservations?status=Pending" else "Reservations/search?nic=$nic"
             val historyUrl = if (isOperator) "operator/reservations" else "Reservations/history?nic=$nic"
 
             var pendingResponse = ApiClient.get(this@MyBookingsActivity, pendingUrl)
@@ -161,34 +161,18 @@ class MyBookingsActivity : BaseNavActivity() {
                     }
                 }
 
-                // For Operators, split all system reservations into Upcoming vs History tabs by status
-                if (isOperator) {
-                    val allItems = (upcomingList + historyList).distinctBy { it.id }
-                    upcomingList.clear()
-                    historyList.clear()
+                // Split all system/prosumer reservations into Upcoming vs History tabs by status
+                val allItems = (upcomingList + historyList).distinctBy { it.id }
+                upcomingList.clear()
+                historyList.clear()
 
-                    for (item in allItems) {
-                        if (item.status.equals("Completed", ignoreCase = true) ||
-                            item.status.equals("Cancelled", ignoreCase = true) ||
-                            item.status.equals("Done", ignoreCase = true)) {
-                            historyList.add(item)
-                        } else {
-                            upcomingList.add(item)
-                        }
-                    }
-                } else {
-                    // For Prosumers, move any locally completed/cancelled items from upcoming into history
-                    val iterator = upcomingList.iterator()
-                    while (iterator.hasNext()) {
-                        val item = iterator.next()
-                        if (item.status.equals("Completed", ignoreCase = true) ||
-                            item.status.equals("Cancelled", ignoreCase = true) ||
-                            item.status.equals("Done", ignoreCase = true)) {
-                            iterator.remove()
-                            if (!historyList.any { it.id == item.id }) {
-                                historyList.add(0, item)
-                            }
-                        }
+                for (item in allItems) {
+                    if (item.status.equals("Completed", ignoreCase = true) ||
+                        item.status.equals("Cancelled", ignoreCase = true) ||
+                        item.status.equals("Done", ignoreCase = true)) {
+                        historyList.add(item)
+                    } else {
+                        upcomingList.add(item)
                     }
                 }
 
@@ -251,20 +235,16 @@ class MyBookingsActivity : BaseNavActivity() {
         if (list.isEmpty()) {
             recycler.visibility = View.GONE
             layoutEmpty.visibility = View.VISIBLE
-            
-            try {
-                if (layoutEmpty is android.view.ViewGroup) {
-                    val group = layoutEmpty as android.view.ViewGroup
-                    for (i in 0 until group.childCount) {
-                        val child = group.getChildAt(i)
-                        if (child is android.widget.TextView) {
-                            child.text = if (currentTab == 0) "No pending bookings" else "No booking history"
-                            break
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                // Ignore if we can't update the text dynamically
+
+            val title = findViewById<android.widget.TextView>(R.id.textEmptyTitle)
+            val subtitle = findViewById<android.widget.TextView>(R.id.textEmptySubtitle)
+
+            if (currentTab == 0) {
+                title?.text = "No upcoming bookings"
+                subtitle?.text = "Reserve an energy slot to get started!"
+            } else {
+                title?.text = "No booking history"
+                subtitle?.text = "Completed and cancelled bookings will appear here."
             }
         } else {
             layoutEmpty.visibility = View.GONE
