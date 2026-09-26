@@ -4,6 +4,7 @@ package com.smartsolar.modules.prosumer
  * ProsumerDashboardActivity.kt
  * Main dashboard for Solar Prosumers.
  * Automatically loads pending/upcoming counts and displays next booking card.
+ * Queries /Reservations/search?nic={nic} to retrieve all prosumer reservations.
  * Auto-refreshes on resume.
  * Author: Member 4 – Operator Product
  */
@@ -80,15 +81,18 @@ class ProsumerDashboardActivity : BaseNavActivity() {
     }
 
     private fun loadDashboardData(nic: String) {
+        val cleanNic = nic.trim()
         progressBar.visibility = View.VISIBLE
         cardNextBooking.visibility = View.GONE
         layoutEmptyNextBooking.visibility = View.GONE
 
         lifecycleScope.launch(Dispatchers.IO) {
             val sessionManager = SessionManager(this@ProsumerDashboardActivity)
-            var response = ApiClient.get(this@ProsumerDashboardActivity, "Reservations/pending?nic=$nic")
+
+            // 1. Query /Reservations/search?nic={cleanNic} to get ALL reservations for this prosumer
+            var response = ApiClient.get(this@ProsumerDashboardActivity, "Reservations/search?nic=$cleanNic")
             if (response == null || response.trim() == "[]" || response.trim() == "{}") {
-                response = ApiClient.get(this@ProsumerDashboardActivity, "Reservations?nic=$nic")
+                response = ApiClient.get(this@ProsumerDashboardActivity, "Reservations/pending?nic=$cleanNic")
             }
 
             if (response != null && response.trim().isNotEmpty()) {

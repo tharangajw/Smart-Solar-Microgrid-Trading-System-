@@ -4,7 +4,7 @@ package com.smartsolar.modules.prosumer
  * ReservationDetailActivity.kt
  * Displays detailed information about a specific energy reservation,
  * formatted nicely for end users with readable dates, clean IDs, and status badges.
- * Supports direct Operator Energy Transfer Finalization.
+ * Supports direct Operator Energy Transfer Finalization with optimistic instant UI response.
  * Author: Member 4 – Operator Product
  */
 
@@ -32,6 +32,7 @@ class ReservationDetailActivity : AppCompatActivity() {
     private var bookingId: String? = null
     private var nodeId: String? = null
     private var slotId: String? = null
+    private var reservationDate: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,10 +89,10 @@ class ReservationDetailActivity : AppCompatActivity() {
         } else {
             buttonViewQR.text = "View Transaction QR Code"
             buttonViewQR.setOnClickListener {
-                val validId = if (!bookingId.isNullOrEmpty() && bookingId != "null") bookingId!! else "6ab2582d235e3ad6e67b4986"
+                val validId = bookingId
                 val qrJson = JSONObject().apply {
                     put("id", validId)
-                    put("qrCodeId", "QR_$validId")
+                    put("qrCodeId", "")
                     put("status", "Approved")
                 }.toString()
                 val intent = Intent(this@ReservationDetailActivity, com.smartsolar.modules.qr.QRDisplayActivity::class.java)
@@ -112,6 +113,8 @@ class ReservationDetailActivity : AppCompatActivity() {
                 val intent = Intent(this@ReservationDetailActivity, UpdateReservationActivity::class.java)
                 intent.putExtra("BOOKING_ID", bookingId)
                 intent.putExtra("NODE_ID", nodeId ?: "Station Hub")
+                intent.putExtra("SLOT_ID", slotId)
+                intent.putExtra("RESERVATION_DATE", reservationDate)
                 startActivity(intent)
             }
         }
@@ -133,6 +136,7 @@ class ReservationDetailActivity : AppCompatActivity() {
                         slotId = obj.optString("slotId", "Energy Slot")
                         val status = obj.optString("status", "Approved")
                         val rawDate = obj.optString("reservationDate", "")
+                        reservationDate = rawDate
                         val rawCreated = obj.optString("createdAt", "")
 
                         populateView(
@@ -157,7 +161,7 @@ class ReservationDetailActivity : AppCompatActivity() {
                                 val activeId = if (!fullId.isNullOrEmpty() && fullId != "null") fullId else if (!bookingId.isNullOrEmpty() && bookingId != "null") bookingId!! else "6ab2582d235e3ad6e67b4986"
                                 val qrJson = JSONObject().apply {
                                     put("id", activeId)
-                                    put("qrCodeId", "QR_$activeId")
+                                    put("qrCodeId", obj.optString("qrCodeId", ""))
                                     put("status", status)
                                 }.toString()
                                 val intent = Intent(this@ReservationDetailActivity, com.smartsolar.modules.qr.QRDisplayActivity::class.java)
@@ -175,13 +179,27 @@ class ReservationDetailActivity : AppCompatActivity() {
         val validId = if (targetId.isNotEmpty() && targetId != "null") targetId else bookingId ?: ""
         if (validId.isEmpty() || validId == "null") return
 
-        Toast.makeText(this, "Completing transfer...", Toast.LENGTH_SHORT).show()
+        // 1. Optimistic Instant Local Update
+        val sessionManager = SessionManager(this)
+        sessionManager.saveReservationStatus(validId, "Completed")
+        sessionManager.saveReservationStatus(bookingId ?: "", "Completed")
 
+        val textStatus = findViewById<TextView>(R.id.textStatus)
+        textStatus.text = "Completed"
+        applyStatusBadgeStyle(textStatus, "Completed")
+
+        val layoutActions = findViewById<View>(R.id.layoutActions)
+        layoutActions.visibility = View.GONE
+
+        // 2. Show Dialog INSTANTLY
+        AlertDialog.Builder(this)
+            .setTitle("✅ Transfer Complete")
+            .setMessage("Energy transfer has been finalized and status updated to COMPLETED.")
+            .setPositiveButton("OK", null)
+            .show()
+
+        // 3. Sync to API in background
         lifecycleScope.launch(Dispatchers.IO) {
-            val sessionManager = SessionManager(this@ReservationDetailActivity)
-            sessionManager.saveReservationStatus(validId, "Completed")
-            sessionManager.saveReservationStatus(bookingId ?: "", "Completed")
-
             val scanBody = JSONObject().apply {
                 put("qrCodeId", "QR_$validId")
                 put("reservationId", validId)
@@ -189,20 +207,7 @@ class ReservationDetailActivity : AppCompatActivity() {
             }
 
             ApiClient.post(this@ReservationDetailActivity, "operator/scan-qr", scanBody)
-            ApiClient.put(this@ReservationDetailActivity, "Reservations/$validId/complete", JSONObject().apply { put("status", "Completed") })
             ApiClient.put(this@ReservationDetailActivity, "Reservations/$validId", JSONObject().apply { put("status", "Completed") })
-
-            withContext(Dispatchers.Main) {
-                val textStatus = findViewById<TextView>(R.id.textStatus)
-                textStatus.text = "Completed"
-                applyStatusBadgeStyle(textStatus, "Completed")
-
-                AlertDialog.Builder(this@ReservationDetailActivity)
-                    .setTitle("✅ Transfer Complete")
-                    .setMessage("Energy transfer has been finalized and status updated to COMPLETED.")
-                    .setPositiveButton("OK", null)
-                    .show()
-            }
         }
     }
 

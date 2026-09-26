@@ -97,7 +97,7 @@ const PendingActivationsPage = () => {
                     <td className="px-4 py-3 font-medium text-charcoal">{user.nic}</td>
                     <td className="px-4 py-3">{user.fullName}</td>
                     <td className="px-4 py-3 text-charcoal-light">{user.email}</td>
-                    <td className="px-4 py-3 text-charcoal-light">{user.phoneNumber || '—'}</td>
+                    <td className="px-4 py-3 text-charcoal-light">{user.phoneNumber || user.phone || user.phoneNo || user.mobile || '—'}</td>
                     <td className="px-4 py-3">
                       <span className="bg-solar/20 text-yellow-700 px-2 py-1 rounded-md text-xs font-medium">
                         {user.status === 'Deactivated' ? 'Deactivated' : 'Pending'}

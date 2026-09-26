@@ -45,7 +45,7 @@ const OperatorSidebar = ({ isOpen, setIsOpen, operator, onLogout }) => {
 
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-forest/10 flex flex-col
-          transform transition-transform duration-300 ease-in-out
+          transform transition-transform duration-300 ease-in-out print:hidden
           lg:static lg:translate-x-0
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
@@ -121,7 +121,7 @@ const OperatorSidebar = ({ isOpen, setIsOpen, operator, onLogout }) => {
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
 const OperatorHeader = ({ onMenuClick, operator }) => (
-  <header className="h-16 bg-white/80 backdrop-blur-md border-b border-forest/10 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30 shrink-0">
+  <header className="h-16 bg-white/80 backdrop-blur-md border-b border-forest/10 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30 shrink-0 print:hidden">
     <div className="flex items-center gap-4">
       <button
         onClick={onMenuClick}
@@ -162,7 +162,7 @@ const OperatorLayout = () => {
   };
 
   return (
-    <div className="flex h-screen bg-ivory font-sans text-charcoal overflow-hidden">
+    <div className="flex h-screen bg-ivory font-sans text-charcoal overflow-hidden print:h-auto print:bg-white print:overflow-visible print:block">
       <OperatorSidebar
         isOpen={isSidebarOpen}
         setIsOpen={setIsSidebarOpen}
@@ -170,12 +170,12 @@ const OperatorLayout = () => {
         onLogout={handleLogout}
       />
 
-      <div className="flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden">
+      <div className="flex-1 flex flex-col h-full overflow-y-auto overflow-x-hidden print:h-auto print:overflow-visible print:block print:w-full">
         <OperatorHeader
           onMenuClick={() => setIsSidebarOpen(true)}
           operator={operator}
         />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full print:p-0 print:m-0 print:max-w-none print:w-full print:block">
           <Outlet />
         </main>
       </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import BookingTable from '../Components/BookingTable';
-import { Search, Filter, XCircle, AlertCircle, Loader, X } from 'lucide-react';
+import { Search, Filter, XCircle, AlertCircle, Loader, X, RotateCcw } from 'lucide-react';
 import { approveReservation, getAllReservations, cancelReservation, getAllStations } from '../../../Services/operatorApi';
 
 const BookingMonitoring = () => {
@@ -24,14 +24,15 @@ const BookingMonitoring = () => {
   const [cancelLoading, setCancelLoading] = useState(false);
   const [cancelError, setCancelError] = useState('');
 
-  const loadData = async () => {
+  const loadData = async (overrideFilters) => {
     setLoading(true);
     try {
+      const activeFilters = overrideFilters || filters;
       const params = {};
-      if (filters.nic) params.nic = filters.nic;
-      if (filters.status) params.status = filters.status;
-      if (filters.from) params.from = filters.from;
-      if (filters.to) params.to = filters.to;
+      if (activeFilters.nic) params.nic = activeFilters.nic;
+      if (activeFilters.status) params.status = activeFilters.status;
+      if (activeFilters.from) params.from = activeFilters.from;
+      if (activeFilters.to) params.to = activeFilters.to;
 
       const [reservRes, statRes] = await Promise.all([
         getAllReservations(params),
@@ -49,6 +50,12 @@ const BookingMonitoring = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleClear = () => {
+    const empty = { nic: '', status: '', from: '', to: '' };
+    setFilters(empty);
+    loadData(empty);
   };
 
   useEffect(() => {
@@ -149,12 +156,20 @@ const BookingMonitoring = () => {
             onChange={(e) => setFilters({ ...filters, to: e.target.value })}
           />
         </div>
-        <div className="w-full md:w-auto">
+        <div className="w-full md:w-auto flex gap-2">
           <button 
-            onClick={loadData}
+            onClick={() => loadData()}
             className="w-full md:w-auto px-6 py-2 bg-forest text-ivory rounded-xl text-sm font-medium hover:bg-forest/90 transition-colors h-[38px]"
           >
             Search
+          </button>
+          <button 
+            onClick={handleClear}
+            className="w-full md:w-auto px-4 py-2 border border-forest/20 text-charcoal hover:bg-forest/5 rounded-xl text-sm font-medium transition-colors h-[38px] inline-flex items-center justify-center gap-1.5"
+            title="Clear all filters"
+          >
+            <RotateCcw className="h-4 w-4 text-charcoal-light" />
+            Clear
           </button>
         </div>
       </div>

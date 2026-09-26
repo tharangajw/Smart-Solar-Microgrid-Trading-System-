@@ -19,14 +19,17 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Models
 
 // National Identity Card - Primary key for prosumers
         [BsonElement("nic")]
+        [JsonPropertyName("nic")]
         public string Nic { get; set; } = string.Empty;
 
 // User's full name
         [BsonElement("fullName")]
+        [JsonPropertyName("fullName")]
         public string FullName { get; set; } = string.Empty;
 
 // User's email address
         [BsonElement("email")]
+        [JsonPropertyName("email")]
         public string Email { get; set; } = string.Empty;
 
 // Hashed password (never returned to clients)
@@ -36,33 +39,41 @@ namespace SmartSolarMicrogrid.API.Modules.Users.Models
 
 // User role: Backoffice, GridOperator, or Prosumer
         [BsonElement("role")]
+        [JsonPropertyName("role")]
         public string Role { get; set; } = string.Empty;
 
 // Phone number
         [BsonElement("phoneNumber")]
+        [JsonPropertyName("phoneNumber")]
         public string? PhoneNumber { get; set; }
 
 // Physical address
         [BsonElement("address")]
+        [JsonPropertyName("address")]
         public string? Address { get; set; }
 // Account activation status
         [BsonElement("isActive")]
+        [JsonPropertyName("isActive")]
         public bool IsActive { get; set; } = true;
 
 // Pending | Active | Deactivated — Backoffice controls activation
         [BsonElement("status")]
+        [JsonPropertyName("status")]
         public string Status { get; set; } = UserAccountStatus.Active;
 
 // Account creation date
         [BsonElement("createdAt")]
+        [JsonPropertyName("createdAt")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 // Last updated date
         [BsonElement("updatedAt")]
+        [JsonPropertyName("updatedAt")]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
 // Solar panel capacity in kW (for prosumers)
         [BsonElement("solarCapacityKw")]
+        [JsonPropertyName("solarCapacityKw")]
         public double? SolarCapacityKw { get; set; }
     }
 

@@ -3,7 +3,7 @@ import { Menu, Bell } from 'lucide-react';
 
 const DashboardHeader = ({ onMenuClick }) => {
   return (
-    <header className="h-16 bg-white/80 backdrop-blur-md border-b border-forest/10 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
+    <header className="h-16 bg-white/80 backdrop-blur-md border-b border-forest/10 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30 print:hidden">
       <div className="flex items-center gap-4">
         <button 
           onClick={onMenuClick}
