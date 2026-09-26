@@ -43,7 +43,12 @@ class QRDisplayActivity : AppCompatActivity() {
                     reservationData
                 }
 
-                val finalData = if (qrData.isNotEmpty()) qrData else "SOLAR_BOOKING_QR"
+                if (qrData.isBlank() || qrData == "null") {
+                    android.widget.Toast.makeText(this, "This reservation has no approved transaction QR yet", android.widget.Toast.LENGTH_LONG).show()
+                    finish()
+                    return
+                }
+                val finalData = qrData
                 val bitmap = generateQrCode(finalData)
                 imageQrCode.setImageBitmap(bitmap)
                 textInstructions.text = "Show this code to the Grid Operator"
@@ -53,9 +58,8 @@ class QRDisplayActivity : AppCompatActivity() {
                 textInstructions.text = "Show this code to the Grid Operator"
             }
         } else {
-            val bitmap = generateQrCode("SOLAR_BOOKING_DEFAULT")
-            imageQrCode.setImageBitmap(bitmap)
-            textInstructions.text = "Show this code to the Grid Operator"
+            android.widget.Toast.makeText(this, "No approved transaction QR was supplied", android.widget.Toast.LENGTH_LONG).show()
+            finish()
         }
 
         buttonDone.setOnClickListener { finish() }
