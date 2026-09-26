@@ -32,6 +32,7 @@ class ReservationDetailActivity : AppCompatActivity() {
     private var bookingId: String? = null
     private var nodeId: String? = null
     private var slotId: String? = null
+    private var reservationDate: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,6 +113,8 @@ class ReservationDetailActivity : AppCompatActivity() {
                 val intent = Intent(this@ReservationDetailActivity, UpdateReservationActivity::class.java)
                 intent.putExtra("BOOKING_ID", bookingId)
                 intent.putExtra("NODE_ID", nodeId ?: "Station Hub")
+                intent.putExtra("SLOT_ID", slotId)
+                intent.putExtra("RESERVATION_DATE", reservationDate)
                 startActivity(intent)
             }
         }
@@ -133,6 +136,7 @@ class ReservationDetailActivity : AppCompatActivity() {
                         slotId = obj.optString("slotId", "Energy Slot")
                         val status = obj.optString("status", "Approved")
                         val rawDate = obj.optString("reservationDate", "")
+                        reservationDate = rawDate
                         val rawCreated = obj.optString("createdAt", "")
 
                         populateView(
