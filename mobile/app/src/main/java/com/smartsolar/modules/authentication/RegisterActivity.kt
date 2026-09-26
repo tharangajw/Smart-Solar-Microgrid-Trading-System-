@@ -30,6 +30,7 @@ class RegisterActivity : AppCompatActivity() {
         val editNic = findViewById<EditText>(R.id.editTextNic)
         val editName = findViewById<EditText>(R.id.editTextName)
         val editEmail = findViewById<EditText>(R.id.editTextEmail)
+        val editPhone = findViewById<EditText>(R.id.editTextPhone)
         val editPassword = findViewById<EditText>(R.id.editTextPassword)
         val buttonRegister = findViewById<Button>(R.id.buttonRegister)
         val textViewBack = findViewById<TextView>(R.id.textViewBack)
@@ -38,6 +39,7 @@ class RegisterActivity : AppCompatActivity() {
             val nic = editNic.text.toString().trim()
             val name = editName.text.toString().trim()
             val email = editEmail.text.toString().trim()
+            val phone = editPhone?.text?.toString()?.trim() ?: ""
             val password = editPassword.text.toString().trim()
 
             // Validation
@@ -52,7 +54,7 @@ class RegisterActivity : AppCompatActivity() {
                 put("fullName", name) 
                 put("email", email)
                 put("password", password)
-                put("phoneNumber", "0000000000")
+                put("phoneNumber", if (phone.isNotEmpty()) phone else "N/A")
                 put("address", "N/A")
                 put("solarCapacityKw", 0.0)
             }
