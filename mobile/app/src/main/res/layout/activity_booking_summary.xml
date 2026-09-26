@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         app:cardCornerRadius="24dp"
         app:cardElevation="6dp"
-        app:cardBackgroundColor="@color/backgroundCard"
+        app:cardBackgroundColor="@color/white"
         app:strokeWidth="1dp"
         app:strokeColor="@color/dividerColor">
 
@@ -26,17 +26,18 @@
 
             <!-- Success Icon Container -->
             <FrameLayout
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:background="@drawable/bg_pill_badge"
+                android:layout_width="88dp"
+                android:layout_height="88dp"
+                android:background="@drawable/bg_icon_circle"
+                android:backgroundTint="@color/statusCompletedBg"
                 android:layout_marginBottom="24dp">
 
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:src="@android:drawable/checkbox_on_background"
-                    app:tint="@color/colorPrimary" />
+                    android:text="✅"
+                    android:textSize="44sp" />
             </FrameLayout>
 
             <TextView

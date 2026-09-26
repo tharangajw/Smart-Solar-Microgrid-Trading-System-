@@ -67,22 +67,18 @@ class QRScannerActivity : AppCompatActivity() {
     }
 
     /**
-     * Extracts clean 24-character MongoDB hex ID from any QR payload format (JSON, prefixed strings like QR_...).
+     * Extracts clean ID / QR code payload from any QR format (JSON or string).
      */
     private fun extractCleanId(raw: String): String {
         var cleaned = raw.trim()
         if (cleaned.startsWith("{")) {
             try {
                 val json = JSONObject(cleaned)
-                cleaned = json.optString("id", json.optString("_id", json.optString("bookingId", json.optString("qrCodeId", cleaned))))
+                cleaned = json.optString("qrCodeId", json.optString("qrCode", json.optString("id", json.optString("_id", cleaned))))
             } catch (_: Exception) {}
         }
         cleaned = cleaned.replace("QR_", "").replace("qr_", "").trim()
-
-        // Match 24-character hexadecimal MongoDB ObjectId
-        val hexRegex = Regex("[a-fA-F0-9]{24}")
-        val match = hexRegex.find(cleaned)
-        return match?.value ?: if (cleaned.equalsIgnoreCase("null") || cleaned == "null") "" else cleaned
+        return if (cleaned.equalsIgnoreCase("null") || cleaned == "null") "" else cleaned
     }
 
     /**
@@ -167,13 +163,10 @@ class QRScannerActivity : AppCompatActivity() {
 
     /**
      * Core Business Logic:
-     * 1. Extract clean ID from scanned QR content
-     * 2. Search C# backend for reservation data
-     * 3. Execute C# backend 2-step lifecycle transition:
-     *    Step 3a: POST /api/operator/approve/{id} (Pending -> Approved)
-     *    Step 3b: POST /api/operator/scan-qr (Approved -> Completed / Done)
-     * 4. Save local status override to "Completed"
-     * 5. Show verified summary dialog
+     * 1. Extract clean ID / QR code payload from scanned content
+     * 2. Call C# Backend API: GET /api/operator/verify-qr/{qrCodeId} to verify server data
+     * 3. Display reservation details to Operator
+     * 4. Upon physical confirmation, call POST /api/operator/scan-qr to finalize transaction & mark job as DONE
      */
     private fun processAndVerifyQrCode(scannedContent: String) {
         if (scannedContent.trim().isEmpty()) {
@@ -181,129 +174,79 @@ class QRScannerActivity : AppCompatActivity() {
             return
         }
 
-        val cleanReservationId = extractCleanId(scannedContent)
+        val cleanId = extractCleanId(scannedContent)
+        if (cleanId.isEmpty()) {
+            Toast.makeText(this, "Invalid QR Code scanned", Toast.LENGTH_SHORT).show()
+            return
+        }
 
         Toast.makeText(this, "Verifying transfer with server...", Toast.LENGTH_SHORT).show()
+        verifyTransactionBeforeConfirmation(cleanId)
+    }
 
+    private fun verifyTransactionBeforeConfirmation(transactionId: String) {
+        if (transactionId.isBlank()) {
+            showVerificationError("QR code does not contain a transaction ID.")
+            return
+        }
         lifecycleScope.launch(Dispatchers.IO) {
-            // Step 1: Search server for reservation data using multi-endpoint checks
-            val serverObj = fetchReservationDataFromServer(cleanReservationId)
-
-            var targetId = cleanReservationId
-            if (targetId.isEmpty() || targetId.equalsIgnoreCase("null") || targetId == "null") {
-                val serverId = serverObj?.optString("id", serverObj.optString("_id", "")) ?: ""
-                if (serverId.isNotEmpty() && !serverId.equalsIgnoreCase("null") && serverId != "null") {
-                    targetId = serverId
-                } else {
-                    targetId = "6ab2582d235e3ad6e67b4988"
-                }
-            }
-
-            var qrCodeId = serverObj?.optString("qrCodeId", "") ?: ""
-            if (qrCodeId.isEmpty() || qrCodeId == "null") {
-                qrCodeId = "QR_$targetId"
-            }
-
-            val rawNodeId = serverObj?.optString("nodeId", serverObj?.optString("stationId", "")) ?: ""
-            val rawNodeName = serverObj?.optString("nodeName", serverObj?.optString("stationName", serverObj?.optString("name", ""))) ?: ""
-            val slotId = serverObj?.optString("slotId", "Energy Slot") ?: "Energy Slot"
-
-            val cleanStationName = resolveStationName(rawNodeId, rawNodeName)
-            val cleanSlot = slotId.replace("_", " ").replace("-", " ")
-                .split(" ").joinToString(" ") { word -> word.lowercase().replaceFirstChar { char -> char.uppercase() } }
-            val refCode = if (targetId.length >= 8) "RES-${targetId.takeLast(8).uppercase()}" else "RES-${targetId.uppercase()}"
-
-            // Step 2: C# Backend 2-step transition (Approve -> Scan/Finalize)
-            var isSuccess = false
-            var serverMsg = "Energy transfer verified and status updated to Completed."
-
-            // 2a. Approve reservation on C# backend if in Pending status
-            val approveResult = ApiClient.post(this@QRScannerActivity, "operator/approve/$targetId", JSONObject())
-            if (approveResult.isSuccess && approveResult.body != null) {
-                try {
-                    val appJson = JSONObject(approveResult.body)
-                    val newQrId = appJson.optString("qrCodeId", "")
-                    if (newQrId.isNotEmpty()) qrCodeId = newQrId
-                } catch (_: Exception) {}
-            }
-
-            // 2b. Finalize via POST /api/operator/scan-qr
-            val scanBody = JSONObject().apply {
-                put("qrCodeId", qrCodeId)
-            }
-            var apiResult = ApiClient.post(this@QRScannerActivity, "operator/scan-qr", scanBody)
-            if (apiResult.isSuccess) {
-                isSuccess = true
-                serverMsg = parseMessage(apiResult.body, serverMsg)
-            } else {
-                // Fallback: POST operator/scan-qr with reservationId
-                val scanBodyAlt = JSONObject().apply {
-                    put("qrCodeId", qrCodeId)
-                    put("reservationId", targetId)
-                }
-                apiResult = ApiClient.post(this@QRScannerActivity, "operator/scan-qr", scanBodyAlt)
-                if (apiResult.isSuccess) {
-                    isSuccess = true
-                    serverMsg = parseMessage(apiResult.body, serverMsg)
-                } else {
-                    // Fallback: PUT Reservations/{id} with status = Completed
-                    val statusBody = JSONObject().apply { put("status", "Completed") }
-                    apiResult = ApiClient.put(this@QRScannerActivity, "Reservations/$targetId", statusBody)
-                    if (apiResult.isSuccess) {
-                        isSuccess = true
-                        serverMsg = parseMessage(apiResult.body, serverMsg)
-                    }
-                }
-            }
-
-            val finalSuccess = isSuccess || (serverObj != null) || targetId.isNotEmpty()
-
-            // Save local status override so Reservation Details and Bookings lists reflect Completed status
-            if (finalSuccess) {
-                val sessionManager = SessionManager(this@QRScannerActivity)
-                sessionManager.saveReservationStatus(targetId, "Completed")
-                if (cleanReservationId.isNotEmpty() && cleanReservationId != targetId) {
-                    sessionManager.saveReservationStatus(cleanReservationId, "Completed")
-                }
-                if (scannedContent.isNotEmpty() && !scannedContent.startsWith("{")) {
-                    sessionManager.saveReservationStatus(scannedContent, "Completed")
-                }
-            }
-
+            val encoded = java.net.URLEncoder.encode(transactionId, "UTF-8")
+            val response = ApiClient.get(this@QRScannerActivity, "operator/verify-qr/$encoded")
             withContext(Dispatchers.Main) {
-                if (finalSuccess) {
-                    val summaryMessage = """
-                        ✅ Energy Transfer Finalized
-                        
-                        • Reference: $refCode
-                        • Station: $cleanStationName
-                        • Slot: $cleanSlot
-                        • Status: COMPLETED
-                        
-                        $serverMsg
-                    """.trimIndent()
-
+                if (response == null) {
+                    showVerificationError("Server could not verify this transaction.")
+                    return@withContext
+                }
+                try {
+                    val verified = JSONObject(response)
+                    if (!verified.optString("status").equals("Approved", ignoreCase = true)) {
+                        showVerificationError("This transaction is not approved.")
+                        return@withContext
+                    }
+                    val reservation = verified.optJSONObject("reservation")
+                    val message = "Transaction: $transactionId\nNode: ${verified.optString("nodeId", "Unknown")}\nScheduled: ${verified.optString("scheduledTime", "Not specified")}\nStatus: APPROVED\n\nConfirm the physical transfer to mark this job as DONE."
                     AlertDialog.Builder(this@QRScannerActivity)
-                        .setTitle("✅ Transfer Complete")
-                        .setMessage(summaryMessage)
-                        .setCancelable(false)
-                        .setPositiveButton("Done") { _, _ ->
-                            finish()
-                        }
-                        .show()
-                } else {
-                    val errorMsg = apiResult.message ?: "Could not verify QR code on server."
-                    AlertDialog.Builder(this@QRScannerActivity)
-                        .setTitle("❌ Verification Failed")
-                        .setMessage("$errorMsg\n\nPlease check the QR code and try again.")
-                        .setPositiveButton("Retry") { _, _ ->
-                            startCameraScan()
-                        }
+                        .setTitle("Reservation verified")
+                        .setMessage(message)
                         .setNegativeButton("Cancel", null)
-                        .show()
+                        .setPositiveButton("Confirm transfer") { _, _ ->
+                            finalizeTransaction(transactionId, reservation)
+                        }.show()
+                } catch (_: Exception) {
+                    showVerificationError("Invalid verification response from server.")
                 }
             }
         }
+    }
+
+    private fun finalizeTransaction(transactionId: String, reservation: JSONObject?) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val result = ApiClient.post(this@QRScannerActivity, "operator/scan-qr", JSONObject().apply {
+                put("qrCodeId", transactionId)
+            })
+            withContext(Dispatchers.Main) {
+                if (result.isSuccess) {
+                    reservation?.optString("id")?.takeIf { it.isNotBlank() }?.let {
+                        SessionManager(this@QRScannerActivity).saveReservationStatus(it, "Completed")
+                    }
+                    AlertDialog.Builder(this@QRScannerActivity)
+                        .setTitle("Transfer complete")
+                        .setMessage("Energy transfer completed and job marked as DONE by the server.")
+                        .setPositiveButton("Done") { _, _ -> finish() }.show()
+                } else {
+                    showVerificationError(result.message ?: "Transaction could not be completed.")
+                }
+            }
+        }
+    }
+
+    private fun showVerificationError(message: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Verification failed")
+            .setMessage(message)
+            .setPositiveButton("Retry") { _, _ -> startCameraScan() }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun resolveStationName(nodeId: String, rawNodeName: String): String {
