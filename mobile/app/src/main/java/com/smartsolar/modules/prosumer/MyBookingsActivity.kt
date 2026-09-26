@@ -3,8 +3,8 @@ package com.smartsolar.modules.prosumer
 /*
  * MyBookingsActivity.kt
  * Displays reservations in two tabs (Upcoming vs History).
- * Supports both Prosumer (NIC-filtered) and Grid Operator (system-wide) monitoring.
- * Syncs local status overrides from SessionManager to ensure completed transfers show immediately.
+ * Fast, reliable loading for Prosumers and Grid Operators via /Reservations/search.
+ * Syncs local status overrides from SessionManager and caches to SQLite for offline access.
  * Author: Member 4 – Operator Product
  */
 
@@ -87,7 +87,7 @@ class MyBookingsActivity : BaseNavActivity() {
 
     private fun loadBookings() {
         val session = SessionManager(this)
-        val nic = session.getNic() ?: ""
+        val nic = session.getNic()?.trim() ?: ""
         val role = session.getRole()?.lowercase() ?: ""
         val isOperator = role.contains("operator") || role.contains("grid") || role.contains("admin")
 
@@ -96,44 +96,34 @@ class MyBookingsActivity : BaseNavActivity() {
         layoutEmpty.visibility = View.GONE
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val pendingUrl = if (isOperator) "operator/reservations?status=Pending" else "Reservations/pending?nic=$nic"
-            val historyUrl = if (isOperator) "operator/reservations" else "Reservations/history?nic=$nic"
+            val primaryEndpoint = if (isOperator) "Reservations/search" else "Reservations/search?nic=$nic"
 
-            var pendingResponse = ApiClient.get(this@MyBookingsActivity, pendingUrl)
-            if (isOperator && (pendingResponse == null || pendingResponse.trim() == "[]" || pendingResponse.trim() == "{}")) {
-                pendingResponse = ApiClient.get(this@MyBookingsActivity, "Reservations/pending")
-            }
-
-            var historyResponse = ApiClient.get(this@MyBookingsActivity, historyUrl)
-            if (isOperator && (historyResponse == null || historyResponse.trim() == "[]" || historyResponse.trim() == "{}")) {
-                historyResponse = ApiClient.get(this@MyBookingsActivity, "Reservations")
+            var response = ApiClient.get(this@MyBookingsActivity, primaryEndpoint)
+            if (response == null || response.trim() == "[]" || response.trim() == "{}") {
+                val fallbackEndpoint = if (isOperator) "operator-dashboard/bookings" else "Reservations/pending?nic=$nic"
+                response = ApiClient.get(this@MyBookingsActivity, fallbackEndpoint)
             }
 
             withContext(Dispatchers.Main) {
                 progressBar.visibility = View.GONE
 
-                // Parse upcoming
                 upcomingList.clear()
-                if (pendingResponse != null) {
-                    parseBookingList(pendingResponse, upcomingList)
-                }
-
-                // Parse history
                 historyList.clear()
-                if (historyResponse != null) {
-                    parseBookingList(historyResponse, historyList)
+
+                val allFetchedBookings = mutableListOf<Booking>()
+                if (response != null && response.trim().isNotEmpty()) {
+                    parseBookingList(response, allFetchedBookings)
                 }
 
                 // SQLite Caching Logic
                 val dao = com.smartsolar.data.local.ReservationDao(this@MyBookingsActivity)
-                val isNetworkFailure = (pendingResponse == null && historyResponse == null)
+                val isNetworkFailure = (response == null)
 
                 if (!isNetworkFailure) {
                     // We got data from API, so cache it locally
-                    val allFetched = (upcomingList + historyList).distinctBy { it.id }
-                    if (allFetched.isNotEmpty()) {
+                    if (allFetchedBookings.isNotEmpty()) {
                         dao.clearAllReservations()
-                        val cacheList = allFetched.map { b ->
+                        val cacheList = allFetchedBookings.map { b ->
                             com.smartsolar.models.Reservation(b.id, b.slotId, b.nodeId, b.status, b.reservationDate)
                         }
                         dao.insertReservations(cacheList)
@@ -142,53 +132,29 @@ class MyBookingsActivity : BaseNavActivity() {
                     // Network failed, load from SQLite local cache
                     val localData = dao.getAllReservations()
                     if (localData.isNotEmpty()) {
-                        upcomingList.clear()
-                        historyList.clear()
                         localData.forEach { r ->
-                            val b = Booking(
-                                id = r.id, 
-                                nodeId = r.nodeId ?: "–", 
-                                slotId = r.slotId ?: "–", 
-                                status = r.status ?: "Pending", 
-                                reservationDate = r.scheduledDate ?: "–"
+                            allFetchedBookings.add(
+                                Booking(
+                                    id = r.id, 
+                                    nodeId = r.nodeId ?: "–", 
+                                    slotId = r.slotId ?: "–", 
+                                    status = r.status ?: "Pending", 
+                                    reservationDate = r.scheduledDate ?: "–"
+                                )
                             )
-                            if (b.status.equals("Completed", ignoreCase = true) || b.status.equals("Cancelled", ignoreCase = true) || b.status.equals("Done", ignoreCase = true)) {
-                                historyList.add(b)
-                            } else {
-                                upcomingList.add(b)
-                            }
                         }
                     }
                 }
 
-                // For Operators, split all system reservations into Upcoming vs History tabs by status
-                if (isOperator) {
-                    val allItems = (upcomingList + historyList).distinctBy { it.id }
-                    upcomingList.clear()
-                    historyList.clear()
-
-                    for (item in allItems) {
-                        if (item.status.equals("Completed", ignoreCase = true) ||
-                            item.status.equals("Cancelled", ignoreCase = true) ||
-                            item.status.equals("Done", ignoreCase = true)) {
-                            historyList.add(item)
-                        } else {
-                            upcomingList.add(item)
-                        }
-                    }
-                } else {
-                    // For Prosumers, move any locally completed/cancelled items from upcoming into history
-                    val iterator = upcomingList.iterator()
-                    while (iterator.hasNext()) {
-                        val item = iterator.next()
-                        if (item.status.equals("Completed", ignoreCase = true) ||
-                            item.status.equals("Cancelled", ignoreCase = true) ||
-                            item.status.equals("Done", ignoreCase = true)) {
-                            iterator.remove()
-                            if (!historyList.any { it.id == item.id }) {
-                                historyList.add(0, item)
-                            }
-                        }
+                // Categorize all bookings into Upcoming vs History tabs by status
+                val uniqueBookings = allFetchedBookings.distinctBy { it.id }
+                for (b in uniqueBookings) {
+                    if (b.status.equals("Completed", ignoreCase = true) ||
+                        b.status.equals("Cancelled", ignoreCase = true) ||
+                        b.status.equals("Done", ignoreCase = true)) {
+                        historyList.add(b)
+                    } else {
+                        upcomingList.add(b)
                     }
                 }
 
@@ -251,20 +217,16 @@ class MyBookingsActivity : BaseNavActivity() {
         if (list.isEmpty()) {
             recycler.visibility = View.GONE
             layoutEmpty.visibility = View.VISIBLE
-            
-            try {
-                if (layoutEmpty is android.view.ViewGroup) {
-                    val group = layoutEmpty as android.view.ViewGroup
-                    for (i in 0 until group.childCount) {
-                        val child = group.getChildAt(i)
-                        if (child is android.widget.TextView) {
-                            child.text = if (currentTab == 0) "No pending bookings" else "No booking history"
-                            break
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                // Ignore if we can't update the text dynamically
+
+            val title = findViewById<android.widget.TextView>(R.id.textEmptyTitle)
+            val subtitle = findViewById<android.widget.TextView>(R.id.textEmptySubtitle)
+
+            if (currentTab == 0) {
+                title?.text = "No upcoming bookings"
+                subtitle?.text = "Reserve an energy slot to get started!"
+            } else {
+                title?.text = "No booking history"
+                subtitle?.text = "Completed and cancelled bookings will appear here."
             }
         } else {
             layoutEmpty.visibility = View.GONE
