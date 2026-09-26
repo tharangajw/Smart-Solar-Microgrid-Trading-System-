@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/backgroundColor">
+
+    <!-- Top Bar -->
+    <include
+        android:id="@+id/customTopBar"
+        layout="@layout/view_custom_top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:elevation="4dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:layout_margin="16dp"
+        android:background="@android:color/white"
+        android:elevation="4dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Grid Node (Locked)"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+        <TextView
+            android:id="@+id/textNodeId"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_input_outlined"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:layout_marginBottom="16dp"
+            android:enabled="false"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select New Date"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+            
+        <TextView
+            android:id="@+id/textDatePicker"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_input_outlined"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:text="Tap to pick a date"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select New Slot"
+            android:textStyle="bold"
+            android:layout_marginBottom="4dp"/>
+            
+        <TextView
+            android:id="@+id/textSlotPicker"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_input_outlined"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:text="Loading slots..."
+            android:layout_marginBottom="24dp"/>
+
+        <Button
+            android:id="@+id/buttonUpdate"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:text="Save Changes"
+            android:backgroundTint="@color/colorPrimary"
+            android:textColor="@android:color/white"/>
+
+        <ProgressBar
+            android:id="@+id/progressUpdate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+</LinearLayout>

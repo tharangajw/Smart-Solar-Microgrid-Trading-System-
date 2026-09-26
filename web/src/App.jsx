@@ -1,122 +1,83 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import MicrogridNodesPage from './Modules/Microgrid/MicrogridNodesPage';
+import EnergySlotsPage from './Modules/EnergySlots/EnergySlotsPage';
+import MapPage from './Modules/Map/MapPage';
+import './App.css';
+
+import HomePage from './Modules/Home/HomePage';
+import DashboardPage from './Modules/Dashboard/DashboardPage';
+import Login from './Modules/Authentication/Login';
+import Register from './Modules/Authentication/Register';
+
+import OperatorLayout from './Modules/Operator/Layout/OperatorLayout';
+import OperatorDashboard from './Modules/Operator/pages/OperatorDashboard';
+import BookingMonitoring from './Modules/Operator/pages/BookingMonitoring';
+import BookingDetails from './Modules/Operator/pages/BookingDetails';
+import SlotAvailability from './Modules/Operator/pages/SlotAvailability';
+import StationsMap from './Modules/Operator/pages/StationsMap';
+import OperatorRoute from './Routes/OperatorRoute';
+
+import BackofficeLayout from './Modules/Backoffice/Layout/BackofficeLayout';
+import BackofficeDashboard from './Modules/Backoffice/pages/BackofficeDashboard';
+import GridOperatorsPage from './Modules/Backoffice/pages/GridOperatorsPage';
+import BackofficeMicrogridNodesPage from './Modules/Backoffice/pages/MicrogridNodesPage';
+import PendingActivationsPage from './Modules/Backoffice/pages/PendingActivationsPage';
+import ProsumerManagementPage from './Modules/Backoffice/pages/ProsumerManagementPage';
+import ReservationManagementPage from './Modules/Backoffice/pages/ReservationManagementPage';
+import BackofficeRoute from './Routes/BackofficeRoute';
+import ProsumerRoute from './Routes/ProsumerRoute';
+import ReservationsPage from './Modules/Reservations/ReservationsPage';
+import ReservationDetailPage from './Modules/Reservations/ReservationDetailPage';
+
+import ReportsPage from './Modules/Reports/ReportsPage';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-      <div className="ticks"></div>
+        <Route element={<BackofficeRoute />}>
+          <Route path="/backoffice" element={<BackofficeLayout />}>
+            <Route index element={<Navigate to="pending" replace />} />
+            <Route path="dashboard" element={<BackofficeDashboard />} />
+            <Route path="operators" element={<GridOperatorsPage />} />
+            <Route path="nodes" element={<BackofficeMicrogridNodesPage />} />
+            <Route path="map" element={<MapPage />} />
+            <Route path="reports" element={<ReportsPage />} />
+            <Route path="pending" element={<PendingActivationsPage />} />
+            <Route path="prosumers" element={<ProsumerManagementPage />} />
+            <Route path="reservations" element={<ReservationManagementPage />} />
+          </Route>
+        </Route>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        <Route element={<OperatorRoute />}>
+          <Route path="/operator" element={<OperatorLayout />}>
+            <Route path="dashboard" element={<OperatorDashboard />} />
+            <Route path="bookings" element={<BookingMonitoring />} />
+            <Route path="bookings/:id" element={<BookingDetails />} />
+            <Route path="slots" element={<SlotAvailability />} />
+            <Route path="map" element={<StationsMap />} />
+            <Route path="reports" element={<ReportsPage />} />
+          </Route>
+        </Route>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        <Route element={<ProsumerRoute />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+        </Route>
+
+        <Route path="/reservations" element={<ReservationsPage />} />
+        <Route path="/reservations/:id" element={<ReservationDetailPage />} />
+        <Route path="/microgrid" element={<MicrogridNodesPage />} />
+        <Route path="/map" element={<MapPage />} />
+        <Route path="/slots" element={<EnergySlotsPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

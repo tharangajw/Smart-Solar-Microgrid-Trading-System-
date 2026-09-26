@@ -1,0 +1,204 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import StatusBadge from '../Components/StatusBadge';
+import { ArrowLeft, User, MapPin, Calendar, Zap, CreditCard } from 'lucide-react';
+import { approveReservation, getReservationById } from '../../../Services/operatorApi';
+
+const BookingDetails = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [booking, setBooking] = useState(null);
+  const [station, setStation] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [qrCodeId, setQrCodeId] = useState('');
+  const [approving, setApproving] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const res = await getReservationById(id);
+        setBooking(res.data);
+        
+        // Fetch station details based on nodeId
+        if (res.data?.nodeId) {
+          try {
+            // Import getStationById from operatorApi if not imported
+            const { getStationById } = await import('../../../Services/operatorApi');
+            const stationRes = await getStationById(res.data.nodeId);
+            setStation(stationRes.data);
+          } catch (stationErr) {
+            console.error("Could not fetch station details", stationErr);
+          }
+        }
+      } catch (err) {
+        setError(err.response?.data?.message || 'Unable to load this reservation.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [id]);
+
+  if (loading) {
+    return <div className="p-8 text-center text-gray-500">Loading details...</div>;
+  }
+
+  if (!booking) {
+    return <div className="p-8 text-center text-red-500">{error || 'Booking not found.'}</div>;
+  }
+
+  const handleApprove = async () => {
+    setApproving(true); setError('');
+    try {
+      const response = await approveReservation(booking.id);
+      setBooking({ ...booking, status: 'Approved' });
+      setQrCodeId(response.data.qrCodeId);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Unable to approve reservation.');
+    } finally { setApproving(false); }
+  };
+
+  const fmt = (d) => d ? new Date(d).toLocaleString('en-LK', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+
+  return (
+    <div className="space-y-6 max-w-4xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center space-x-4">
+          <button 
+            onClick={() => navigate('/operator/bookings')}
+            className="p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Booking #{booking.id}</h1>
+            <p className="text-sm text-gray-500">Node: {station?.name || booking.nodeId}</p>
+          </div>
+        </div>
+        <div className="flex gap-2 items-center">
+          <StatusBadge status={booking.status} />
+          {booking.status?.toLowerCase() === 'pending' && <button onClick={handleApprove} disabled={approving} className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700 transition-colors disabled:opacity-60">{approving ? 'Approving…' : 'Approve'}</button>}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Prosumer Details */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <User size={20} className="text-teal-600" />
+            Prosumer Details
+          </h2>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2">
+              <span className="block text-sm text-gray-500">NIC</span>
+              <span className="font-medium text-gray-900 text-right">{booking.prosumerNic || '—'}</span>
+            </div>
+            {/* Displaying static 'Prosumer' as actual name isn't stored in reservation */}
+            <div className="grid grid-cols-2">
+              <span className="block text-sm text-gray-500">Account Type</span>
+              <span className="font-medium text-gray-900 text-right">Prosumer</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Node Details */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <MapPin size={20} className="text-teal-600" />
+            Station / Node
+          </h2>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2">
+              <span className="block text-sm text-gray-500">Node Name</span>
+              <span className="font-medium text-gray-900 text-right">{station?.name || booking.nodeId}</span>
+            </div>
+            <div className="grid grid-cols-2">
+              <span className="block text-sm text-gray-500">Region</span>
+              <span className="font-medium text-gray-900 text-right">{station?.region || '—'}</span>
+            </div>
+            <div className="grid grid-cols-2">
+              <span className="block text-sm text-gray-500">Coordinates</span>
+              <span className="font-medium text-gray-900 text-right font-mono text-sm">
+                {station?.latitude && station?.longitude ? `${station.latitude.toFixed(4)}, ${station.longitude.toFixed(4)}` : '—'}
+              </span>
+            </div>
+            <div className="grid grid-cols-2">
+              <span className="block text-sm text-gray-500">Target Slot</span>
+              <span className="font-medium text-gray-900 text-right font-mono text-sm">{booking.slotId || '—'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Reservation Details */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 md:col-span-2">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <Zap size={20} className="text-teal-600" />
+            Reservation Data
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-8">
+            <div>
+              <span className="block text-sm text-gray-500 flex items-center gap-1 mb-1">
+                <Calendar size={14} /> Scheduled Date & Time
+              </span>
+              <span className="font-medium text-gray-900">
+                {fmt(booking.reservationDate)}
+              </span>
+            </div>
+            <div>
+              <span className="block text-sm text-gray-500 flex items-center gap-1 mb-1">
+                <Zap size={14} /> Energy Amount
+              </span>
+              <span className="font-medium text-gray-900">Slot {booking.slotId || booking.energyAmount || '—'}</span>
+            </div>
+            <div>
+              <span className="block text-sm text-gray-500 flex items-center gap-1 mb-1">
+                <CreditCard size={14} /> Payment Status
+              </span>
+              <span className="font-medium text-gray-900">Not tracked</span>
+            </div>
+            <div>
+              <span className="block text-sm text-gray-500 mb-1">QR Status</span>
+              <span className="font-medium text-gray-900">
+                {qrCodeId ? 'Generated' : booking.qrCodeId ? 'Generated' : booking.status?.toLowerCase() === 'approved' ? 'Generated' : 'Pending'}
+              </span>
+            </div>
+            <div>
+              <span className="block text-sm text-gray-500 mb-1">Created At</span>
+              <span className="font-medium text-gray-900">{fmt(booking.createdAt)}</span>
+            </div>
+            <div>
+              <span className="block text-sm text-gray-500 mb-1">Last Updated</span>
+              <span className="font-medium text-gray-900">{fmt(booking.updatedAt)}</span>
+            </div>
+          </div>
+          
+          {/* Cancellation Reason if applicable */}
+          {booking.status?.toLowerCase() === 'cancelled' && booking.cancellationReason && (
+            <div className="mt-6 pt-5 border-t border-gray-100">
+              <span className="block text-sm text-red-500 font-medium mb-1">Cancellation Reason</span>
+              <p className="text-gray-700 bg-red-50 p-3 rounded-lg text-sm">{booking.cancellationReason}</p>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">{error}</div>}
+      {(qrCodeId || booking.qrCodeId) && (
+        <div className="rounded-xl border border-teal-200 bg-teal-50 p-4 flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-teal-800">QR Code Identifier</h3>
+            <p className="text-teal-600 text-sm mt-1">This ID is linked to the prosumer's generated QR code.</p>
+          </div>
+          <code className="bg-white px-4 py-2 rounded border border-teal-100 text-teal-700 font-bold">
+            {qrCodeId || booking.qrCodeId}
+          </code>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default BookingDetails;

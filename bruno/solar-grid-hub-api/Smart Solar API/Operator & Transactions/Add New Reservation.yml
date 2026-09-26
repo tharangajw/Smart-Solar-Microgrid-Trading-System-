@@ -1,0 +1,26 @@
+info:
+  name: Add New Reservation
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://localhost:5281/api/reservations
+  body:
+    type: json
+    data: |
+      {
+        "prosumerId": "PROSUMER_12345",
+        "nodeId": "NODE_999",
+        "capacityKWh": 15.5,
+        "scheduledTime": "2026-09-20T10:00:00Z",
+        "qrCodeId": "test-qr-001"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false
