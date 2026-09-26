@@ -163,10 +163,117 @@ const ReportsPage = () => {
     return matchesSearch && matchesHub;
   });
 
+  const renderTradingTable = () => (
+    <div className="overflow-x-auto pt-4">
+      <table className="w-full text-left border-collapse">
+        <thead>
+          <tr className="border-b border-forest/10 text-[11px] font-semibold text-charcoal-light uppercase tracking-wider">
+            <th className="py-3 px-4">Transaction ID</th>
+            <th className="py-3 px-4">Date & Time</th>
+            <th className="py-3 px-4">Station Hub</th>
+            <th className="py-3 px-4">Prosumer</th>
+            <th className="py-3 px-4">Energy (kWh)</th>
+            <th className="py-3 px-4">Rate (LKR/kWh)</th>
+            <th className="py-3 px-4">Total Value</th>
+            <th className="py-3 px-4">Status</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-forest/5 text-xs">
+          {filteredTradingData.length === 0 ? (
+            <tr>
+              <td colSpan="8" className="text-center py-8 text-charcoal-light">No transaction report records found.</td>
+            </tr>
+          ) : (
+            filteredTradingData.map((row) => (
+              <tr key={row.id} className="hover:bg-cream/40 transition-colors">
+                <td className="py-3 px-4 font-mono font-bold text-forest">{row.id}</td>
+                <td className="py-3 px-4 text-charcoal-light">{row.date}</td>
+                <td className="py-3 px-4 font-semibold text-charcoal">{row.station}</td>
+                <td className="py-3 px-4">{row.prosumer}</td>
+                <td className="py-3 px-4 font-mono font-bold text-forest">{row.energyKwh} kWh</td>
+                <td className="py-3 px-4">LKR {row.rateLkr}</td>
+                <td className="py-3 px-4 font-bold text-forest">LKR {row.totalLkr.toLocaleString()}</td>
+                <td className="py-3 px-4">
+                  <span className="inline-flex items-center gap-1 bg-leaf/20 text-forest font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-leaf/30">
+                    <CheckCircle2 size={12} /> {row.status}
+                  </span>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  const renderPerformanceTable = () => (
+    <div className="overflow-x-auto pt-4">
+      <table className="w-full text-left border-collapse">
+        <thead>
+          <tr className="border-b border-forest/10 text-[11px] font-semibold text-charcoal-light uppercase tracking-wider">
+            <th className="py-3 px-4">Station Code</th>
+            <th className="py-3 px-4">Station Name</th>
+            <th className="py-3 px-4">Installed Capacity</th>
+            <th className="py-3 px-4">Solar Output</th>
+            <th className="py-3 px-4">Storage Slots Occupied</th>
+            <th className="py-3 px-4">Grid Uptime</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-forest/5 text-xs">
+          {MOCK_STATION_PERFORMANCE.map((st) => (
+            <tr key={st.code} className="hover:bg-cream/40 transition-colors">
+              <td className="py-3 px-4 font-mono font-bold text-forest">{st.code}</td>
+              <td className="py-3 px-4 font-semibold text-charcoal">{st.name}</td>
+              <td className="py-3 px-4 font-mono">{st.capacityKw} kW</td>
+              <td className="py-3 px-4 font-bold text-forest">{st.outputKwh} kWh</td>
+              <td className="py-3 px-4 font-semibold">{st.slotsUsed}</td>
+              <td className="py-3 px-4">
+                <span className="font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
+                  {st.uptime}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  const renderEnvironmentalTable = () => (
+    <div className="overflow-x-auto pt-4">
+      <table className="w-full text-left border-collapse">
+        <thead>
+          <tr className="border-b border-forest/10 text-[11px] font-semibold text-charcoal-light uppercase tracking-wider">
+            <th className="py-3 px-4">Province / Region</th>
+            <th className="py-3 px-4">Clean Solar Generated</th>
+            <th className="py-3 px-4">CO₂ Displaced (kg)</th>
+            <th className="py-3 px-4">Equivalent Trees Saved</th>
+            <th className="py-3 px-4">Green Score</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-forest/5 text-xs">
+          {MOCK_ENVIRONMENTAL_IMPACT.map((env) => (
+            <tr key={env.region} className="hover:bg-cream/40 transition-colors">
+              <td className="py-3 px-4 font-semibold text-forest">{env.region}</td>
+              <td className="py-3 px-4 font-mono font-bold text-charcoal">{env.cleanEnergyKwh.toLocaleString()} kWh</td>
+              <td className="py-3 px-4 font-bold text-emerald-700">{env.co2SavedKg.toLocaleString()} kg</td>
+              <td className="py-3 px-4 font-semibold text-charcoal">{env.treesPlanted} Trees</td>
+              <td className="py-3 px-4">
+                <span className="font-bold text-forest bg-forest/10 px-2.5 py-0.5 rounded-md border border-forest/20">
+                  {env.greenRating}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+
   const mainContent = (
     <div className="flex flex-col gap-6 w-full">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Page Header (Screen Only) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:hidden">
         <div>
           <h1 className="font-display text-2xl font-bold text-forest flex items-center gap-2">
             <BarChart3 className="text-solar" size={26} /> Microgrid Analytics & Reports
@@ -201,8 +308,8 @@ const ReportsPage = () => {
         </div>
       </div>
 
-      {/* Filter Toolbar */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-forest/10 flex flex-col md:flex-row items-center justify-between gap-4">
+      {/* Filter Toolbar (Screen Only) */}
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-forest/10 flex flex-col md:flex-row items-center justify-between gap-4 print:hidden">
         <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
           <span className="text-xs font-medium text-charcoal-light flex items-center gap-1 shrink-0 mr-1">
             <Calendar size={14} className="text-forest" /> Timeframe:
@@ -247,8 +354,8 @@ const ReportsPage = () => {
         </div>
       </div>
 
-      {/* Key Metric Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Key Metric Summary Cards (Screen Only) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 print:hidden">
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-forest/10 flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-charcoal-light uppercase tracking-wider">Total Energy Traded</p>
@@ -302,8 +409,8 @@ const ReportsPage = () => {
         </div>
       </div>
 
-      {/* Visual Analytics Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Visual Analytics Charts Section (Screen Only) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 print:hidden">
         {/* Main Chart: Generation vs Consumption Trend */}
         <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-forest/10 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
@@ -389,8 +496,8 @@ const ReportsPage = () => {
         </div>
       </div>
 
-      {/* Hourly Peak Generation Bar Chart */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-forest/10">
+      {/* Hourly Peak Generation Bar Chart (Screen Only) */}
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-forest/10 print:hidden">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="font-display text-lg font-bold text-forest">Diurnal Solar Output Distribution</h3>
@@ -418,7 +525,7 @@ const ReportsPage = () => {
 
       {/* Tabbed Data Reports Section */}
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-forest/10">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-forest/10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-forest/10 print:hidden">
           <div className="flex items-center gap-2 overflow-x-auto">
             <button
               onClick={() => setActiveTab('trading')}
@@ -464,115 +571,98 @@ const ReportsPage = () => {
           </div>
         </div>
 
-        {/* Tab 1: Trading Transactions Log */}
-        {activeTab === 'trading' && (
-          <div className="overflow-x-auto pt-4">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-forest/10 text-[11px] font-semibold text-charcoal-light uppercase tracking-wider">
-                  <th className="py-3 px-4">Transaction ID</th>
-                  <th className="py-3 px-4">Date & Time</th>
-                  <th className="py-3 px-4">Station Hub</th>
-                  <th className="py-3 px-4">Prosumer</th>
-                  <th className="py-3 px-4">Energy (kWh)</th>
-                  <th className="py-3 px-4">Rate (LKR/kWh)</th>
-                  <th className="py-3 px-4">Total Value</th>
-                  <th className="py-3 px-4">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-forest/5 text-xs">
-                {filteredTradingData.length === 0 ? (
-                  <tr>
-                    <td colSpan="8" className="text-center py-8 text-charcoal-light">No transaction report records found.</td>
-                  </tr>
-                ) : (
-                  filteredTradingData.map((row) => (
-                    <tr key={row.id} className="hover:bg-cream/40 transition-colors">
-                      <td className="py-3 px-4 font-mono font-bold text-forest">{row.id}</td>
-                      <td className="py-3 px-4 text-charcoal-light">{row.date}</td>
-                      <td className="py-3 px-4 font-semibold text-charcoal">{row.station}</td>
-                      <td className="py-3 px-4">{row.prosumer}</td>
-                      <td className="py-3 px-4 font-mono font-bold text-forest">{row.energyKwh} kWh</td>
-                      <td className="py-3 px-4">LKR {row.rateLkr}</td>
-                      <td className="py-3 px-4 font-bold text-forest">LKR {row.totalLkr.toLocaleString()}</td>
-                      <td className="py-3 px-4">
-                        <span className="inline-flex items-center gap-1 bg-leaf/20 text-forest font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-leaf/30">
-                          <CheckCircle2 size={12} /> {row.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
+        {/* Screen View: Render single active tab */}
+        <div className="print:hidden">
+          {activeTab === 'trading' && renderTradingTable()}
+          {activeTab === 'performance' && renderPerformanceTable()}
+          {activeTab === 'environmental' && renderEnvironmentalTable()}
+        </div>
 
-        {/* Tab 2: Station Performance */}
-        {activeTab === 'performance' && (
-          <div className="overflow-x-auto pt-4">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-forest/10 text-[11px] font-semibold text-charcoal-light uppercase tracking-wider">
-                  <th className="py-3 px-4">Station Code</th>
-                  <th className="py-3 px-4">Station Name</th>
-                  <th className="py-3 px-4">Installed Capacity</th>
-                  <th className="py-3 px-4">Solar Output</th>
-                  <th className="py-3 px-4">Storage Slots Occupied</th>
-                  <th className="py-3 px-4">Grid Uptime</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-forest/5 text-xs">
-                {MOCK_STATION_PERFORMANCE.map((st) => (
-                  <tr key={st.code} className="hover:bg-cream/40 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-forest">{st.code}</td>
-                    <td className="py-3 px-4 font-semibold text-charcoal">{st.name}</td>
-                    <td className="py-3 px-4 font-mono">{st.capacityKw} kW</td>
-                    <td className="py-3 px-4 font-bold text-forest">{st.outputKwh} kWh</td>
-                    <td className="py-3 px-4 font-semibold">{st.slotsUsed}</td>
-                    <td className="py-3 px-4">
-                      <span className="font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">
-                        {st.uptime}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Print View: Official High-End Audit Report Layout (Visible ONLY on print) */}
+        <div className="hidden print:block space-y-6 pt-1 font-sans text-charcoal">
+          {/* Official Letterhead Header */}
+          <div className="border-b-2 border-forest pb-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="Smart Solar Logo" className="w-12 h-12 object-contain" />
+              <div>
+                <h1 className="text-xl font-bold text-forest tracking-tight uppercase leading-none">Smart Solar Microgrid System</h1>
+                <p className="text-xs text-charcoal-light font-medium mt-1">Official Operational & Peer-to-Peer Energy Audit Report</p>
+              </div>
+            </div>
+            <div className="text-right text-[11px] text-charcoal-light space-y-0.5">
+              <p><span className="font-semibold text-charcoal">Date:</span> {new Date().toLocaleDateString('en-LK', { dateStyle: 'long' })}</p>
+              <p><span className="font-semibold text-charcoal">Timeframe:</span> {timeframe === '24h' ? 'Today' : timeframe === '7d' ? 'Last 7 Days' : timeframe === '30d' ? 'Last 30 Days' : 'Year to Date'}</p>
+              <p><span className="font-semibold text-charcoal">Grid Scope:</span> {selectedHub === 'ALL' ? 'All Grid Hubs' : selectedHub}</p>
+              <p><span className="font-semibold text-charcoal">Ref:</span> REP-2026-{timeframe.toUpperCase()}-001</p>
+            </div>
           </div>
-        )}
 
-        {/* Tab 3: Environmental Impact */}
-        {activeTab === 'environmental' && (
-          <div className="overflow-x-auto pt-4">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-forest/10 text-[11px] font-semibold text-charcoal-light uppercase tracking-wider">
-                  <th className="py-3 px-4">Province / Region</th>
-                  <th className="py-3 px-4">Clean Solar Generated</th>
-                  <th className="py-3 px-4">CO₂ Displaced (kg)</th>
-                  <th className="py-3 px-4">Equivalent Trees Saved</th>
-                  <th className="py-3 px-4">Green Score</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-forest/5 text-xs">
-                {MOCK_ENVIRONMENTAL_IMPACT.map((env) => (
-                  <tr key={env.region} className="hover:bg-cream/40 transition-colors">
-                    <td className="py-3 px-4 font-semibold text-forest">{env.region}</td>
-                    <td className="py-3 px-4 font-mono font-bold text-charcoal">{env.cleanEnergyKwh.toLocaleString()} kWh</td>
-                    <td className="py-3 px-4 font-bold text-emerald-700">{env.co2SavedKg.toLocaleString()} kg</td>
-                    <td className="py-3 px-4 font-semibold text-charcoal">{env.treesPlanted} Trees</td>
-                    <td className="py-3 px-4">
-                      <span className="font-bold text-forest bg-forest/10 px-2.5 py-0.5 rounded-md border border-forest/20">
-                        {env.greenRating}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* Executive Summary Cards (Print Friendly) */}
+          <div className="print:break-inside-avoid">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-forest mb-2">Executive Summary KPIs</h2>
+            <div className="grid grid-cols-4 gap-3">
+              <div className="border border-forest/20 rounded-lg p-2.5 bg-slate-50/60">
+                <p className="text-[9px] text-charcoal-light uppercase font-bold tracking-wider">Total Energy Traded</p>
+                <p className="text-sm font-bold text-forest mt-0.5">4,430 kWh</p>
+                <p className="text-[9px] text-emerald-700 font-semibold">+14.8% vs last week</p>
+              </div>
+              <div className="border border-forest/20 rounded-lg p-2.5 bg-slate-50/60">
+                <p className="text-[9px] text-charcoal-light uppercase font-bold tracking-wider">Revenue Generated</p>
+                <p className="text-sm font-bold text-forest mt-0.5">LKR 238,400</p>
+                <p className="text-[9px] text-emerald-700 font-semibold">+8.2% peer trade growth</p>
+              </div>
+              <div className="border border-forest/20 rounded-lg p-2.5 bg-slate-50/60">
+                <p className="text-[9px] text-charcoal-light uppercase font-bold tracking-wider">Storage Occupancy</p>
+                <p className="text-sm font-bold text-forest mt-0.5">51 / 65 Slots</p>
+                <p className="text-[9px] text-forest font-semibold">78.4% Occupied</p>
+              </div>
+              <div className="border border-forest/20 rounded-lg p-2.5 bg-slate-50/60">
+                <p className="text-[9px] text-charcoal-light uppercase font-bold tracking-wider">Carbon Offset</p>
+                <p className="text-sm font-bold text-forest mt-0.5">43.4 Tons CO₂</p>
+                <p className="text-[9px] text-emerald-700 font-semibold">~1,965 Trees Saved</p>
+              </div>
+            </div>
           </div>
-        )}
+
+          {/* Section 1: Trading Transactions */}
+          <div className="print:break-inside-avoid pt-2">
+            <div className="flex items-center justify-between border-b border-forest/20 pb-1 mb-2">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-forest">
+                1. Peer-to-Peer Energy Trading Transactions Log
+              </h2>
+              <span className="text-[10px] text-charcoal-light font-mono font-semibold">Records Count: {filteredTradingData.length}</span>
+            </div>
+            {renderTradingTable()}
+          </div>
+
+          {/* Section 2: Station Performance */}
+          <div className="print:break-inside-avoid pt-2">
+            <div className="flex items-center justify-between border-b border-forest/20 pb-1 mb-2">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-forest">
+                2. Microgrid Station Specs & Grid Uptime
+              </h2>
+              <span className="text-[10px] text-charcoal-light font-mono font-semibold">Hubs Active: 5</span>
+            </div>
+            {renderPerformanceTable()}
+          </div>
+
+          {/* Section 3: Environmental Impact */}
+          <div className="print:break-inside-avoid pt-2">
+            <div className="flex items-center justify-between border-b border-forest/20 pb-1 mb-2">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-forest">
+                3. Environmental Sustainability & Carbon Offset Metrics
+              </h2>
+              <span className="text-[10px] text-charcoal-light font-mono font-semibold">Status: Certified Green</span>
+            </div>
+            {renderEnvironmentalTable()}
+          </div>
+
+          {/* Official Document Footer */}
+          <div className="border-t border-forest/20 pt-3 flex items-center justify-between text-[10px] text-charcoal-light print:break-inside-avoid">
+            <p className="font-medium">Smart Solar Microgrid System — Official Operational & Financial Report</p>
+            <p>Confidential • Backoffice Management Audit Document</p>
+          </div>
+        </div>
       </div>
     </div>
   );
