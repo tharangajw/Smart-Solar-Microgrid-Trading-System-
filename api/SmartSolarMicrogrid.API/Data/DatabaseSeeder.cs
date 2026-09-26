@@ -26,6 +26,7 @@ namespace SmartSolarMicrogrid.API.Data
         {
             await SeedBackofficeUser();
             await SeedGridOperatorUser();
+            await SeedProsumerUsers();
             await SeedSolarStations();
             await SeedReservations();
         }
@@ -93,6 +94,58 @@ namespace SmartSolarMicrogrid.API.Data
 
             await _context.Users.InsertOneAsync(operatorUser);
             Console.WriteLine("Default Grid Operator user created successfully.");
+        }
+
+        // Seed default Prosumers matching dummy reservations and update any 0000000000 phone numbers in DB
+        private async Task SeedProsumerUsers()
+        {
+            var p1 = await _context.Users.Find(u => u.Nic == "891234567V").FirstOrDefaultAsync();
+            if (p1 == null)
+            {
+                await _context.Users.InsertOneAsync(new User
+                {
+                    Nic = "891234567V",
+                    FullName = "Sunil Perera",
+                    Email = "sunil@smartsolar.com",
+                    Password = BCrypt.Net.BCrypt.HashPassword("Prosumer@123"),
+                    Role = UserRoles.Prosumer,
+                    PhoneNumber = "0771112233",
+                    Address = "123 Solar Street, Colombo",
+                    SolarCapacityKw = 5.5,
+                    IsActive = false,
+                    Status = UserAccountStatus.Pending,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+            }
+
+            var p2 = await _context.Users.Find(u => u.Nic == "901234568V").FirstOrDefaultAsync();
+            if (p2 == null)
+            {
+                await _context.Users.InsertOneAsync(new User
+                {
+                    Nic = "901234568V",
+                    FullName = "Kamal Silva",
+                    Email = "kamal@smartsolar.com",
+                    Password = BCrypt.Net.BCrypt.HashPassword("Prosumer@123"),
+                    Role = UserRoles.Prosumer,
+                    PhoneNumber = "0778889900",
+                    Address = "456 Grid Way, Kandy",
+                    SolarCapacityKw = 7.2,
+                    IsActive = false,
+                    Status = UserAccountStatus.Pending,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+            }
+
+            // Update any existing prosumer records in DB that have 0000000000 as phone number
+            var filterZeroes = Builders<User>.Filter.Or(
+                Builders<User>.Filter.Eq(u => u.PhoneNumber, "0000000000"),
+                Builders<User>.Filter.Eq("phoneNumber", "0000000000")
+            );
+            var updatePhone = Builders<User>.Update.Set(u => u.PhoneNumber, "0771234567");
+            await _context.Users.UpdateManyAsync(filterZeroes, updatePhone);
         }
 
         // Add stations only on a new local database so map and availability features work immediately.
