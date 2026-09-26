@@ -73,25 +73,23 @@ graph TD
 The project follows a **Clean Architecture / Modular Monolith** approach separated into 3 main application tiers:
 
 ```
-                  +-----------------------------------+
-                  |      React 19 + Vite Web App      |
-                  |   (Admin & Operator Dashboard)    |
-                  +-----------------+-----------------+
-                                    |
-+-----------------------------------+-----------------------------------+
-|               Native Android Kotlin Mobile Application                |
-|                    (EV Drivers & Solar Prosumers)                     |
-+-----------------------------------+-----------------------------------+
-                                    |
-                                    v
+   +------------------------------+        +------------------------------+
+   |   React 19 + Vite Web App    |        | Native Android Mobile App    |
+   | (Admin & Operator Dashboard) |        | (EV Drivers & Prosumers UI)  |
+   +--------------+---------------+        +--------------+---------------+
+                  |                                       |
+                  | REST APIs & SignalR WebSockets        |
+                  +-------------------+-------------------+
+                                      |
+                                      v
                   +-----------------------------------+
                   |  ASP.NET Core Web API (.NET 10)   |
                   |  - SignalR Real-Time Station Hub  |
                   |  - JWT Bearer Authentication      |
                   |  - Modular Monolith Controllers  |
                   +-----------------+-----------------+
-                                    |
-                                    v
+                                      |
+                                      v
                   +-----------------------------------+
                   |          MongoDB Database         |
                   |   (Users, Stations, Reservations) |
