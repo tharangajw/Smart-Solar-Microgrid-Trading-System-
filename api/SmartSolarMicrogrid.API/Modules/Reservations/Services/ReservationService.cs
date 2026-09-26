@@ -86,7 +86,7 @@ namespace SmartSolarMicrogrid.API.Modules.Reservations.Services
                 throw new NoticePeriodViolationException("Updates require atleast 12 hours notice.");
             }
 
-            if (updateReservationDto.ReservationDate < DateTime.UtcNow)
+            if (updateReservationDto.ReservationDate < DateTime.UtcNow.AddHours(12))
             {
                 throw new InvalidReservationDateException("Updates require at least 12 hours notice.");
             }
