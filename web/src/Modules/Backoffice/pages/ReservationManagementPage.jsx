@@ -3,7 +3,7 @@ import {
   CalendarDays, Search, Loader,
   RefreshCw, CheckCircle, AlertCircle, Clock, Filter
 } from 'lucide-react';
-import { getAllReservations } from '../../../Services/backofficeApi';
+import { getAllReservations, approveReservation } from '../../../Services/backofficeApi';
 import backofficeApi from '../../../Services/backofficeApi';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -34,6 +34,7 @@ const ReservationManagementPage = () => {
   const [search, setSearch]                 = useState('');
   const [statusFilter, setStatusFilter]     = useState('');
   const [globalMsg, setGlobalMsg]           = useState({ type: '', text: '' });
+  const [approvingId, setApprovingId]       = useState(null);
 
   const notify = (type, text) => {
     setGlobalMsg({ type, text });
@@ -70,6 +71,22 @@ const ReservationManagementPage = () => {
   const filtered = reservations.filter(r =>
     !search || r.prosumerNic?.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleApprove = async (reservation) => {
+    setApprovingId(reservation.id);
+    try {
+      const response = await approveReservation(reservation.id);
+      setReservations(current => current.map(item => item.id === reservation.id
+        ? { ...item, status: 'Approved', qrCodeId: response.data?.qrCodeId }
+        : item
+      ));
+      notify('success', 'Reservation approved successfully.');
+    } catch (err) {
+      notify('error', err.response?.data?.message || 'Failed to approve reservation.');
+    } finally {
+      setApprovingId(null);
+    }
+  };
 
   const stats = {
     total:     reservations.length,
@@ -174,6 +191,7 @@ const ReservationManagementPage = () => {
                   <th className="px-4 py-3 font-medium">Time</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium">Created</th>
+                  <th className="px-4 py-3 font-medium">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -203,6 +221,17 @@ const ReservationManagementPage = () => {
                       </td>
                       <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
                       <td className="px-4 py-3 text-charcoal-light text-xs">{fmt(r.createdAt)}</td>
+                      <td className="px-4 py-3">
+                        {r.status === 'Pending' && (
+                          <button
+                            onClick={() => handleApprove(r)}
+                            disabled={approvingId === r.id}
+                            className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+                          >
+                            {approvingId === r.id ? 'Approving...' : 'Approve'}
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}

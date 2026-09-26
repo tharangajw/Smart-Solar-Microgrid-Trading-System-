@@ -24,7 +24,8 @@ class SessionManager(context: Context) {
         const val KEY_NIC = "user_nic"
         const val KEY_EMAIL = "user_email"
         const val KEY_SERVER_IP = "server_ip"
-        const val DEFAULT_IP = "192.168.8.191" // Updated to user's new IP address
+        const val KEY_LAST_VIEWED_ALERT_COUNT = "last_viewed_alert_count"
+        const val DEFAULT_IP = "192.168.1.25" // Updated to user's primary Wi-Fi IP address
     }
 
     /** Save server IP address */
@@ -79,6 +80,16 @@ class SessionManager(context: Context) {
             }
         }
         return null
+    }
+
+    /** Mark alerts as read up to current alert count */
+    fun markAlertsAsRead(count: Int) {
+        prefs.edit().putInt(KEY_LAST_VIEWED_ALERT_COUNT, count).apply()
+    }
+
+    /** Get last viewed alert count */
+    fun getLastViewedAlertCount(): Int {
+        return prefs.getInt(KEY_LAST_VIEWED_ALERT_COUNT, 0)
     }
 
     /** Get stored JWT token */

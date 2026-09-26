@@ -68,4 +68,7 @@ export const updateReservation = (id, data) =>
 export const cancelReservation = (id, data) =>
   backofficeApi.put(`/reservations/${id}/cancel`, data);
 
+export const approveReservation = (id) =>
+  backofficeApi.post(`/backoffice/reservations/${id}/approve`);
+
 export default backofficeApi;

@@ -112,6 +112,32 @@ namespace SmartSolarMicrogrid.API.Modules.Transactions.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        /// <summary>
+        /// GET /api/operator/verify-qr/{qrCodeId}
+        /// Reads and verifies the QR transaction, but does not complete it.
+        /// </summary>
+        [HttpGet("verify-qr/{qrCodeId}")]
+        public async Task<IActionResult> VerifyQrCode(string qrCodeId)
+        {
+            var result = await _operatorService.GetVerifiedTransactionAsync(qrCodeId);
+            if (result == null)
+                return NotFound(new { message = "Invalid QR code. No matching transaction found." });
+
+            if (result.Transaction.Status != "Approved")
+                return Conflict(new { message = $"Transaction is {result.Transaction.Status}, not Approved." });
+
+            return Ok(new
+            {
+                transactionId = result.Transaction.QrCodeId,
+                status = result.Transaction.Status,
+                prosumerId = result.Transaction.ProsumerId,
+                nodeId = result.Transaction.NodeId,
+                capacityKWh = result.Transaction.CapacityKWh,
+                scheduledTime = result.Transaction.ScheduledTime,
+                reservation = result.Reservation
+            });
+        }
     }
 
     // ── Request body model ────────────────────────────────────────────────────
