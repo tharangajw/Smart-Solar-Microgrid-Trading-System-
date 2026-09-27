@@ -6,10 +6,11 @@ import backofficeApi from '../../Services/backofficeApi';
 import { exportToCSV } from '../../Utils/exportUtils';
 import { MapPin, Search, Filter, Download, Zap, BatteryCharging, ExternalLink } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { Loader } from '@googlemaps/js-api-loader';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Fix Leaflet marker default icons
+// Fix Leaflet marker default icons for fallback map engine
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -354,93 +355,227 @@ const MapPage = () => {
   );
 };
 
-// Internal Map Component using native Leaflet
+// Fail-safe Map Component supporting both Google Maps & Leaflet
 const StationMapView = ({ stations, selectedStation, setSelectedStation }) => {
   const mapRef = useRef(null);
+  const googleMapRef = useRef(null);
   const leafletMapRef = useRef(null);
+  const markersRef = useRef([]);
+  const infoWindowRef = useRef(null);
+  const [useGoogleMaps, setUseGoogleMaps] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
     if (!mapRef.current) return;
 
-    if (!leafletMapRef.current) {
-      const initialLat = selectedStation ? getLat(selectedStation, 0) : 7.8731;
-      const initialLng = selectedStation ? getLng(selectedStation, 0) : 80.7718;
-      const map = L.map(mapRef.current).setView([initialLat, initialLng], 8);
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
-
-      leafletMapRef.current = map;
-    }
-
-    const map = leafletMapRef.current;
-
-    // Clear existing markers
-    map.eachLayer((layer) => {
-      if (layer instanceof L.Marker) {
-        map.removeLayer(layer);
-      }
-    });
-
-    const markersGroup = [];
-
-    // Add station markers
-    stations.forEach((station, idx) => {
-      const lat = getLat(station, idx);
-      const lng = getLng(station, idx);
-      const name = getStationName(station);
-      const cap = getCapacity(station);
-      const avail = getAvailable(station);
-      const st = getStatus(station);
-
-      if (lat !== undefined && lng !== undefined && !isNaN(lat) && !isNaN(lng)) {
-        const marker = L.marker([lat, lng]).addTo(map);
-        markersGroup.push(marker);
-
-        marker.bindPopup(`
-          <div style="font-family: sans-serif; padding: 4px; min-width: 160px;">
-            <h4 style="margin: 0 0 4px 0; color: #1B4D3E; font-weight: bold; font-size: 14px;">${name}</h4>
-            <p style="margin: 0 0 6px 0; font-size: 11px; color: #4A5568;">${station.address || 'Smart Grid Station, Sri Lanka'}</p>
-            <div style="font-size: 11px; margin-bottom: 6px;">
-              <b>Capacity:</b> ${cap} kW<br/>
-              <b>Available:</b> ${avail} kW
-            </div>
-            <div style="font-size: 11px; font-weight: bold; color: ${st === 'ONLINE' ? '#1B4D3E' : '#D69E2E'};">
-              Status: ${st}
-            </div>
-          </div>
-        `);
-
-        marker.on('click', () => {
-          setSelectedStation(station);
+    if (apiKey && apiKey.trim().length > 0) {
+      try {
+        const loader = new Loader({
+          apiKey: apiKey.trim(),
+          version: 'weekly',
+          libraries: ['places']
         });
 
-        if (selectedStation?.id === station.id) {
-          map.setView([lat, lng], 12);
-          marker.openPopup();
-        }
-      }
-    });
+        loader.load().then((google) => {
+          if (!mapRef.current) return;
 
-    if (markersGroup.length > 0 && !selectedStation) {
-      try {
-        const group = L.featureGroup(markersGroup);
-        map.fitBounds(group.getBounds().pad(0.15));
-      } catch (e) {
-        console.error('Could not fit bounds:', e);
+          const initialLat = selectedStation ? getLat(selectedStation, 0) : 7.8731;
+          const initialLng = selectedStation ? getLng(selectedStation, 0) : 80.7718;
+
+          if (!googleMapRef.current) {
+            const map = new google.maps.Map(mapRef.current, {
+              center: { lat: initialLat, lng: initialLng },
+              zoom: 8,
+              mapTypeId: 'roadmap',
+              zoomControl: true,
+              streetViewControl: false,
+              mapTypeControl: false,
+              fullscreenControl: true,
+            });
+            googleMapRef.current = map;
+            infoWindowRef.current = new google.maps.InfoWindow();
+          }
+          setUseGoogleMaps(true);
+          setMapLoaded(true);
+        }).catch(err => {
+          console.warn("Google Maps load failed, falling back to Leaflet map engine:", err);
+          initLeafletMap();
+        });
+      } catch (err) {
+        console.warn("Google Maps init exception, using fallback map:", err);
+        initLeafletMap();
       }
+    } else {
+      initLeafletMap();
     }
 
-    // Invalidate map size so Leaflet renders properly in flex layouts
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 250);
+    function initLeafletMap() {
+      if (!mapRef.current) return;
+      setUseGoogleMaps(false);
 
-  }, [stations, selectedStation]);
+      if (!leafletMapRef.current) {
+        const initialLat = selectedStation ? getLat(selectedStation, 0) : 7.8731;
+        const initialLng = selectedStation ? getLng(selectedStation, 0) : 80.7718;
+        const map = L.map(mapRef.current).setView([initialLat, initialLng], 8);
 
-  return <div ref={mapRef} className="w-full h-full rounded-xl z-0" style={{ minHeight: '480px' }} />;
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        leafletMapRef.current = map;
+      }
+      setMapLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!mapLoaded) return;
+
+    if (useGoogleMaps && googleMapRef.current && window.google) {
+      const google = window.google;
+      const map = googleMapRef.current;
+
+      // Clear Google Map markers
+      markersRef.current.forEach(m => m.setMap && m.setMap(null));
+      markersRef.current = [];
+
+      const bounds = new google.maps.LatLngBounds();
+
+      stations.forEach((station, idx) => {
+        const lat = getLat(station, idx);
+        const lng = getLng(station, idx);
+        const name = getStationName(station);
+        const cap = getCapacity(station);
+        const avail = getAvailable(station);
+        const st = getStatus(station);
+
+        if (lat !== undefined && lng !== undefined && !isNaN(lat) && !isNaN(lng)) {
+          const pos = { lat, lng };
+          const marker = new google.maps.Marker({
+            position: pos,
+            map: map,
+            title: name,
+          });
+
+          const contentString = `
+            <div style="font-family: system-ui, sans-serif; padding: 6px; min-width: 170px;">
+              <h4 style="margin: 0 0 4px 0; color: #1B4D3E; font-weight: 700; font-size: 14px;">${name}</h4>
+              <p style="margin: 0 0 6px 0; font-size: 11px; color: #4A5568;">${station.address || 'Smart Grid Station, Sri Lanka'}</p>
+              <div style="font-size: 11px; margin-bottom: 6px;">
+                <b>Capacity:</b> ${cap} kW<br/>
+                <b>Available:</b> ${avail} kW
+              </div>
+              <div style="font-size: 11px; font-weight: 700; color: ${st === 'ONLINE' ? '#1B4D3E' : '#D69E2E'};">
+                Status: ${st}
+              </div>
+            </div>
+          `;
+
+          marker.addListener('click', () => {
+            setSelectedStation(station);
+            if (infoWindowRef.current) {
+              infoWindowRef.current.setContent(contentString);
+              infoWindowRef.current.open(map, marker);
+            }
+          });
+
+          markersRef.current.push(marker);
+          bounds.extend(pos);
+
+          if (selectedStation?.id === station.id) {
+            map.setCenter(pos);
+            map.setZoom(12);
+            if (infoWindowRef.current) {
+              infoWindowRef.current.setContent(contentString);
+              infoWindowRef.current.open(map, marker);
+            }
+          }
+        }
+      });
+
+      if (stations.length > 0 && !selectedStation) {
+        try {
+          map.fitBounds(bounds);
+        } catch (e) {
+          console.error('Could not fit bounds:', e);
+        }
+      }
+    } else if (!useGoogleMaps && leafletMapRef.current) {
+      const map = leafletMapRef.current;
+
+      // Clear existing Leaflet markers
+      map.eachLayer((layer) => {
+        if (layer instanceof L.Marker) {
+          map.removeLayer(layer);
+        }
+      });
+
+      const markersGroup = [];
+
+      stations.forEach((station, idx) => {
+        const lat = getLat(station, idx);
+        const lng = getLng(station, idx);
+        const name = getStationName(station);
+        const cap = getCapacity(station);
+        const avail = getAvailable(station);
+        const st = getStatus(station);
+
+        if (lat !== undefined && lng !== undefined && !isNaN(lat) && !isNaN(lng)) {
+          const marker = L.marker([lat, lng]).addTo(map);
+          markersGroup.push(marker);
+
+          marker.bindPopup(`
+            <div style="font-family: system-ui, sans-serif; padding: 4px; min-width: 160px;">
+              <h4 style="margin: 0 0 4px 0; color: #1B4D3E; font-weight: bold; font-size: 14px;">${name}</h4>
+              <p style="margin: 0 0 6px 0; font-size: 11px; color: #4A5568;">${station.address || 'Smart Grid Station, Sri Lanka'}</p>
+              <div style="font-size: 11px; margin-bottom: 6px;">
+                <b>Capacity:</b> ${cap} kW<br/>
+                <b>Available:</b> ${avail} kW
+              </div>
+              <div style="font-size: 11px; font-weight: bold; color: ${st === 'ONLINE' ? '#1B4D3E' : '#D69E2E'};">
+                Status: ${st}
+              </div>
+            </div>
+          `);
+
+          marker.on('click', () => {
+            setSelectedStation(station);
+          });
+
+          if (selectedStation?.id === station.id) {
+            map.setView([lat, lng], 12);
+            marker.openPopup();
+          }
+        }
+      });
+
+      if (markersGroup.length > 0 && !selectedStation) {
+        try {
+          const group = L.featureGroup(markersGroup);
+          map.fitBounds(group.getBounds().pad(0.15));
+        } catch (e) {
+          console.error('Could not fit bounds:', e);
+        }
+      }
+
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 250);
+    }
+  }, [mapLoaded, useGoogleMaps, stations, selectedStation]);
+
+  return (
+    <div className="w-full h-full relative">
+      <div ref={mapRef} className="w-full h-full rounded-xl z-0" style={{ minHeight: '480px' }} />
+      {!useGoogleMaps && (
+        <div className="absolute bottom-2 left-2 z-10 bg-white/90 backdrop-blur-xs text-[10px] text-forest px-2.5 py-1 rounded-md border border-forest/20 shadow-2xs font-medium">
+          Map Mode: Interactive Tile (Set <code className="font-mono">VITE_GOOGLE_MAPS_API_KEY</code> in <code className="font-mono">web/.env</code> for Google Maps)
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default MapPage;
-
