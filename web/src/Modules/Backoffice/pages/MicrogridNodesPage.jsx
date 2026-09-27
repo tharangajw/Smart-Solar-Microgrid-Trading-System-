@@ -297,7 +297,7 @@ const MicrogridNodesPage = () => {
                 />
               </div>
 
-              {/* Location Picker Map (OpenStreetMap) */}
+              {/* Location Picker Map (Google Maps) */}
               <div className="p-3 bg-cream/40 rounded-xl border border-forest/10">
                 <LocationPickerMap
                   lat={form.latitude}

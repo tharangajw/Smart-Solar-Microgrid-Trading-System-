@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Loader } from '@googlemaps/js-api-loader';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Search, MapPin, Loader2 } from 'lucide-react';
 
-// Fix Leaflet default marker icon paths in React/Vite
+// Fix Leaflet marker default icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -24,8 +25,14 @@ const SRI_LANKA_CITIES = [
 
 const LocationPickerMap = ({ lat, lng, onChange }) => {
   const mapContainerRef = useRef(null);
-  const mapRef = useRef(null);
-  const markerRef = useRef(null);
+  const googleMapRef = useRef(null);
+  const leafletMapRef = useRef(null);
+  const googleMarkerRef = useRef(null);
+  const leafletMarkerRef = useRef(null);
+  const infoWindowRef = useRef(null);
+
+  const [useGoogleMaps, setUseGoogleMaps] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState('');
@@ -33,84 +40,185 @@ const LocationPickerMap = ({ lat, lng, onChange }) => {
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    const initialLat = parseFloat(lat) || 7.4863;
-    const initialLng = parseFloat(lng) || 80.3647;
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
-    if (!mapRef.current) {
-      const map = L.map(mapContainerRef.current).setView([initialLat, initialLng], 12);
+    if (apiKey && apiKey.trim().length > 0) {
+      try {
+        const loader = new Loader({
+          apiKey: apiKey.trim(),
+          version: 'weekly',
+          libraries: ['places']
+        });
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19,
-      }).addTo(map);
+        loader.load().then((google) => {
+          if (!mapContainerRef.current) return;
 
-      const marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
-      marker.bindPopup(`<b>Selected Location</b><br/>Lat: ${initialLat.toFixed(5)}<br/>Lng: ${initialLng.toFixed(5)}`);
+          const initialLat = parseFloat(lat) || 7.4863;
+          const initialLng = parseFloat(lng) || 80.3647;
+          const pos = { lat: initialLat, lng: initialLng };
 
-      marker.on('dragend', () => {
-        const position = marker.getLatLng();
-        const newLat = position.lat.toFixed(6);
-        const newLng = position.lng.toFixed(6);
-        marker.setPopupContent(`<b>Selected Location</b><br/>Lat: ${newLat}<br/>Lng: ${newLng}`).openPopup();
-        onChange(newLat, newLng);
-      });
+          if (!googleMapRef.current) {
+            const map = new google.maps.Map(mapContainerRef.current, {
+              center: pos,
+              zoom: 12,
+              mapTypeId: 'roadmap',
+              zoomControl: true,
+              streetViewControl: false,
+              mapTypeControl: false,
+              fullscreenControl: true,
+            });
 
-      map.on('click', (e) => {
-        const newLat = e.latlng.lat.toFixed(6);
-        const newLng = e.latlng.lng.toFixed(6);
-        marker.setLatLng(e.latlng);
-        marker.setPopupContent(`<b>Selected Location</b><br/>Lat: ${newLat}<br/>Lng: ${newLng}`).openPopup();
-        onChange(newLat, newLng);
-      });
+            const infoWindow = new google.maps.InfoWindow({
+              content: `<b>Selected Location</b><br/>Lat: ${initialLat.toFixed(5)}<br/>Lng: ${initialLng.toFixed(5)}`
+            });
 
-      mapRef.current = map;
-      markerRef.current = marker;
+            const marker = new google.maps.Marker({
+              position: pos,
+              map: map,
+              draggable: true,
+              title: 'Selected Hub Location'
+            });
 
-      // Invalidate size to ensure Leaflet renders all tiles properly inside dynamic modals
-      const timer = setTimeout(() => {
-        if (mapRef.current) {
-          mapRef.current.invalidateSize();
-        }
-      }, 250);
+            infoWindow.open(map, marker);
 
-      return () => clearTimeout(timer);
+            marker.addListener('dragend', () => {
+              const position = marker.getPosition();
+              const newLat = position.lat().toFixed(6);
+              const newLng = position.lng().toFixed(6);
+              infoWindow.setContent(`<b>Selected Location</b><br/>Lat: ${newLat}<br/>Lng: ${newLng}`);
+              infoWindow.open(map, marker);
+              onChange(newLat, newLng);
+            });
+
+            map.addListener('click', (e) => {
+              const newLat = e.latLng.lat().toFixed(6);
+              const newLng = e.latLng.lng().toFixed(6);
+              marker.setPosition(e.latLng);
+              infoWindow.setContent(`<b>Selected Location</b><br/>Lat: ${newLat}<br/>Lng: ${newLng}`);
+              infoWindow.open(map, marker);
+              onChange(newLat, newLng);
+            });
+
+            googleMapRef.current = map;
+            googleMarkerRef.current = marker;
+            infoWindowRef.current = infoWindow;
+          }
+          setUseGoogleMaps(true);
+          setMapLoaded(true);
+        }).catch(err => {
+          console.warn('Google Maps loader failed, using fallback map:', err);
+          initLeafletMap();
+        });
+      } catch (err) {
+        console.warn('Google Maps loader exception, using fallback map:', err);
+        initLeafletMap();
+      }
+    } else {
+      initLeafletMap();
     }
 
-    return () => {
-      if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
+    function initLeafletMap() {
+      if (!mapContainerRef.current) return;
+      setUseGoogleMaps(false);
+
+      const initialLat = parseFloat(lat) || 7.4863;
+      const initialLng = parseFloat(lng) || 80.3647;
+
+      if (!leafletMapRef.current) {
+        const map = L.map(mapContainerRef.current).setView([initialLat, initialLng], 12);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors',
+          maxZoom: 19,
+        }).addTo(map);
+
+        const marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
+        marker.bindPopup(`<b>Selected Location</b><br/>Lat: ${initialLat.toFixed(5)}<br/>Lng: ${initialLng.toFixed(5)}`).openPopup();
+
+        marker.on('dragend', () => {
+          const position = marker.getLatLng();
+          const newLat = position.lat.toFixed(6);
+          const newLng = position.lng.toFixed(6);
+          marker.setPopupContent(`<b>Selected Location</b><br/>Lat: ${newLat}<br/>Lng: ${newLng}`).openPopup();
+          onChange(newLat, newLng);
+        });
+
+        map.on('click', (e) => {
+          const newLat = e.latlng.lat.toFixed(6);
+          const newLng = e.latlng.lng.toFixed(6);
+          marker.setLatLng(e.latlng);
+          marker.setPopupContent(`<b>Selected Location</b><br/>Lat: ${newLat}<br/>Lng: ${newLng}`).openPopup();
+          onChange(newLat, newLng);
+        });
+
+        leafletMapRef.current = map;
+        leafletMarkerRef.current = marker;
+
+        setTimeout(() => {
+          if (leafletMapRef.current) {
+            leafletMapRef.current.invalidateSize();
+          }
+        }, 250);
       }
-    };
+      setMapLoaded(true);
+    }
   }, []);
 
   useEffect(() => {
     const currentLat = parseFloat(lat);
     const currentLng = parseFloat(lng);
-    if (!isNaN(currentLat) && !isNaN(currentLng) && mapRef.current && markerRef.current) {
-      const existingPos = markerRef.current.getLatLng();
+    if (isNaN(currentLat) || isNaN(currentLng)) return;
+
+    if (useGoogleMaps && googleMapRef.current && googleMarkerRef.current && window.google) {
+      const existingPos = googleMarkerRef.current.getPosition();
+      if (existingPos) {
+        const isDifferent =
+          Math.abs(existingPos.lat() - currentLat) > 0.00001 ||
+          Math.abs(existingPos.lng() - currentLng) > 0.00001;
+
+        if (isDifferent) {
+          const newPos = { lat: currentLat, lng: currentLng };
+          googleMarkerRef.current.setPosition(newPos);
+          if (infoWindowRef.current) {
+            infoWindowRef.current.setContent(`<b>Selected Location</b><br/>Lat: ${currentLat.toFixed(5)}<br/>Lng: ${currentLng.toFixed(5)}`);
+          }
+          googleMapRef.current.panTo(newPos);
+        }
+      }
+    } else if (!useGoogleMaps && leafletMapRef.current && leafletMarkerRef.current) {
+      const existingPos = leafletMarkerRef.current.getLatLng();
       const isDifferent =
         Math.abs(existingPos.lat - currentLat) > 0.00001 ||
         Math.abs(existingPos.lng - currentLng) > 0.00001;
 
       if (isDifferent) {
         const newLatLng = [currentLat, currentLng];
-        markerRef.current.setLatLng(newLatLng);
-        markerRef.current.setPopupContent(`<b>Selected Location</b><br/>Lat: ${currentLat.toFixed(5)}<br/>Lng: ${currentLng.toFixed(5)}`);
-        mapRef.current.panTo(newLatLng);
+        leafletMarkerRef.current.setLatLng(newLatLng);
+        leafletMarkerRef.current.setPopupContent(`<b>Selected Location</b><br/>Lat: ${currentLat.toFixed(5)}<br/>Lng: ${currentLng.toFixed(5)}`);
+        leafletMapRef.current.panTo(newLatLng);
       }
     }
-  }, [lat, lng]);
+  }, [lat, lng, useGoogleMaps]);
 
   const handleCitySelect = (city) => {
     setSearchError('');
     const newLat = city.lat.toFixed(6);
     const newLng = city.lng.toFixed(6);
     onChange(newLat, newLng);
-    if (mapRef.current && markerRef.current) {
-      mapRef.current.setView([city.lat, city.lng], 13);
-      markerRef.current.setLatLng([city.lat, city.lng]);
-      markerRef.current.setPopupContent(`<b>${city.name}</b><br/>Lat: ${newLat}<br/>Lng: ${newLng}`).openPopup();
+
+    if (useGoogleMaps && googleMapRef.current && googleMarkerRef.current && window.google) {
+      const pos = { lat: city.lat, lng: city.lng };
+      googleMapRef.current.setCenter(pos);
+      googleMapRef.current.setZoom(13);
+      googleMarkerRef.current.setPosition(pos);
+      if (infoWindowRef.current) {
+        infoWindowRef.current.setContent(`<b>${city.name}</b><br/>Lat: ${newLat}<br/>Lng: ${newLng}`);
+        infoWindowRef.current.open(googleMapRef.current, googleMarkerRef.current);
+      }
+    } else if (!useGoogleMaps && leafletMapRef.current && leafletMarkerRef.current) {
+      leafletMapRef.current.setView([city.lat, city.lng], 13);
+      leafletMarkerRef.current.setLatLng([city.lat, city.lng]);
+      leafletMarkerRef.current.setPopupContent(`<b>${city.name}</b><br/>Lat: ${newLat}<br/>Lng: ${newLng}`).openPopup();
     }
   };
 
@@ -122,8 +230,42 @@ const LocationPickerMap = ({ lat, lng, onChange }) => {
     setSearching(true);
     setSearchError('');
 
+    if (useGoogleMaps && window.google && window.google.maps && window.google.maps.Geocoder) {
+      try {
+        const geocoder = new window.google.maps.Geocoder();
+        geocoder.geocode({ address: searchQuery }, (results, status) => {
+          if (status === 'OK' && results && results[0]) {
+            const location = results[0].geometry.location;
+            const newLat = location.lat().toFixed(6);
+            const newLng = location.lng().toFixed(6);
+
+            onChange(newLat, newLng);
+            if (googleMapRef.current && googleMarkerRef.current) {
+              googleMapRef.current.setCenter(location);
+              googleMapRef.current.setZoom(14);
+              googleMarkerRef.current.setPosition(location);
+              if (infoWindowRef.current) {
+                infoWindowRef.current.setContent(`<b>${results[0].formatted_address}</b><br/>Lat: ${newLat}<br/>Lng: ${newLng}`);
+                infoWindowRef.current.open(googleMapRef.current, googleMarkerRef.current);
+              }
+            }
+            setSearching(false);
+            return;
+          } else {
+            fallbackNominatimSearch();
+          }
+        });
+        return;
+      } catch (err) {
+        console.warn('Google Geocoder failed, using fallback Nominatim:', err);
+      }
+    }
+
+    fallbackNominatimSearch();
+  };
+
+  const fallbackNominatimSearch = async () => {
     try {
-      // Free OpenStreetMap Nominatim Search API
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}`
       );
@@ -136,10 +278,19 @@ const LocationPickerMap = ({ lat, lng, onChange }) => {
 
         onChange(newLat, newLng);
 
-        if (mapRef.current && markerRef.current) {
-          mapRef.current.setView([parseFloat(target.lat), parseFloat(target.lon)], 14);
-          markerRef.current.setLatLng([parseFloat(target.lat), parseFloat(target.lon)]);
-          markerRef.current.setPopupContent(
+        if (useGoogleMaps && googleMapRef.current && googleMarkerRef.current && window.google) {
+          const pos = { lat: parseFloat(target.lat), lng: parseFloat(target.lon) };
+          googleMapRef.current.setCenter(pos);
+          googleMapRef.current.setZoom(14);
+          googleMarkerRef.current.setPosition(pos);
+          if (infoWindowRef.current) {
+            infoWindowRef.current.setContent(`<b>${target.display_name.split(',')[0]}</b><br/>Lat: ${newLat}<br/>Lng: ${newLng}`);
+            infoWindowRef.current.open(googleMapRef.current, googleMarkerRef.current);
+          }
+        } else if (!useGoogleMaps && leafletMapRef.current && leafletMarkerRef.current) {
+          leafletMapRef.current.setView([parseFloat(target.lat), parseFloat(target.lon)], 14);
+          leafletMarkerRef.current.setLatLng([parseFloat(target.lat), parseFloat(target.lon)]);
+          leafletMarkerRef.current.setPopupContent(
             `<b>${target.display_name.split(',')[0]}</b><br/>Lat: ${newLat}<br/>Lng: ${newLng}`
           ).openPopup();
         }
@@ -157,10 +308,10 @@ const LocationPickerMap = ({ lat, lng, onChange }) => {
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <label className="block text-xs font-semibold text-charcoal flex items-center gap-1.5">
-          <MapPin size={14} className="text-forest" /> Pick Hub Location on OpenStreetMap
+          <MapPin size={14} className="text-forest" /> Pick Hub Location on Map
         </label>
         <span className="text-[10px] text-forest font-semibold bg-forest/10 px-2 py-0.5 rounded-full border border-forest/20">
-          OpenStreetMap
+          {useGoogleMaps ? 'Google Maps' : 'Interactive Map'}
         </span>
       </div>
 
@@ -229,4 +380,3 @@ const LocationPickerMap = ({ lat, lng, onChange }) => {
 };
 
 export default LocationPickerMap;
-
