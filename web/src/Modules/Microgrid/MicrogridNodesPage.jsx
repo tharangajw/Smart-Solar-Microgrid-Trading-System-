@@ -472,7 +472,7 @@ const MicrogridNodesPage = () => {
             </div>
           )}
 
-          {/* Add / Edit Modal with Interactive OpenStreetMap Picker */}
+          {/* Add / Edit Modal with Interactive Location Picker */}
           {(isAddModalOpen || isEditModalOpen) && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-forest/20 backdrop-blur-sm">
               <div className="bg-white border border-forest/10 w-full max-w-2xl rounded-2xl p-6 shadow-xl relative max-h-[92vh] overflow-y-auto">
@@ -521,7 +521,7 @@ const MicrogridNodesPage = () => {
                     </div>
                   </div>
 
-                  {/* Interactive OpenStreetMap Picker */}
+                  {/* Interactive Location Picker Map (Google Maps) */}
                   <div className="p-3 bg-cream/40 rounded-xl border border-forest/10">
                     <LocationPickerMap
                       lat={formData.lat}
