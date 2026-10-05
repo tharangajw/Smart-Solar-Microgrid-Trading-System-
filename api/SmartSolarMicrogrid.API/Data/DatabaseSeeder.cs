@@ -112,8 +112,8 @@ namespace SmartSolarMicrogrid.API.Data
                     PhoneNumber = "0771112233",
                     Address = "123 Solar Street, Colombo",
                     SolarCapacityKw = 5.5,
-                    IsActive = false,
-                    Status = UserAccountStatus.Pending,
+                    IsActive = true,
+                    Status = UserAccountStatus.Active,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 });
@@ -132,12 +132,19 @@ namespace SmartSolarMicrogrid.API.Data
                     PhoneNumber = "0778889900",
                     Address = "456 Grid Way, Kandy",
                     SolarCapacityKw = 7.2,
-                    IsActive = false,
-                    Status = UserAccountStatus.Pending,
+                    IsActive = true,
+                    Status = UserAccountStatus.Active,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 });
             }
+
+            // Ensure all prosumer accounts in database are activated so mobile users can log in & reserve slots
+            var filterProsumers = Builders<User>.Filter.Eq(u => u.Role, UserRoles.Prosumer);
+            var updateActivate = Builders<User>.Update
+                .Set(u => u.IsActive, true)
+                .Set(u => u.Status, UserAccountStatus.Active);
+            await _context.Users.UpdateManyAsync(filterProsumers, updateActivate);
 
             // Update any existing prosumer records in DB that have 0000000000 as phone number
             var filterZeroes = Builders<User>.Filter.Or(
