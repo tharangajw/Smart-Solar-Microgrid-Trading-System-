@@ -44,8 +44,10 @@ object ApiClient {
         // 0. High Priority: Previously verified working Base URL
         cachedWorkingBaseUrl?.let { candidates.add(it) }
 
-        // 1. Primary C# Web API Wi-Fi IP (192.168.1.25:5281)
-        candidates.add("http://192.168.1.25:5281/api")
+        // 1. High Priority for Emulator: 10.0.2.2 maps to host localhost
+        if (isEmulator()) {
+            candidates.add("http://10.0.2.2:5281/api")
+        }
 
         // 2. Saved IP from SessionManager
         val savedIp = SessionManager(context).getServerIp().trim()
@@ -62,12 +64,9 @@ object ApiClient {
             }
         }
 
-        // 3. Emulator-specific candidate
-        if (isEmulator()) {
-            candidates.add("http://10.0.2.2:5281/api")
-        }
-
-        // 4. Secondary Wi-Fi fallback candidates
+        // 3. Active Wi-Fi Host IP candidates
+        candidates.add("http://192.168.1.7:5281/api")
+        candidates.add("http://192.168.1.25:5281/api")
         candidates.add("http://192.168.8.191:5281/api")
 
         return candidates.distinct()

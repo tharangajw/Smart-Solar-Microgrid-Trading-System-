@@ -25,7 +25,7 @@ class SessionManager(context: Context) {
         const val KEY_EMAIL = "user_email"
         const val KEY_SERVER_IP = "server_ip"
         const val KEY_LAST_VIEWED_ALERT_COUNT = "last_viewed_alert_count"
-        const val DEFAULT_IP = "192.168.1.25" // Updated to user's primary Wi-Fi IP address
+        const val DEFAULT_IP = "192.168.1.7" // Updated to active local Wi-Fi IP address
     }
 
     /** Save server IP address */

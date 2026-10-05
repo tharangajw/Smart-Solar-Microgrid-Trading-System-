@@ -92,14 +92,14 @@ class ReserveSlotActivity : AppCompatActivity() {
             datePicker.show()
         }
 
-        // 1. Fetch Nodes (Stations)
+        // 1. Fetch Nodes (Stations) - Query Stations endpoint first
         lifecycleScope.launch(Dispatchers.IO) {
-            var response = ApiClient.get(this@ReserveSlotActivity, "nodes?status=ACTIVE")
+            var response = ApiClient.get(this@ReserveSlotActivity, "Stations")
             if (response == null || response.trim() == "[]" || response.trim() == "{}") {
-                response = ApiClient.get(this@ReserveSlotActivity, "Nodes")
+                response = ApiClient.get(this@ReserveSlotActivity, "stations")
             }
             if (response == null || response.trim() == "[]" || response.trim() == "{}") {
-                response = ApiClient.get(this@ReserveSlotActivity, "Stations")
+                response = ApiClient.get(this@ReserveSlotActivity, "Nodes")
             }
 
             withContext(Dispatchers.Main) {
@@ -124,14 +124,17 @@ class ReserveSlotActivity : AppCompatActivity() {
                             val s = array.getJSONObject(i)
                             val id = s.optString("id", s.optString("_id", s.optString("stationId", s.optString("nodeId", ""))))
                             val name = s.optString("name", s.optString("stationName", s.optString("title", "Station $i")))
-                            if (id.isNotEmpty()) {
-                                stations.add(Station(id, name, s))
+                            val avail = s.optInt("availableSlots", s.optInt("totalSlots", 1))
+                            val status = s.optString("status", "active")
+                            val isActive = if (s.has("isActive")) s.optBoolean("isActive", true) else true
+                            if (id.isNotEmpty() && status.lowercase() != "inactive" && avail > 0 && isActive) {
+                                stations.add(Station(id, "$name ($avail slots)", s))
                             }
                         }
 
                         if (stations.isEmpty()) {
-                            stations.add(Station("6ab226bc235e3ad6e67b4981", "Colombo Solar Hub"))
-                            stations.add(Station("6ab226bc235e3ad6e67b4982", "Kandy Grid Station"))
+                            stations.add(Station("6ab226bc235e3ad6e67b4983", "Galle Solar Hub"))
+                            stations.add(Station("6ab226bc235e3ad6e67b4982", "Kandy Solar Hub"))
                         }
 
                         val adapter = ArrayAdapter(
@@ -200,14 +203,17 @@ class ReserveSlotActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val reservationTimeStr = if (selectedDateStr != null) {
+            val effectiveNic = if (nic.isNotEmpty()) nic else session.getEmail() ?: "PROSUMER"
+
+            val reservationTimeStr = if (!selectedDateStr.isNullOrEmpty()) {
                 "${selectedDateStr}T09:00:00Z"
             } else {
-                "2026-09-27T09:00:00Z"
+                val tomorrow = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 1) }
+                SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(tomorrow.time) + "T09:00:00Z"
             }
 
             val body = JSONObject().apply {
-                put("prosumerNic", nic)
+                put("prosumerNic", effectiveNic)
                 put("nodeId", selectedStationId)
                 put("slotId", selectedSlot!!.id)
                 put("reservationDate", reservationTimeStr)
@@ -225,16 +231,35 @@ class ReserveSlotActivity : AppCompatActivity() {
                     progressReserve.visibility = View.GONE
 
                     if (result.isSuccess) {
+                        // Cache created reservation in SQLite local database
+                        try {
+                            if (result.body != null) {
+                                val jsonRes = JSONObject(result.body)
+                                val resId = jsonRes.optString("id", jsonRes.optString("_id", ""))
+                                if (resId.isNotEmpty()) {
+                                    val dao = com.smartsolar.data.local.ReservationDao(this@ReserveSlotActivity)
+                                    val newRes = com.smartsolar.models.Reservation(
+                                        id = resId,
+                                        slotId = selectedSlot!!.id,
+                                        nodeId = selectedStationId,
+                                        status = "Pending",
+                                        scheduledDate = reservationTimeStr
+                                    )
+                                    dao.insertReservation(newRes)
+                                }
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.e("ReserveSlot", "Error caching reservation locally", e)
+                        }
+
+                        Toast.makeText(this@ReserveSlotActivity, "Reservation created successfully!", Toast.LENGTH_LONG).show()
                         val intent = Intent(this@ReserveSlotActivity, BookingSummaryActivity::class.java)
                         intent.putExtra("MESSAGE", "Booking Confirmed!")
                         startActivity(intent)
                         finish()
                     } else {
-                        Toast.makeText(this@ReserveSlotActivity, "Booking Confirmed!", Toast.LENGTH_SHORT).show()
-                        val intent = Intent(this@ReserveSlotActivity, BookingSummaryActivity::class.java)
-                        intent.putExtra("MESSAGE", "Booking Confirmed!")
-                        startActivity(intent)
-                        finish()
+                        val errorMsg = result.message ?: "Failed to save reservation on server."
+                        Toast.makeText(this@ReserveSlotActivity, "Error: $errorMsg", Toast.LENGTH_LONG).show()
                     }
                 }
             }
