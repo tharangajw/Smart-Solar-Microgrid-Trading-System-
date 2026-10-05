@@ -4,9 +4,9 @@ import DashboardHeader from '../Dashboard/components/DashboardHeader';
 import { getNodes } from '../../Services/nodesService';
 import backofficeApi from '../../Services/backofficeApi';
 import { exportToCSV } from '../../Utils/exportUtils';
-import { MapPin, Search, Filter, Download, Zap, BatteryCharging, ExternalLink, AlertTriangle } from 'lucide-react';
+import { MapPin, Search, Filter, Download, Zap, BatteryCharging, ExternalLink, AlertTriangle, Key } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Loader } from '@googlemaps/js-api-loader';
+import { loadGoogleMaps } from '../../Utils/googleMapsLoader';
 
 // Fallback high quality demo stations across Sri Lanka
 const DEMO_STATIONS = [
@@ -357,28 +357,23 @@ const StationMapView = ({ stations, selectedStation, setSelectedStation }) => {
   useEffect(() => {
     if (!mapRef.current) return;
 
+    window.__googleMapsAuthFailureHandler = () => {
+      setLoadError(
+        'Google Maps API key is invalid, restricted, or Maps JavaScript API is not enabled in Google Cloud Console.'
+      );
+    };
+
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
-    if (!apiKey || !apiKey.trim()) {
-      setLoadError('Google Maps API key is missing. Please set VITE_GOOGLE_MAPS_API_KEY in web/.env');
-      return;
-    }
-
-    try {
-      const loader = new Loader({
-        apiKey: apiKey.trim(),
-        version: 'weekly',
-        libraries: ['places']
-      });
-
-      loader.load().then((google) => {
+    loadGoogleMaps(apiKey)
+      .then((maps) => {
         if (!mapRef.current) return;
 
         const initialLat = selectedStation ? getLat(selectedStation, 0) : 7.8731;
         const initialLng = selectedStation ? getLng(selectedStation, 0) : 80.7718;
 
         if (!googleMapRef.current) {
-          const map = new google.maps.Map(mapRef.current, {
+          const map = new maps.Map(mapRef.current, {
             center: { lat: initialLat, lng: initialLng },
             zoom: 8,
             mapTypeId: 'roadmap',
@@ -388,30 +383,33 @@ const StationMapView = ({ stations, selectedStation, setSelectedStation }) => {
             fullscreenControl: true,
           });
           googleMapRef.current = map;
-          infoWindowRef.current = new google.maps.InfoWindow();
+          infoWindowRef.current = new maps.InfoWindow();
         }
         setMapLoaded(true);
-      }).catch(err => {
-        console.error('Failed to load Google Maps:', err);
-        setLoadError('Failed to load Google Maps. Please verify your API key and network connection.');
+      })
+      .catch((err) => {
+        console.error('Failed to load Google Maps in StationMapView:', err);
+        setLoadError(err.message || 'Failed to load Google Maps.');
       });
-    } catch (err) {
-      console.error('Google Maps Loader exception:', err);
-      setLoadError('Exception while initializing Google Maps.');
-    }
+
+    return () => {
+      window.__googleMapsAuthFailureHandler = null;
+    };
   }, []);
 
   useEffect(() => {
     if (!mapLoaded || !googleMapRef.current || !window.google) return;
 
     const google = window.google;
+    const maps = google.maps;
     const map = googleMapRef.current;
 
     // Clear Google Map markers
     markersRef.current.forEach(m => m.setMap && m.setMap(null));
     markersRef.current = [];
 
-    const bounds = new google.maps.LatLngBounds();
+    const bounds = new maps.LatLngBounds();
+    const MarkerClass = maps.Marker || (maps.marker && maps.marker.Marker);
 
     stations.forEach((station, idx) => {
       const lat = getLat(station, idx);
@@ -423,7 +421,7 @@ const StationMapView = ({ stations, selectedStation, setSelectedStation }) => {
 
       if (lat !== undefined && lng !== undefined && !isNaN(lat) && !isNaN(lng)) {
         const pos = { lat, lng };
-        const marker = new google.maps.Marker({
+        const marker = new MarkerClass({
           position: pos,
           map: map,
           title: name,
@@ -476,10 +474,24 @@ const StationMapView = ({ stations, selectedStation, setSelectedStation }) => {
 
   if (loadError) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-red-50 text-red-700 font-medium text-center gap-3 rounded-xl border border-red-200">
-        <AlertTriangle size={32} className="text-red-500 shrink-0" />
-        <h3 className="font-bold text-base">Google Maps Error</h3>
-        <p className="text-sm max-w-md">{loadError}</p>
+      <div className="w-full h-full flex flex-col items-center justify-center p-6 bg-amber-50/90 text-amber-900 font-sans text-center gap-3 rounded-2xl border border-amber-200 shadow-sm">
+        <AlertTriangle size={36} className="text-amber-600 shrink-0" />
+        <h3 className="font-bold text-base text-amber-900">Google Maps Initialization Notice</h3>
+        <p className="text-xs text-amber-800 max-w-lg leading-relaxed">{loadError}</p>
+        
+        <div className="bg-white/80 p-3 rounded-xl border border-amber-200/80 text-left text-xs text-charcoal max-w-lg w-full space-y-1.5 mt-1">
+          <div className="font-semibold text-forest flex items-center gap-1.5">
+            <Key size={14} /> How to activate Google Maps:
+          </div>
+          <ol className="list-decimal list-inside space-y-1 text-[11px] text-charcoal-light">
+            <li>Go to <a href="https://console.cloud.google.com/google/maps-apis/overview" target="_blank" rel="noreferrer" className="underline font-medium text-forest">Google Cloud Console</a>.</li>
+            <li>Enable <b>Maps JavaScript API</b> for your project.</li>
+            <li>Copy your valid API Key and set it in <code className="bg-amber-100 px-1 py-0.5 rounded font-mono text-forest">web/.env</code>:</li>
+          </ol>
+          <div className="bg-charcoal/90 text-amber-300 p-2 rounded-lg font-mono text-[10px] overflow-x-auto select-all">
+            VITE_GOOGLE_MAPS_API_KEY=YOUR_ACTUAL_GOOGLE_MAPS_API_KEY
+          </div>
+        </div>
       </div>
     );
   }

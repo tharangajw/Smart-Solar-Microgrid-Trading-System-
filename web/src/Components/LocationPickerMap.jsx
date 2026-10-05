@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Loader } from '@googlemaps/js-api-loader';
-import { Search, MapPin, Loader2, AlertTriangle } from 'lucide-react';
+import { loadGoogleMaps } from '../Utils/googleMapsLoader';
+import { Search, MapPin, Loader2, AlertTriangle, Key } from 'lucide-react';
 
 const SRI_LANKA_CITIES = [
   { name: 'Kurunegala', lat: 7.4863, lng: 80.3647 },
@@ -28,21 +28,16 @@ const LocationPickerMap = ({ lat, lng, onChange }) => {
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
+    window.__googleMapsAuthFailureHandler = () => {
+      setLoadError(
+        'Google Maps API Key error: The key is invalid, restricted, or Maps JavaScript API is not enabled.'
+      );
+    };
+
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
-    if (!apiKey || !apiKey.trim()) {
-      setLoadError('Google Maps API key is missing. Please set VITE_GOOGLE_MAPS_API_KEY in web/.env');
-      return;
-    }
-
-    try {
-      const loader = new Loader({
-        apiKey: apiKey.trim(),
-        version: 'weekly',
-        libraries: ['places']
-      });
-
-      loader.load().then((google) => {
+    loadGoogleMaps(apiKey)
+      .then((maps) => {
         if (!mapContainerRef.current) return;
 
         const initialLat = parseFloat(lat) || 7.4863;
@@ -50,7 +45,7 @@ const LocationPickerMap = ({ lat, lng, onChange }) => {
         const pos = { lat: initialLat, lng: initialLng };
 
         if (!googleMapRef.current) {
-          const map = new google.maps.Map(mapContainerRef.current, {
+          const map = new maps.Map(mapContainerRef.current, {
             center: pos,
             zoom: 12,
             mapTypeId: 'roadmap',
@@ -60,11 +55,12 @@ const LocationPickerMap = ({ lat, lng, onChange }) => {
             fullscreenControl: true,
           });
 
-          const infoWindow = new google.maps.InfoWindow({
+          const infoWindow = new maps.InfoWindow({
             content: `<b>Selected Location</b><br/>Lat: ${initialLat.toFixed(5)}<br/>Lng: ${initialLng.toFixed(5)}`
           });
 
-          const marker = new google.maps.Marker({
+          const MarkerClass = maps.Marker || (maps.marker && maps.marker.Marker);
+          const marker = new MarkerClass({
             position: pos,
             map: map,
             draggable: true,
@@ -96,14 +92,15 @@ const LocationPickerMap = ({ lat, lng, onChange }) => {
           infoWindowRef.current = infoWindow;
         }
         setMapLoaded(true);
-      }).catch(err => {
-        console.error('Failed to load Google Maps:', err);
-        setLoadError('Failed to load Google Maps. Please verify your API key and network connection.');
+      })
+      .catch((err) => {
+        console.error('Failed to initialize Google Maps in LocationPickerMap:', err);
+        setLoadError(err.message || 'Failed to load Google Maps.');
       });
-    } catch (err) {
-      console.error('Google Maps Loader exception:', err);
-      setLoadError('Exception while initializing Google Maps.');
-    }
+
+    return () => {
+      window.__googleMapsAuthFailureHandler = null;
+    };
   }, []);
 
   useEffect(() => {
@@ -262,9 +259,10 @@ const LocationPickerMap = ({ lat, lng, onChange }) => {
 
       <div className="relative w-full h-56 rounded-xl border border-forest/30 shadow-inner overflow-hidden">
         {loadError ? (
-          <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-red-50 text-red-700 text-xs text-center font-medium gap-2">
-            <AlertTriangle size={20} className="text-red-500 shrink-0" />
-            <p>{loadError}</p>
+          <div className="w-full h-full flex flex-col items-center justify-center p-3 bg-amber-50 text-amber-900 text-xs text-center font-medium gap-2">
+            <AlertTriangle size={24} className="text-amber-600 shrink-0" />
+            <p className="text-[11px] font-semibold">{loadError}</p>
+            <p className="text-[10px] text-amber-700">Please provide a valid key in <code className="font-mono bg-amber-100 px-1 rounded text-forest">web/.env</code></p>
           </div>
         ) : (
           <div
